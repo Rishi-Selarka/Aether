@@ -8,15 +8,15 @@ import PackageDescription
 import AppleProductTypes
 
 let package = Package(
-    name: "ARC",
+    name: "archsys",
     platforms: [
         .iOS("17.0")
     ],
     products: [
         .iOSApplication(
-            name: "ARC",
+            name: "archsys",
             targets: ["AppModule"],
-            bundleIdentifier: "com.rishiselarka.ARC",
+            bundleIdentifier: "com.rishiselarka.archsys",
             teamIdentifier: "S8LD68K2KG",
             displayVersion: "1.0",
             bundleVersion: "1",

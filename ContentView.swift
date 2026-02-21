@@ -18,7 +18,7 @@ struct ContentView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.arcBackground)
+        .background(Color.archsysBackground)
         .onAppear {
             SwiftDataManager.initializeIfNeeded(context: modelContext)
         }
@@ -33,11 +33,11 @@ struct TierMapView: View {
             VStack(spacing: LayoutConstants.spacingL) {
                 Text("City Architect")
                     .font(.largeTitle.bold())
-                    .foregroundColor(.arcTextPrimary)
+                    .foregroundColor(.archsysTextPrimary)
                 
                 Text("Build Mobile Architectures, Visually")
                     .font(.title3)
-                    .foregroundColor(.arcTextSecondary)
+                    .foregroundColor(.archsysTextSecondary)
                 
                 ForEach(progress.tiers.sorted(by: { $0.id < $1.id }), id: \.id) { tier in
                     TierCardView(tier: tier)
@@ -45,7 +45,7 @@ struct TierMapView: View {
             }
             .padding(LayoutConstants.spacingL)
         }
-        .background(Color.arcBackground)
+        .background(Color.archsysBackground)
     }
 }
 
@@ -61,11 +61,11 @@ struct TierCardView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Tier \(tier.id): \(tier.name)")
                     .font(.headline)
-                    .foregroundColor(.arcTextPrimary)
+                    .foregroundColor(.archsysTextPrimary)
                 
                 Text(tier.unlocked ? (tier.completed ? "Completed" : "In Progress") : "Locked")
                     .font(.caption)
-                    .foregroundColor(.arcTextSecondary)
+                    .foregroundColor(.archsysTextSecondary)
             }
             
             Spacer()
@@ -79,7 +79,7 @@ struct TierCardView: View {
             }
         }
         .padding(LayoutConstants.spacingM)
-        .background(Color.arcSurface)
+        .background(Color.archsysSurface)
         .cornerRadius(LayoutConstants.cornerRadiusM)
         .opacity(tier.unlocked ? 1 : 0.6)
     }

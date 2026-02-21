@@ -73,8 +73,3 @@ Docs/
 
 1. **Commit**: `/commit` or `/commit all`
 2. **Push**: `/commit push` or `git push origin main`
-3. **CI**: GitHub Actions runs build on every push/PR to `main`
-
-### GitHub Actions
-
-- **Build**: `.github/workflows/build.yml` — verifies iOS app builds on push and PR
