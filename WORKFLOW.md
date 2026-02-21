@@ -37,8 +37,7 @@ Docs/
 
 | Server | Purpose |
 |--------|---------|
-| **XcodeBuildMCP** | Build, run on iPad simulator, test |
-| **user-Figma** | Design context from Figma (when designs exist) |
+| **XcodeBuildMCP** | Build, run on simulator, test |
 | **user-context7** | Swift/SwiftUI documentation lookup |
 
 ## Skills (`.cursor/skills/`)

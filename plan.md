@@ -581,56 +581,6 @@ Each NodeType has allowedConnections list. For example:
 
 ---
 
-## Figma Make AI Workflow
-
-**Time**: 3-4 hours to generate all 14 screens
-
-**Process**:
-
-1. **Master Context Prompt** (use for ALL screens):
-Establish app name, platform, style, colors, typography, spacing, design principles in one comprehensive context prompt
-
-2. **Generate Each Screen** (14 screen-specific prompts provided in plan):
-- Onboarding View
-- Tier Map View
-- Tier Detail View
-- Builder View (main canvas - most detailed)
-- Simulation Overlay
-- Inspector Panel
-- Learn More Sheet
-- Code View (split-screen)
-- Glossary View
-- Recipe Book View
-- Comparison View
-- Achievement View
-- Tutorial Overlay
-- Settings/Credits View
-
-3. **Refine** (if needed):
-Common refinements: make darker, more professional, increase spacing, larger text, match iOS patterns
-
-4. **Create Prototype**: Link all screens with transitions
-
-5. **Export**: Screenshots (PNG @2x), design specs, color codes, typography specs
-
-**Each Prompt Includes**:
-- Context reference to design system
-- Exact layout specs (heights, widths, spacing)
-- Complete content descriptions
-- Color hex codes
-- Typography specifications
-- Style guidance (references Apple apps)
-
-**Pro Tips**:
-- Be very specific in prompts
-- Emphasize "true black #000000" and "dark mode"
-- Reference iOS design language
-- Say "professional tool, not a game"
-- Iterate - first generation 80%, refine to 95%
-- Use same color codes across all prompts
-
----
-
 ## 3-Minute Demo Flow (Optimized for Judges)
 
 ### 0:00-0:20 (20s) - Instant Hook
@@ -963,13 +913,12 @@ Common refinements: make darker, more professional, increase spacing, larger tex
 
 ## Quick Start Steps
 
-1. **Design** (3-4 hours): Use Figma Make AI with provided prompts → Generate all 14 screens
-2. **Foundation** (Days 1-2): SwiftData models, Graph Engine, NodeTypes
-3. **Core UI** (Days 3-4): BuilderView, drag-drop, particles
-4. **Tiers** (Days 5-8): Implement all 5 tiers with simulations
-5. **Features** (Days 9-10): Code generation, glossary, recipes
-6. **Polish** (Day 11): Accessibility, haptics, achievements
-7. **Submit** (Day 12): Test, rehearse demo, submit
+1. **Foundation** (Days 1-2): SwiftData models, Graph Engine, NodeTypes
+2. **Core UI** (Days 3-4): BuilderView, drag-drop, particles
+3. **Tiers** (Days 5-8): Implement all 5 tiers with simulations
+4. **Features** (Days 9-10): Code generation, glossary, recipes
+5. **Polish** (Day 11): Accessibility, haptics, achievements
+6. **Submit** (Day 12): Test, rehearse demo, submit
 
 ---
 
@@ -981,7 +930,6 @@ Your plan includes:
 - Advanced particle system detailed
 - Dynamic code generation approach
 - 42 features listed
-- Figma Make AI prompts (14 screens, ready to copy-paste)
 - 12-day realistic timeline
 - Complete testing and submission strategy
 - Demo script optimized for judges
