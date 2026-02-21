@@ -61,8 +61,20 @@ Docs/
 
 **Optional** for this Swift Student Challenge. Focus on shipping. Add tests when time permits.
 
-## Git
+## Git & GitHub
+
+**Repo**: https://github.com/Rishi-Selarka/archsys
 
 - `.cursor/` is in `.gitignore` — local workflow only, not pushed
 - Use `/commit` for conventional commits
 - Co-Authored-By line required for AI-assisted commits
+
+### When features / bug fixes / app are done
+
+1. **Commit**: `/commit` or `/commit all`
+2. **Push**: `/commit push` or `git push origin main`
+3. **CI**: GitHub Actions runs build on every push/PR to `main`
+
+### GitHub Actions
+
+- **Build**: `.github/workflows/build.yml` — verifies iOS app builds on push and PR
