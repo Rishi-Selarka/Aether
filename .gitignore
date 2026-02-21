@@ -1,0 +1,36 @@
+# Cursor / IDE - NOT pushed to GitHub (local workflow only)
+.cursor/
+
+# Swift / Xcode
+.build/
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+DerivedData/
+*.moved-aside
+
+# Swift Package Manager
+.swiftpm/
+Packages/
+Package.pins
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Misc
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
