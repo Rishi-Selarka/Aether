@@ -5,22 +5,36 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var progressRecords: [CityProgress]
     
+    @State private var showSplash = true
+    
     var progress: CityProgress? {
         progressRecords.first
     }
     
     var body: some View {
         Group {
-            if let progress {
-                TierMapView(progress: progress)
+            if showSplash {
+                SplashView()
+                    .transition(.opacity)
             } else {
-                ProgressView("Loading City Architect...")
+                if let progress {
+                    TierMapView(progress: progress)
+                        .transition(.opacity)
+                } else {
+                    ProgressView("Loading City Architect...")
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.archsysBackground)
         .onAppear {
             SwiftDataManager.initializeIfNeeded(context: modelContext)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                withAnimation(.easeInOut(duration: 0.8)) {
+                    showSplash = false
+                }
+            }
         }
     }
 }
