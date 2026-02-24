@@ -4,12 +4,6 @@ import SwiftData
 @MainActor
 enum ProgressTracker {
 
-    static func unlockFirstBlueprintIfNeeded(graph: ArchitectureGraph, context: ModelContext) {
-        let hasStructure = graph.allNodes.count >= 2 && !graph.allConnections.isEmpty
-        guard hasStructure else { return }
-        SwiftDataManager.unlockAchievement(AchievementID.firstBlueprint.rawValue, context: context)
-    }
-
     static func unlockCleanConnectionsIfNeeded(antiPatternCount: Int, context: ModelContext) {
         guard antiPatternCount == 0 else { return }
         SwiftDataManager.unlockAchievement(AchievementID.cleanConnections.rawValue, context: context)
