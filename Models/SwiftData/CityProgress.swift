@@ -7,6 +7,7 @@ final class CityProgress {
     var unlockedTierIDs: [Int]
     var completedTierIDs: [Int]
     var achievements: [String]
+    var simulationRunCount: Int
     var lastPlayedDate: Date
     
     @Relationship(deleteRule: .cascade)
@@ -17,6 +18,7 @@ final class CityProgress {
         self.unlockedTierIDs = [1]
         self.completedTierIDs = []
         self.achievements = []
+        self.simulationRunCount = 0
         self.lastPlayedDate = Date()
         self.tiers = []
     }

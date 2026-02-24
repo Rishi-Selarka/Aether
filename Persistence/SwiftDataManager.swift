@@ -7,27 +7,39 @@ enum SwiftDataManager {
     static func initializeIfNeeded(context: ModelContext) {
         let descriptor = FetchDescriptor<CityProgress>()
         
-        guard (try? context.fetch(descriptor).first) == nil else {
-            return
+        if (try? context.fetch(descriptor).first) == nil {
+            let progress = CityProgress()
+            context.insert(progress)
+
+            let tiers = [
+                Tier(id: 1, name: "Local Data Village", unlocked: true),
+                Tier(id: 2, name: "Connected Town", unlocked: true),
+                Tier(id: 3, name: "Performance Peak", unlocked: true),
+                Tier(id: 4, name: "Resilient Fortress", unlocked: true),
+                Tier(id: 5, name: "Smart City", unlocked: true)
+            ]
+
+            for tier in tiers {
+                context.insert(tier)
+                progress.tiers.append(tier)
+            }
+
+            try? context.save()
+        } else {
+            ensureAllTiersUnlocked(context: context)
         }
-        
-        let progress = CityProgress()
-        context.insert(progress)
-        
-        let tiers = [
-            Tier(id: 1, name: "Local Data Village", unlocked: true),
-            Tier(id: 2, name: "Connected Town", unlocked: false),
-            Tier(id: 3, name: "Performance Peak", unlocked: false),
-            Tier(id: 4, name: "Resilient Fortress", unlocked: false),
-            Tier(id: 5, name: "Smart City", unlocked: false)
-        ]
-        
-        for tier in tiers {
-            context.insert(tier)
-            progress.tiers.append(tier)
+    }
+
+    /// Ensures all tiers are unlocked for free exploration (migration for existing installs).
+    static func ensureAllTiersUnlocked(context: ModelContext) {
+        let descriptor = FetchDescriptor<Tier>()
+        guard let tiers = try? context.fetch(descriptor) else { return }
+        var changed = false
+        for tier in tiers where !tier.unlocked {
+            tier.unlocked = true
+            changed = true
         }
-        
-        try? context.save()
+        if changed { try? context.save() }
     }
     
     static func fetchProgress(context: ModelContext) -> CityProgress? {
@@ -80,5 +92,32 @@ enum SwiftDataManager {
         
         progress.achievements.append(achievement)
         try? context.save()
+    }
+    
+    static func getOrCreateActiveArchitecture(for tier: Tier, context: ModelContext) -> Architecture {
+        if let active = tier.architectures.first(where: { $0.isActive }) {
+            return active
+        }
+        let arch = Architecture(tierID: tier.id)
+        context.insert(arch)
+        tier.architectures.append(arch)
+        try? context.save()
+        return arch
+    }
+
+    /// Demo mode: reset all progress and reinitialize fresh state.
+    static func resetAll(context: ModelContext) {
+        let progressDescriptor = FetchDescriptor<CityProgress>()
+        let tierDescriptor = FetchDescriptor<Tier>()
+        guard let progressList = try? context.fetch(progressDescriptor),
+              let tierList = try? context.fetch(tierDescriptor) else { return }
+        for p in progressList {
+            context.delete(p)
+        }
+        for t in tierList {
+            context.delete(t)
+        }
+        try? context.save()
+        initializeIfNeeded(context: context)
     }
 }
