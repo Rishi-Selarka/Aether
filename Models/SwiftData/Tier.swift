@@ -10,10 +10,9 @@ final class Tier {
     var score: Double
     var bestTime: TimeInterval?
     var attemptsCount: Int
-    
-    @Relationship(deleteRule: .cascade)
-    var architectures: [Architecture]
-    
+    /// Number of times this tier has been passed (score ≥ 75%).
+    var passCount: Int
+
     init(id: Int, name: String, unlocked: Bool = false) {
         self.id = id
         self.name = name
@@ -22,6 +21,6 @@ final class Tier {
         self.score = 0
         self.bestTime = nil
         self.attemptsCount = 0
-        self.architectures = []
+        self.passCount = 0
     }
 }

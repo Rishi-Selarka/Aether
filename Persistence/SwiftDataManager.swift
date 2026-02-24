@@ -94,30 +94,59 @@ enum SwiftDataManager {
         try? context.save()
     }
     
-    static func getOrCreateActiveArchitecture(for tier: Tier, context: ModelContext) -> Architecture {
-        if let active = tier.architectures.first(where: { $0.isActive }) {
-            return active
-        }
-        let arch = Architecture(tierID: tier.id)
-        context.insert(arch)
-        tier.architectures.append(arch)
-        try? context.save()
-        return arch
-    }
-
     /// Demo mode: reset all progress and reinitialize fresh state.
     static func resetAll(context: ModelContext) {
         let progressDescriptor = FetchDescriptor<CityProgress>()
         let tierDescriptor = FetchDescriptor<Tier>()
+        let attemptDescriptor = FetchDescriptor<QuizAttempt>()
         guard let progressList = try? context.fetch(progressDescriptor),
               let tierList = try? context.fetch(tierDescriptor) else { return }
-        for p in progressList {
-            context.delete(p)
-        }
-        for t in tierList {
-            context.delete(t)
-        }
+        let attemptList = (try? context.fetch(attemptDescriptor)) ?? []
+        for p in progressList { context.delete(p) }
+        for t in tierList { context.delete(t) }
+        for a in attemptList { context.delete(a) }
         try? context.save()
         initializeIfNeeded(context: context)
+    }
+
+    // MARK: - Quiz Attempt Recording
+
+    /// Records a passing quiz attempt: increments passCount, marks tier completed.
+    static func recordPass(tierID: Int, score: Double = 0, context: ModelContext) {
+        guard let tier = fetchTier(id: tierID, context: context) else { return }
+        tier.passCount += 1
+        tier.attemptsCount += 1
+        tier.completed = true
+        if score > tier.score { tier.score = score }
+        if let progress = fetchProgress(context: context),
+           !progress.completedTierIDs.contains(tierID) {
+            progress.completedTierIDs.append(tierID)
+        }
+        try? context.save()
+    }
+
+    /// Records a failed quiz attempt: increments attemptsCount only.
+    static func recordAttempt(tierID: Int, score: Double = 0, context: ModelContext) {
+        guard let tier = fetchTier(id: tierID, context: context) else { return }
+        tier.attemptsCount += 1
+        if score > tier.score { tier.score = score }
+        try? context.save()
+    }
+
+    /// Fetches all quiz attempts, sorted by most recent first.
+    static func fetchAllAttempts(context: ModelContext) -> [QuizAttempt] {
+        let descriptor = FetchDescriptor<QuizAttempt>(
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        return (try? context.fetch(descriptor)) ?? []
+    }
+
+    /// Fetches quiz attempts for a specific tier, sorted by most recent first.
+    static func fetchAttempts(tierID: Int, context: ModelContext) -> [QuizAttempt] {
+        let descriptor = FetchDescriptor<QuizAttempt>(
+            predicate: #Predicate { $0.tierID == tierID },
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        return (try? context.fetch(descriptor)) ?? []
     }
 }

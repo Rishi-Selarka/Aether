@@ -10,9 +10,7 @@ struct MyApp: App {
         .modelContainer(for: [
             CityProgress.self,
             Tier.self,
-            Architecture.self,
-            ArchitectureNode.self,
-            NodeConnection.self
+            QuizAttempt.self
         ])
     }
 }

@@ -5,30 +5,30 @@ struct StatsCardView: View {
 
     // MARK: - Computed Metrics
 
-    private var citiesUnlocked: String {
-        let count = tiers.isEmpty ? 5 : tiers.filter { $0.unlocked }.count
+    private var citiesPassed: String {
+        let count = tiers.filter { $0.passCount > 0 }.count
         return "\(count)/5"
     }
 
-    private var totalBuilds: String {
-        "\(tiers.flatMap { $0.architectures }.count)"
+    private var totalAttempts: String {
+        "\(tiers.map { $0.attemptsCount }.reduce(0, +))"
     }
 
     private var bestScore: String {
-        let max = tiers.map { $0.score }.max() ?? 0
-        guard max > 0 else { return "—" }
-        return "\(Int(max * 100))%"
+        let best = tiers.map { $0.score }.max() ?? 0
+        guard best > 0 else { return "—" }
+        return "\(Int(best))%"
     }
 
     // MARK: - Body
 
     var body: some View {
         HStack(spacing: 0) {
-            metric(value: citiesUnlocked, label: "Cities")
+            metric(value: citiesPassed, label: "Passed")
             Divider()
                 .frame(height: 32)
                 .opacity(0.4)
-            metric(value: totalBuilds, label: "Builds")
+            metric(value: totalAttempts, label: "Attempts")
             Divider()
                 .frame(height: 32)
                 .opacity(0.4)
