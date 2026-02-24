@@ -1,5 +1,6 @@
-# Cursor / IDE - NOT pushed to GitHub (local workflow only)
+# Cursor / IDE / Claude - NOT pushed to GitHub (local workflow only)
 .cursor/
+.claude/
 
 # Swift / Xcode
 .build/
