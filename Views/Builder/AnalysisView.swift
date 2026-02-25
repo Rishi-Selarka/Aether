@@ -8,6 +8,7 @@ struct AnalysisView: View {
     let onDone: () -> Void
     let onReattempt: () -> Void
 
+    @Environment(\.dismiss) private var dismiss
     @State private var showContent = false
     @State private var waterLevel: CGFloat = 0
     @State private var wavePhase: CGFloat = 0
@@ -95,7 +96,12 @@ struct AnalysisView: View {
     private var doneButtonRow: some View {
         HStack {
             Spacer()
-            Button(action: onDone) {
+            Button {
+                dismiss()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    onDone()
+                }
+            } label: {
                 Text("Done")
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(.white)
@@ -272,7 +278,12 @@ struct AnalysisView: View {
     // MARK: - Reattempt Button
 
     private var reattemptButton: some View {
-        Button(action: onReattempt) {
+        Button {
+            dismiss()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                onReattempt()
+            }
+        } label: {
             HStack(spacing: 8) {
                 Image(systemName: "arrow.counterclockwise")
                     .font(.system(size: 14, weight: .semibold))
