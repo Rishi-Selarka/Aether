@@ -44,10 +44,8 @@ struct HistoryView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
-                        .foregroundStyle(.white)
                 }
             }
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .sheet(item: $selectedAttempt) { attempt in
                 AttemptDetailView(attempt: attempt)
             }

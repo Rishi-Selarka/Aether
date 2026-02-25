@@ -98,7 +98,8 @@ struct InteriorGlassCard: View {
                 Text("\(timeLimitMinutes) min")
                     .font(.system(size: 17, weight: .semibold, design: .monospaced))
                     .foregroundStyle(.white)
-                    .frame(minWidth: 56)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .frame(minWidth: 64)
 
                 stepperButton(systemName: "plus", action: incrementTime)
                     .accessibilityLabel("Increase time")

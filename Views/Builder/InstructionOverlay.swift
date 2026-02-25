@@ -63,7 +63,7 @@ struct InstructionOverlay: View {
                 Divider().opacity(0.3)
 
                 Button(action: onDismiss) {
-                    Text("Got it — Let's Build")
+                    Text("Ready to dive")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -77,7 +77,7 @@ struct InstructionOverlay: View {
                                 }
                         }
                 }
-                .accessibilityLabel("Got it, start building")
+                .accessibilityLabel("Ready to dive")
             }
             .padding(24)
             .background {
