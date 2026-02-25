@@ -6,7 +6,6 @@ struct TierMapView: View {
     @State private var selectedTierID: Int?
     @State private var routesRevealed = false
     @State private var showSettings = false
-    @State private var showHistory = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage("isDarkMode") private var isDarkMode = false
 
@@ -38,14 +37,8 @@ struct TierMapView: View {
         .overlay(alignment: .topTrailing) {
             settingsButton
         }
-        .overlay(alignment: .topLeading) {
-            historyButton
-        }
         .sheet(isPresented: $showSettings) {
             SettingsView()
-        }
-        .sheet(isPresented: $showHistory) {
-            HistoryView()
         }
         .navigationDestination(item: $selectedTierID) { tierID in
             InteriorView(tierID: tierID)
@@ -159,23 +152,6 @@ struct TierMapView: View {
 
         }
         .frame(width: canvasWidth, height: TierMapConstants.canvasHeight)
-    }
-
-    // MARK: - History Button
-
-    private var historyButton: some View {
-        Button {
-            HapticManager.lightImpact()
-            showHistory = true
-        } label: {
-            Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 20, weight: .medium))
-                .foregroundStyle(mapLineColor)
-                .frame(width: 44, height: 44)
-        }
-        .padding(.leading, 20)
-        .accessibilityLabel("History")
-        .accessibilityHint("View your past quiz attempts")
     }
 
     // MARK: - Settings Button

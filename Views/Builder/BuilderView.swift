@@ -393,21 +393,7 @@ struct BuilderView: View {
     private func saveAttempt(session: QuizSession) {
         guard let problem else { return }
 
-        // 1. Insert and persist the quiz attempt FIRST (isolated save)
-        let attempt = QuizAttempt(
-            tierID: tierID,
-            problemIndex: selectedProblemIndex,
-            problemTitle: problem.title,
-            score: session.scorePercent,
-            passed: session.passed,
-            totalQuestions: session.totalQuestions,
-            correctAnswers: session.totalCorrect,
-            analysisJSON: ""
-        )
-        modelContext.insert(attempt)
-        try? modelContext.save()
-
-        // 2. Update tier stats separately so a failure here can't roll back the attempt
+        // Update tier stats
         if session.passed {
             SwiftDataManager.recordPass(tierID: tierID, score: session.scorePercent, context: modelContext)
         } else {

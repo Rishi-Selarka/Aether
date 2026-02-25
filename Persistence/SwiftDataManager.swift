@@ -98,13 +98,10 @@ enum SwiftDataManager {
     static func resetAll(context: ModelContext) {
         let progressDescriptor = FetchDescriptor<CityProgress>()
         let tierDescriptor = FetchDescriptor<Tier>()
-        let attemptDescriptor = FetchDescriptor<QuizAttempt>()
         guard let progressList = try? context.fetch(progressDescriptor),
               let tierList = try? context.fetch(tierDescriptor) else { return }
-        let attemptList = (try? context.fetch(attemptDescriptor)) ?? []
         for p in progressList { context.delete(p) }
         for t in tierList { context.delete(t) }
-        for a in attemptList { context.delete(a) }
         try? context.save()
         initializeIfNeeded(context: context)
     }
@@ -133,20 +130,4 @@ enum SwiftDataManager {
         try? context.save()
     }
 
-    /// Fetches all quiz attempts, sorted by most recent first.
-    static func fetchAllAttempts(context: ModelContext) -> [QuizAttempt] {
-        let descriptor = FetchDescriptor<QuizAttempt>(
-            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-        )
-        return (try? context.fetch(descriptor)) ?? []
-    }
-
-    /// Fetches quiz attempts for a specific tier, sorted by most recent first.
-    static func fetchAttempts(tierID: Int, context: ModelContext) -> [QuizAttempt] {
-        let descriptor = FetchDescriptor<QuizAttempt>(
-            predicate: #Predicate { $0.tierID == tierID },
-            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-        )
-        return (try? context.fetch(descriptor)) ?? []
-    }
 }
