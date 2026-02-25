@@ -1,13 +1,8 @@
 import SwiftUI
 
-/// Scrollable vertical canvas showing draggable architecture blocks
-/// with a three-layer particle system: ambient background, bezier flow
-/// streams between blocks, and burst effects on key events.
-///
-/// Particle types (from plan.md "Enhanced Particle System"):
-/// - **Primary**: 12pt glowing core, 6-point trail, bezier path
-/// - **Secondary**: 6pt, faster, 3-point trail
-/// - **Ambient**: 4pt background drift with glow halos
+/// Vertical canvas showing draggable architecture node boxes in a
+/// system-design schematic layout. Clean circuit-board connectors
+/// link each component. Ambient particle field adds subtle depth.
 struct BlockCanvasView: View {
     let correctOrder: [NodeType]
     @Binding var currentOrder: [NodeType]
@@ -20,18 +15,18 @@ struct BlockCanvasView: View {
     @State private var draggingIndex: Int?
     @State private var dragOffset: CGFloat = 0
     @State private var blockFrames: [Int: CGRect] = [:]
-    @State private var burstTriggerTime: Double?
 
     private let gridSpacing: CGFloat = 30
+    private let connectorHeight: CGFloat = 44
 
     // MARK: - Body
 
     var body: some View {
         ZStack {
-            // Layer 1 — Ambient particles + grid dots
-            ambientLayer
+            // Background — blueprint grid + faint ambient particles
+            blueprintBackground
 
-            // Layer 2 — Blocks with flow-particle streams between them
+            // Blocks + connectors
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 0) {
                     ForEach(Array(currentOrder.enumerated()), id: \.element) { index, node in
@@ -39,44 +34,47 @@ struct BlockCanvasView: View {
                             blockRow(node: node, index: index)
 
                             if index < currentOrder.count - 1 {
-                                particleStream(
-                                    fromColor: currentOrder[index].accentColor,
-                                    toColor: currentOrder[index + 1].accentColor,
-                                    seed: Double(index)
-                                )
+                                circuitConnector(index: index)
                             }
                         }
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 20)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 28)
+                .frame(maxWidth: .infinity)
             }
-
-            // Layer 3 — Burst overlay (triggered on correct ordering)
-            burstLayer
         }
+        // Fix overlap: when isOrdered flips, immediately settle any active drag
         .onChange(of: isOrdered) { _, ordered in
             if ordered {
-                burstTriggerTime = Date().timeIntervalSinceReferenceDate
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                    draggingIndex = nil
+                    dragOffset = 0
+                    blockFrames.removeAll()
+                }
             }
         }
     }
 
-    // MARK: - Layer 1: Ambient Background
+    // MARK: - Blueprint Background
 
-    private var ambientLayer: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+    private var blueprintBackground: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 24.0)) { timeline in
             Canvas { ctx, size in
                 let time = timeline.date.timeIntervalSinceReferenceDate
-                drawGrid(ctx: ctx, size: size, time: time)
-                drawAmbientParticles(ctx: ctx, size: size, time: time)
+
+                // Grid dots — subtle blueprint feel
+                drawSchematicGrid(ctx: ctx, size: size, time: time)
+
+                // Subtle ambient particles — monochrome, architecture-feel
+                drawAmbientField(ctx: ctx, size: size, time: time)
             }
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
     }
 
-    private func drawGrid(ctx: GraphicsContext, size: CGSize, time: Double) {
+    private func drawSchematicGrid(ctx: GraphicsContext, size: CGSize, time: Double) {
         let cols = Int(size.width / gridSpacing) + 1
         let rows = Int(size.height / gridSpacing) + 1
 
@@ -84,168 +82,106 @@ struct BlockCanvasView: View {
             for col in 0 ..< cols {
                 let x = CGFloat(col) * gridSpacing
                 let y = CGFloat(row) * gridSpacing
-                let pulse = sin(time * 0.5 + Double(row + col) * 0.3) * 0.5 + 0.5
-                let alpha = 0.03 + pulse * 0.05
-                let rect = CGRect(x: x - 1.2, y: y - 1.2, width: 2.4, height: 2.4)
-                ctx.fill(Path(ellipseIn: rect), with: .color(.white.opacity(alpha)))
+
+                // Crosshair-style dots (+ shape instead of circles)
+                let alpha = 0.06 + sin(time * 0.3 + Double(row * 3 + col) * 0.15) * 0.02
+                let arm: CGFloat = 1.6
+
+                // Horizontal arm
+                ctx.fill(
+                    Path(CGRect(x: x - arm, y: y - 0.4, width: arm * 2, height: 0.8)),
+                    with: .color(.white.opacity(alpha))
+                )
+                // Vertical arm
+                ctx.fill(
+                    Path(CGRect(x: x - 0.4, y: y - arm, width: 0.8, height: arm * 2)),
+                    with: .color(.white.opacity(alpha))
+                )
             }
         }
     }
 
-    /// 30 ambient particles (4pt base) drifting slowly with glow halos.
-    /// Positions are purely deterministic from time + seed — no @State arrays.
-    private func drawAmbientParticles(ctx: GraphicsContext, size: CGSize, time: Double) {
-        for i in 0 ..< 30 {
+    /// Monochrome ambient particles — white/grey, slow drift, no rainbow.
+    private func drawAmbientField(ctx: GraphicsContext, size: CGSize, time: Double) {
+        for i in 0 ..< 20 {
             let s = Double(i)
-            let speed = 0.008 + fmod(s * 0.0037, 0.012)
-            let xNorm = fmod(s * 0.3717 + sin(time * 0.15 + s * 1.3) * 0.025, 1.0)
-            let yNorm = fmod(s * 0.4331 + time * speed, 1.0)
-            let dotSize = 3.0 + CGFloat(fmod(s * 0.31, 2.0))
-            let baseOpacity = 0.15 + fmod(s * 0.23, 0.22)
-            let pulse = 0.55 + sin(time * 1.5 + s * 0.7) * 0.45
-            let hue = fmod(s * 0.13, 1.0)
+            let xNorm = fmod(s * 0.3717 + sin(time * 0.08 + s * 1.6) * 0.02, 1.0)
+            let yNorm = fmod(s * 0.4331 + time * (0.004 + fmod(s * 0.002, 0.006)), 1.0)
+            let dotSize: CGFloat = 2.0 + CGFloat(fmod(s * 0.41, 1.5))
+            let pulse = 0.5 + sin(time * 0.8 + s * 0.9) * 0.5
+            let alpha = (0.06 + fmod(s * 0.018, 0.06)) * pulse
 
-            GlowRenderer.drawDot(
-                in: ctx,
-                at: CGPoint(x: CGFloat(xNorm) * size.width, y: CGFloat(yNorm) * size.height),
-                size: dotSize * CGFloat(max(0.5, pulse)),
-                opacity: baseOpacity * pulse,
-                hue: hue
+            let px = CGFloat(xNorm) * size.width
+            let py = CGFloat(yNorm) * size.height
+
+            // Subtle white glow
+            let glowSize = dotSize * 3
+            ctx.fill(
+                Path(ellipseIn: CGRect(x: px - glowSize / 2, y: py - glowSize / 2,
+                                       width: glowSize, height: glowSize)),
+                with: .color(.white.opacity(alpha * 0.3))
+            )
+            ctx.fill(
+                Path(ellipseIn: CGRect(x: px - dotSize / 2, y: py - dotSize / 2,
+                                       width: dotSize, height: dotSize)),
+                with: .color(.white.opacity(alpha))
             )
         }
     }
 
-    // MARK: - Layer 2: Flow Particle Streams
+    // MARK: - Circuit Connector
 
-    /// A tall Canvas between two blocks with primary + secondary particles
-    /// flowing along organic bezier curves with glow trails.
-    private func particleStream(fromColor: Color, toColor: Color, seed: Double) -> some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 60.0)) { timeline in
+    /// Clean vertical data-flow line between components with small arrow indicator.
+    private func circuitConnector(index: Int) -> some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
             Canvas { ctx, size in
                 let time = timeline.date.timeIntervalSinceReferenceDate
-                let from = CGPoint(x: size.width / 2, y: 0)
-                let to = CGPoint(x: size.width / 2, y: size.height)
+                let midX = size.width / 2
+                let topY: CGFloat = 2
+                let bottomY = size.height - 2
 
-                // Faint bezier guide curve
-                drawGuideCurve(ctx: ctx, from: from, to: to, time: time,
-                               fromColor: fromColor, toColor: toColor)
-
-                // Primary particles (3): 12pt, slow, 6-point trail
-                for i in 0 ..< 3 {
-                    let offset = Double(i) / 3.0 + seed * 0.17
-                    let progress = CGFloat(fmod(time * 0.32 + offset, 1.0))
-                    let waviness: CGFloat = 0.4 + CGFloat(sin(time * 0.7 + Double(i) * 2.1 + seed)) * 0.3
-                    let blended = blendColor(fromColor, toColor, t: Double(progress))
-                    let pos = BezierMath.point(from: from, to: to, t: progress,
-                                               waviness: waviness, time: time + seed)
-
-                    GlowRenderer.drawTrail(
-                        in: ctx, from: from, to: to,
-                        headProgress: progress, waviness: waviness,
-                        time: time + seed, headSize: 12, color: blended, count: 6
-                    )
-                    GlowRenderer.drawDot(in: ctx, at: pos, size: 12, opacity: 0.9, color: blended)
+                // Dashed vertical line
+                let linePath = Path { p in
+                    p.move(to: CGPoint(x: midX, y: topY))
+                    p.addLine(to: CGPoint(x: midX, y: bottomY))
                 }
-
-                // Secondary particles (5): 6pt, faster, 3-point trail
-                for i in 0 ..< 5 {
-                    let offset = Double(i) / 5.0 + seed * 0.13
-                    let progress = CGFloat(fmod(time * 0.6 + offset + 0.3, 1.0))
-                    let waviness: CGFloat = 0.25 + CGFloat(sin(time + Double(i))) * 0.1
-                    let blended = blendColor(fromColor, toColor, t: Double(progress))
-                    let pos = BezierMath.point(from: from, to: to, t: progress,
-                                               waviness: waviness, time: time + seed * 1.7)
-
-                    GlowRenderer.drawTrail(
-                        in: ctx, from: from, to: to,
-                        headProgress: progress, waviness: waviness,
-                        time: time + seed * 1.7, headSize: 6, color: blended, count: 3
-                    )
-                    GlowRenderer.drawDot(in: ctx, at: pos, size: 6, opacity: 0.55, color: blended)
-                }
-            }
-        }
-        .frame(height: 52)
-        .frame(maxWidth: .infinity)
-        .allowsHitTesting(false)
-    }
-
-    private func drawGuideCurve(
-        ctx: GraphicsContext, from: CGPoint, to: CGPoint,
-        time: Double, fromColor: Color, toColor: Color
-    ) {
-        let path = Path { p in
-            p.move(to: from)
-            let steps = 12
-            for s in 1 ... steps {
-                let t = CGFloat(s) / CGFloat(steps)
-                let pt = BezierMath.point(from: from, to: to, t: t, waviness: 0.3, time: time)
-                p.addLine(to: pt)
-            }
-        }
-        ctx.stroke(
-            path,
-            with: .linearGradient(
-                Gradient(colors: [fromColor.opacity(0.12), toColor.opacity(0.12)]),
-                startPoint: from, endPoint: to
-            ),
-            lineWidth: 1
-        )
-    }
-
-    /// Simple colour blend between two SwiftUI colours at parameter `t`.
-    private func blendColor(_ a: Color, _ b: Color, t: Double) -> Color {
-        let clamped = min(1, max(0, t))
-        // Approximate blend using opacity layering
-        return clamped < 0.5 ? a : b
-    }
-
-    // MARK: - Layer 3: Burst Effect
-
-    /// 16 exploding particles + expanding ripple ring, fully deterministic.
-    private var burstLayer: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 60.0)) { timeline in
-            Canvas { ctx, size in
-                guard let trigger = burstTriggerTime else { return }
-                let elapsed = CGFloat(timeline.date.timeIntervalSinceReferenceDate - trigger)
-                guard elapsed >= 0, elapsed < 2.0 else { return }
-
-                let center = CGPoint(x: size.width / 2, y: size.height * 0.4)
-                let gravity: CGFloat = 80
-
-                // Burst particles (12 as per plan.md)
-                for i in 0 ..< 16 {
-                    let angle = CGFloat(i) / 16.0 * .pi * 2 + elapsed * 0.2
-                    let force: CGFloat = 100 + CGFloat(i % 4) * 35
-                    let x = center.x + cos(angle) * force * elapsed
-                    let y = center.y + sin(angle) * force * elapsed + 0.5 * gravity * elapsed * elapsed
-                    let life = max(0, 1.0 - elapsed / 1.6)
-                    let hue = fmod(Double(i) / 16.0 + Double(elapsed) * 0.08, 1.0)
-
-                    GlowRenderer.drawDot(
-                        in: ctx,
-                        at: CGPoint(x: x, y: y),
-                        size: 8 * life + 2,
-                        opacity: Double(life) * 0.85,
-                        hue: hue
-                    )
-                }
-
-                // Expanding ripple ring
-                let rippleRadius = elapsed * 110
-                let rippleLife = max(0, 1.0 - elapsed / 1.5) * 0.35
-                let rippleRect = CGRect(
-                    x: center.x - rippleRadius, y: center.y - rippleRadius,
-                    width: rippleRadius * 2, height: rippleRadius * 2
-                )
                 ctx.stroke(
-                    Path(ellipseIn: rippleRect),
-                    with: .color(.white.opacity(Double(rippleLife))),
-                    lineWidth: 2
+                    linePath,
+                    with: .color(Color(white: 0.3)),
+                    style: StrokeStyle(lineWidth: 1, dash: [4, 3])
+                )
+
+                // Downward arrow chevron at center
+                let arrowY = size.height / 2
+                let chevron = Path { p in
+                    p.move(to: CGPoint(x: midX - 4, y: arrowY - 3))
+                    p.addLine(to: CGPoint(x: midX, y: arrowY + 3))
+                    p.addLine(to: CGPoint(x: midX + 4, y: arrowY - 3))
+                }
+                ctx.stroke(
+                    chevron,
+                    with: .color(Color(white: 0.4)),
+                    style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round)
+                )
+
+                // Single small data-pulse dot travelling downward
+                let pulseT = fmod(time * 0.7 + Double(index) * 0.4, 1.0)
+                let pulseY = topY + CGFloat(pulseT) * (bottomY - topY)
+                let life = 1.0 - abs(pulseT - 0.5) * 2.0 // peaks at center
+
+                ctx.fill(
+                    Path(ellipseIn: CGRect(x: midX - 2, y: pulseY - 2, width: 4, height: 4)),
+                    with: .color(.white.opacity(life * 0.35))
+                )
+                // Glow ring
+                ctx.fill(
+                    Path(ellipseIn: CGRect(x: midX - 5, y: pulseY - 5, width: 10, height: 10)),
+                    with: .color(.white.opacity(life * 0.08))
                 )
             }
         }
-        .ignoresSafeArea()
+        .frame(height: connectorHeight)
+        .frame(maxWidth: .infinity)
         .allowsHitTesting(false)
     }
 
@@ -259,35 +195,38 @@ struct BlockCanvasView: View {
         ZStack(alignment: .topTrailing) {
             ArchitectureBlockView(
                 nodeType: node,
-                isDragging: isDraggingThis
+                isDragging: isDraggingThis,
+                isLocked: !isOrdered
             )
-            .offset(y: isDraggingThis ? dragOffset : 0)
-            .zIndex(isDraggingThis ? 1 : 0)
 
             if quizDone {
                 Image(systemName: "checkmark.seal.fill")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.yellow)
-                    .shadow(color: .yellow.opacity(0.6), radius: 6)
-                    .offset(x: -8, y: -4)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.green)
+                    .shadow(color: .green.opacity(0.5), radius: 4)
+                    .offset(x: -6, y: 4)
                     .transition(.scale.combined(with: .opacity))
             }
         }
+        .offset(y: isDraggingThis ? dragOffset : 0)
+        .zIndex(isDraggingThis ? 10 : 0)
         .background(
             GeometryReader { geo in
-                Color.clear.onAppear {
-                    blockFrames[index] = geo.frame(in: .global)
-                }
-                .onChange(of: currentOrder) { _, _ in
-                    blockFrames[index] = geo.frame(in: .global)
-                }
+                Color.clear
+                    .onAppear {
+                        blockFrames[index] = geo.frame(in: .global)
+                    }
+                    .onChange(of: currentOrder) { _, _ in
+                        DispatchQueue.main.async {
+                            blockFrames[index] = geo.frame(in: .global)
+                        }
+                    }
             }
         )
         .onTapGesture {
-            if isOrdered {
-                HapticManager.lightImpact()
-                onBlockTap(node)
-            }
+            guard isOrdered else { return }
+            HapticManager.lightImpact()
+            onBlockTap(node)
         }
         .gesture(
             DragGesture(coordinateSpace: .global)
@@ -302,7 +241,7 @@ struct BlockCanvasView: View {
                 }
                 .onEnded { _ in
                     guard !isOrdered else { return }
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
                         draggingIndex = nil
                         dragOffset = 0
                     }
@@ -310,34 +249,34 @@ struct BlockCanvasView: View {
         )
         .accessibilityAction(named: "Move up") {
             guard index > 0 else { return }
-            swap(at: index, with: index - 1)
+            swapBlocks(at: index, with: index - 1)
         }
         .accessibilityAction(named: "Move down") {
             guard index < currentOrder.count - 1 else { return }
-            swap(at: index, with: index + 1)
+            swapBlocks(at: index, with: index + 1)
         }
     }
 
     // MARK: - Helpers
 
-    private func swap(at a: Int, with b: Int) {
+    private func swapBlocks(at a: Int, with b: Int) {
         guard a >= 0, b >= 0, a < currentOrder.count, b < currentOrder.count else { return }
         var newOrder = currentOrder
         newOrder.swapAt(a, b)
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
             currentOrder = newOrder
         }
         HapticManager.selection()
     }
 
-    private func swapIfNeeded(draggingIndex: Int, translation: CGFloat) {
-        guard let currentFrame = blockFrames[draggingIndex] else { return }
+    private func swapIfNeeded(draggingIndex idx: Int, translation: CGFloat) {
+        guard let currentFrame = blockFrames[idx] else { return }
         let midY = currentFrame.midY + translation
 
         for (otherIndex, otherFrame) in blockFrames {
-            guard otherIndex != draggingIndex else { continue }
+            guard otherIndex != idx else { continue }
             if otherFrame.contains(CGPoint(x: otherFrame.midX, y: midY)) {
-                swap(at: draggingIndex, with: otherIndex)
+                swapBlocks(at: idx, with: otherIndex)
                 self.draggingIndex = otherIndex
                 return
             }
