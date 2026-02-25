@@ -393,7 +393,7 @@ struct BuilderView: View {
     private func saveAttempt(session: QuizSession) {
         guard let problem else { return }
 
-        // 1. Insert the quiz attempt record
+        // 1. Insert and persist the quiz attempt FIRST (isolated save)
         let attempt = QuizAttempt(
             tierID: tierID,
             problemIndex: selectedProblemIndex,
@@ -405,31 +405,13 @@ struct BuilderView: View {
             analysisJSON: ""
         )
         modelContext.insert(attempt)
+        try? modelContext.save()
 
-        // 2. Update tier stats inline (single save for all changes)
-        let fetchTierID = tierID
-        var descriptor = FetchDescriptor<Tier>(predicate: #Predicate { $0.id == fetchTierID })
-        descriptor.fetchLimit = 1
-        if let tier = try? modelContext.fetch(descriptor).first {
-            tier.attemptsCount += 1
-            if session.passed {
-                tier.passCount += 1
-                tier.completed = true
-                if session.scorePercent > tier.score { tier.score = session.scorePercent }
-                if let progress = try? modelContext.fetch(FetchDescriptor<CityProgress>()).first,
-                   !progress.completedTierIDs.contains(fetchTierID) {
-                    progress.completedTierIDs.append(fetchTierID)
-                }
-            } else {
-                if session.scorePercent > tier.score { tier.score = session.scorePercent }
-            }
-        }
-
-        // 3. Single save for attempt + tier updates
-        do {
-            try modelContext.save()
-        } catch {
-            // Autosave will pick it up on next cycle
+        // 2. Update tier stats separately so a failure here can't roll back the attempt
+        if session.passed {
+            SwiftDataManager.recordPass(tierID: tierID, score: session.scorePercent, context: modelContext)
+        } else {
+            SwiftDataManager.recordAttempt(tierID: tierID, score: session.scorePercent, context: modelContext)
         }
     }
 
