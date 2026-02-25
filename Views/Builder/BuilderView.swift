@@ -40,6 +40,7 @@ struct BuilderView: View {
     @State private var completedBlocks: Set<NodeType> = []
     @State private var activeQuizBlock: BlockQuizState?
     @State private var showQuizCard = false
+    @State private var isLoadingQuiz = false
 
     // MARK: - Analysis State
 
@@ -114,7 +115,7 @@ struct BuilderView: View {
                 isOrdered = true
                 orderedConfirmed = true
                 HapticManager.success()
-                quizSession = buildQuizSession(problem: problem)
+                loadQuizSession(problem: problem)
             }
         }
         .onAppear { setup() }
@@ -321,20 +322,58 @@ struct BuilderView: View {
         guard !timerExpired, let problem else { return }
         timerExpired = true
         HapticManager.error()
-        let session = quizSession ?? buildQuizSession(problem: problem)
-        quizSession = session
+        if quizSession == nil {
+            quizSession = buildStaticQuizSession(problem: problem)
+        }
+        guard let session = quizSession else { return }
         startAnalysis(session: session, problem: problem)
     }
 
     // MARK: - Quiz Logic
 
-    private func buildQuizSession(problem: InteriorProblem) -> QuizSession {
+    /// Loads quiz session — tries AI generation on iOS 26+, falls back to static.
+    private func loadQuizSession(problem: InteriorProblem) {
+        if #available(iOS 26, *) {
+            isLoadingQuiz = true
+            Task { @MainActor in
+                let session = await buildAIQuizSession(problem: problem)
+                quizSession = session
+                isLoadingQuiz = false
+            }
+        } else {
+            quizSession = buildStaticQuizSession(problem: problem)
+        }
+    }
+
+    private func buildStaticQuizSession(problem: InteriorProblem) -> QuizSession {
         let blockStates = problem.blocks.map { node in
             BlockQuizState(
                 blockType: node,
                 questions: QuizContent.questions(for: node, problemID: problem.id)
             )
         }
+        return QuizSession(problem: problem, blockStates: blockStates)
+    }
+
+    @available(iOS 26, *)
+    private func buildAIQuizSession(problem: InteriorProblem) async -> QuizSession {
+        let service = AIQuizService()
+        var blockStates: [BlockQuizState] = []
+
+        for node in problem.blocks {
+            let aiQuestions = await service.generateQuestions(
+                blockType: node,
+                problemTitle: problem.title,
+                problemDescription: problem.description,
+                tierLevel: tierName
+            )
+            // Use AI questions if we got a full set; otherwise fall back to static
+            let questions = aiQuestions.count == 3
+                ? aiQuestions
+                : QuizContent.questions(for: node, problemID: problem.id)
+            blockStates.append(BlockQuizState(blockType: node, questions: questions))
+        }
+
         return QuizSession(problem: problem, blockStates: blockStates)
     }
 

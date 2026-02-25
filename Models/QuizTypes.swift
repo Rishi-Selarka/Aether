@@ -10,6 +10,22 @@ struct QuizQuestion: Identifiable {
     let correctIndex: Int
     /// Fallback explanation shown when AI is unavailable.
     let explanation: String
+
+    /// Returns a copy with options in a random order and correctIndex updated to match.
+    func withShuffledOptions() -> QuizQuestion {
+        var indices = Array(options.indices)
+        indices.shuffle()
+        let shuffledOptions = indices.map { options[$0] }
+        let newCorrectIndex = indices.firstIndex(of: correctIndex) ?? correctIndex
+        return QuizQuestion(
+            id: id,
+            blockType: blockType,
+            questionText: questionText,
+            options: shuffledOptions,
+            correctIndex: newCorrectIndex,
+            explanation: explanation
+        )
+    }
 }
 
 // MARK: - Quiz Answer
