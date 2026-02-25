@@ -33,6 +33,7 @@ struct BuilderView: View {
     @State private var showInstructions = true
     @State private var isOrdered = false
     @State private var orderedConfirmed = false
+    @State private var canvasId = UUID()
 
     // MARK: - Quiz State
 
@@ -139,6 +140,7 @@ struct BuilderView: View {
                 isOrdered: isOrdered,
                 onBlockTap: { node in openQuizForBlock(node) }
             )
+            .id(canvasId)
             bottomBar
                 .padding(.horizontal, 20)
                 .padding(.bottom, 24)
@@ -298,22 +300,9 @@ struct BuilderView: View {
 
     private func setup() {
         guard let problem else { return }
-        currentOrder = Self.derangement(of: problem.blocks)
+        currentOrder = []          // blocks start unplaced in floating area
         secondsRemaining = timeLimitMinutes * 60
         startTimer()
-    }
-
-    /// Shuffles so that NO element remains at its original index.
-    private static func derangement(of items: [NodeType]) -> [NodeType] {
-        guard items.count > 1 else { return items }
-        var result = items
-        for _ in 0 ..< 200 {
-            result.shuffle()
-            let hasFixedPoint = zip(items, result).contains { $0 == $1 }
-            if !hasFixedPoint { return result }
-        }
-        // Fallback: reverse (guaranteed derangement for count >= 2)
-        return items.reversed()
     }
 
     // MARK: - Timer
@@ -473,6 +462,7 @@ struct BuilderView: View {
         analysisTexts = []
         isGeneratingAnalysis = false
         timerExpired = false
+        canvasId = UUID()         // force-recreate BlockCanvasView with fresh slots
         setup()
     }
 }

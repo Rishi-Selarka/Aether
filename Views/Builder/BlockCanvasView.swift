@@ -1,8 +1,10 @@
 import SwiftUI
 
-/// Vertical canvas showing draggable architecture node boxes in a
-/// system-design schematic layout. Clean circuit-board connectors
-/// link each component. Ambient particle field adds subtle depth.
+/// Drag-and-drop architecture canvas. Empty placeholder slots run
+/// vertically in the center; source blocks float on the left and right
+/// sides with a bobbing animation. Users drag blocks into slots,
+/// move between slots, or tap to remove. When all slots are filled
+/// correctly, `currentOrder` is updated and quiz mode activates.
 struct BlockCanvasView: View {
     let correctOrder: [NodeType]
     @Binding var currentOrder: [NodeType]
@@ -10,57 +12,105 @@ struct BlockCanvasView: View {
     let isOrdered: Bool
     let onBlockTap: (NodeType) -> Void
 
-    // MARK: - State
+    // MARK: - Placement State
 
-    @State private var draggingIndex: Int?
-    @State private var dragOffset: CGFloat = 0
-    @State private var blockFrames: [Int: CGRect] = [:]
+    @State private var slots: [NodeType?]
+
+    // MARK: - Drag State
+
+    @State private var draggedBlock: NodeType?
+    @State private var dragSourceSlot: Int?   // nil → dragging from floating
+    @State private var dragLocation: CGPoint = .zero
+    @State private var isDragging = false
+    @State private var slotFrames: [Int: CGRect] = [:]
+
+    // MARK: - Animation
+
+    @State private var snapSlot: Int?
     @State private var showSuccessBanner = false
 
+    // MARK: - Constants
+
     private let gridSpacing: CGFloat = 30
-    private let connectorHeight: CGFloat = 44
+    private let connectorHeight: CGFloat = 30
+    private let boxSize: CGFloat = 110
+
+    // MARK: - Init
+
+    init(
+        correctOrder: [NodeType],
+        currentOrder: Binding<[NodeType]>,
+        completedBlocks: Set<NodeType>,
+        isOrdered: Bool,
+        onBlockTap: @escaping (NodeType) -> Void
+    ) {
+        self.correctOrder = correctOrder
+        self._currentOrder = currentOrder
+        self.completedBlocks = completedBlocks
+        self.isOrdered = isOrdered
+        self.onBlockTap = onBlockTap
+        self._slots = State(initialValue: Array(repeating: nil, count: correctOrder.count))
+    }
+
+    // MARK: - Computed
+
+    private var unplacedBlocks: [NodeType] {
+        let placed = Set(slots.compactMap { $0 })
+        return correctOrder.filter { !placed.contains($0) }
+    }
 
     // MARK: - Body
 
+    /// Single coordinate space shared by drag gestures, slot frames, and ghost.
+    private let canvasSpace = "blockCanvas"
+
     var body: some View {
         ZStack {
-            // Background — blueprint grid + faint ambient particles
             blueprintBackground
 
-            // Blocks + connectors
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 0) {
-                    ForEach(Array(currentOrder.enumerated()), id: \.element) { index, node in
-                        VStack(spacing: 0) {
-                            blockRow(node: node, index: index)
+            GeometryReader { geo in
+                let sideWidth = max(90, (geo.size.width - boxSize - 40) / 2)
 
-                            if index < currentOrder.count - 1 {
-                                circuitConnector(index: index)
-                            }
-                        }
+                ScrollView(.vertical, showsIndicators: false) {
+                    HStack(alignment: .top, spacing: 0) {
+                        // Left floating blocks (even indices)
+                        floatingColumn(
+                            blocks: unplacedBlocks.enumerated()
+                                .filter { $0.offset % 2 == 0 }.map(\.element),
+                            startSeed: 0,
+                            align: .trailing
+                        )
+                        .frame(width: sideWidth)
+
+                        // Center: slot pipeline
+                        slotPipeline
+                            .frame(width: boxSize + 20)
+
+                        // Right floating blocks (odd indices)
+                        floatingColumn(
+                            blocks: unplacedBlocks.enumerated()
+                                .filter { $0.offset % 2 != 0 }.map(\.element),
+                            startSeed: 1,
+                            align: .leading
+                        )
+                        .frame(width: sideWidth)
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
                 }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 28)
-                .frame(maxWidth: .infinity)
+            }
+
+            // Drag ghost follows finger — same coordinate space as drag
+            if isDragging, let block = draggedBlock {
+                ghostView(block: block)
             }
         }
-        // Fix overlap + show success banner when correctly arranged
+        .coordinateSpace(name: canvasSpace)
         .onChange(of: isOrdered) { _, ordered in
             if ordered {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                    draggingIndex = nil
-                    dragOffset = 0
-                    blockFrames.removeAll()
-                }
-                withAnimation(.easeOut(duration: 0.35)) {
-                    showSuccessBanner = true
-                }
-                // Auto-dismiss banner after 2.5s
+                withAnimation(.easeOut(duration: 0.35)) { showSuccessBanner = true }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                    withAnimation(.easeIn(duration: 0.3)) {
-                        showSuccessBanner = false
-                    }
+                    withAnimation(.easeIn(duration: 0.3)) { showSuccessBanner = false }
                 }
             }
         }
@@ -72,133 +122,315 @@ struct BlockCanvasView: View {
         }
     }
 
+    // MARK: - Slot Pipeline
+
+    private var slotPipeline: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(slots.indices), id: \.self) { index in
+                VStack(spacing: 0) {
+                    slotView(index: index)
+                    if index < slots.count - 1 {
+                        connectorLine(index: index)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Single Slot
+
+    @ViewBuilder
+    private func slotView(index: Int) -> some View {
+        ZStack {
+            if let block = slots[index] {
+                filledSlotContent(block: block, index: index)
+            } else {
+                emptySlotContent(index: index)
+            }
+        }
+        .frame(width: boxSize, height: boxSize)
+        .background(
+            GeometryReader { geo in
+                Color.clear
+                    .onAppear { slotFrames[index] = geo.frame(in: .named(canvasSpace)) }
+                    .onChange(of: slots) { _, _ in
+                        DispatchQueue.main.async {
+                            slotFrames[index] = geo.frame(in: .named(canvasSpace))
+                        }
+                    }
+            }
+        )
+    }
+
+    private func filledSlotContent(block: NodeType, index: Int) -> some View {
+        ZStack(alignment: .topTrailing) {
+            ArchitectureBlockView(
+                nodeType: block,
+                isDragging: false,
+                isLocked: isOrdered
+            )
+            .scaleEffect(snapSlot == index ? 1.12 : 1.0)
+            .animation(
+                .spring(response: 0.2, dampingFraction: 0.35),
+                value: snapSlot == index
+            )
+            .opacity(isDragging && dragSourceSlot == index ? 0.2 : 1.0)
+
+            if completedBlocks.contains(block) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(.green)
+                    .shadow(color: .green.opacity(0.5), radius: 4)
+                    .offset(x: -6, y: 4)
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .onTapGesture {
+            if isOrdered {
+                HapticManager.lightImpact()
+                onBlockTap(block)
+            } else {
+                // Remove to floating
+                withAnimation(.spring(response: 0.3)) { slots[index] = nil }
+                syncCurrentOrder()
+                HapticManager.lightImpact()
+            }
+        }
+        .highPriorityGesture(
+            DragGesture(minimumDistance: 8, coordinateSpace: .named(canvasSpace))
+                .onChanged { value in
+                    guard !isOrdered else { return }
+                    if !isDragging {
+                        draggedBlock = block
+                        dragSourceSlot = index
+                        isDragging = true
+                        HapticManager.lightImpact()
+                    }
+                    dragLocation = value.location
+                }
+                .onEnded { value in
+                    guard !isOrdered else { return }
+                    handleDrop(at: value.location)
+                }
+        )
+    }
+
+    private func emptySlotContent(index: Int) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(white: 0.06))
+
+            RoundedRectangle(cornerRadius: 10)
+                .strokeBorder(
+                    style: StrokeStyle(lineWidth: 1.5, dash: [6, 4])
+                )
+                .foregroundStyle(Color(white: 0.22))
+
+            Image(systemName: "plus")
+                .font(.system(size: 18, weight: .ultraLight))
+                .foregroundStyle(Color(white: 0.18))
+        }
+    }
+
+    // MARK: - Floating Column
+
+    private func floatingColumn(
+        blocks: [NodeType], startSeed: Int, align: HorizontalAlignment
+    ) -> some View {
+        VStack(spacing: 20) {
+            Spacer(minLength: 8)
+            ForEach(Array(blocks.enumerated()), id: \.element) { idx, block in
+                floatingCell(block: block, seed: startSeed + idx * 2)
+            }
+            Spacer(minLength: 8)
+        }
+        .frame(maxWidth: .infinity, alignment: align == .trailing ? .trailing : .leading)
+        .animation(.spring(response: 0.4), value: unplacedBlocks)
+    }
+
+    private func floatingCell(block: NodeType, seed: Int) -> some View {
+        ArchitectureBlockView(nodeType: block, isDragging: false)
+            .scaleEffect(isDragging && draggedBlock == block ? 0.5 : 0.75)
+            .opacity(isDragging && draggedBlock == block ? 0.2 : 1.0)
+            .modifier(FloatingBob(seed: seed))
+            .shadow(color: block.accentColor.opacity(0.15), radius: 8, y: 4)
+            .highPriorityGesture(
+                DragGesture(minimumDistance: 8, coordinateSpace: .named(canvasSpace))
+                    .onChanged { value in
+                        if !isDragging {
+                            draggedBlock = block
+                            dragSourceSlot = nil
+                            isDragging = true
+                            HapticManager.lightImpact()
+                        }
+                        dragLocation = value.location
+                    }
+                    .onEnded { value in
+                        handleDrop(at: value.location)
+                    }
+            )
+    }
+
+    // MARK: - Drag Ghost
+
+    private func ghostView(block: NodeType) -> some View {
+        ArchitectureBlockView(nodeType: block, isDragging: true)
+            .frame(width: boxSize, height: boxSize)
+            .scaleEffect(1.08)
+            .shadow(color: block.accentColor.opacity(0.4), radius: 20, y: 6)
+            .position(dragLocation)
+            .allowsHitTesting(false)
+            .zIndex(100)
+    }
+
+    // MARK: - Drop Handling
+
+    private func handleDrop(at location: CGPoint) {
+        guard let block = draggedBlock else { resetDrag(); return }
+
+        if let target = targetSlotIndex(for: location) {
+            if let source = dragSourceSlot {
+                // Slot → Slot: swap contents
+                let occupant = slots[target]
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.55)) {
+                    slots[target] = block
+                    slots[source] = occupant
+                }
+            } else {
+                // Floating → Slot (existing occupant returns to floating automatically)
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.55)) {
+                    slots[target] = block
+                }
+            }
+            triggerSnap(at: target)
+        }
+        // Dropped outside any slot: snap back (no change)
+
+        resetDrag()
+        syncCurrentOrder()
+    }
+
+    private func targetSlotIndex(for location: CGPoint) -> Int? {
+        for (index, frame) in slotFrames {
+            // Generous hit area — fingers are imprecise on touch screens
+            let expanded = frame.insetBy(dx: -30, dy: -18)
+            if expanded.contains(location) { return index }
+        }
+        return nil
+    }
+
+    private func triggerSnap(at index: Int) {
+        HapticManager.mediumImpact()
+        snapSlot = index
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            snapSlot = nil
+        }
+    }
+
+    private func resetDrag() {
+        isDragging = false
+        draggedBlock = nil
+        dragSourceSlot = nil
+    }
+
+    private func syncCurrentOrder() {
+        let filled = slots.compactMap { $0 }
+        currentOrder = filled.count == correctOrder.count ? filled : []
+    }
+
+    // MARK: - Connector Line
+
+    private func connectorLine(index: Int) -> some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+            Canvas { ctx, size in
+                let time = timeline.date.timeIntervalSinceReferenceDate
+                let midX = size.width / 2
+                let top: CGFloat = 2
+                let bottom = size.height - 2
+
+                // Dashed vertical line
+                ctx.stroke(
+                    Path { p in
+                        p.move(to: CGPoint(x: midX, y: top))
+                        p.addLine(to: CGPoint(x: midX, y: bottom))
+                    },
+                    with: .color(Color(white: 0.25)),
+                    style: StrokeStyle(lineWidth: 1, dash: [4, 3])
+                )
+
+                // Chevron
+                let cy = size.height / 2
+                ctx.stroke(
+                    Path { p in
+                        p.move(to: CGPoint(x: midX - 4, y: cy - 3))
+                        p.addLine(to: CGPoint(x: midX, y: cy + 3))
+                        p.addLine(to: CGPoint(x: midX + 4, y: cy - 3))
+                    },
+                    with: .color(Color(white: 0.35)),
+                    style: StrokeStyle(lineWidth: 1, lineCap: .round, lineJoin: .round)
+                )
+
+                // Data-pulse dot
+                let t = fmod(time * 0.6 + Double(index) * 0.35, 1.0)
+                let py = top + CGFloat(t) * (bottom - top)
+                let life = 1.0 - abs(t - 0.5) * 2.0
+                ctx.fill(
+                    Path(ellipseIn: CGRect(x: midX - 2, y: py - 2, width: 4, height: 4)),
+                    with: .color(.white.opacity(life * 0.3))
+                )
+            }
+        }
+        .frame(height: connectorHeight)
+        .allowsHitTesting(false)
+    }
+
     // MARK: - Blueprint Background
 
     private var blueprintBackground: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 24.0)) { timeline in
             Canvas { ctx, size in
                 let time = timeline.date.timeIntervalSinceReferenceDate
-
-                // Grid dots — subtle blueprint feel
-                drawSchematicGrid(ctx: ctx, size: size, time: time)
-
-                // Subtle ambient particles — monochrome, architecture-feel
-                drawAmbientField(ctx: ctx, size: size, time: time)
+                drawGrid(ctx: ctx, size: size, time: time)
+                drawAmbient(ctx: ctx, size: size, time: time)
             }
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
     }
 
-    private func drawSchematicGrid(ctx: GraphicsContext, size: CGSize, time: Double) {
+    private func drawGrid(ctx: GraphicsContext, size: CGSize, time: Double) {
         let cols = Int(size.width / gridSpacing) + 1
         let rows = Int(size.height / gridSpacing) + 1
-
         for row in 0 ..< rows {
             for col in 0 ..< cols {
                 let x = CGFloat(col) * gridSpacing
                 let y = CGFloat(row) * gridSpacing
-
-                // Crosshair-style dots (+ shape instead of circles)
-                let alpha = 0.06 + sin(time * 0.3 + Double(row * 3 + col) * 0.15) * 0.02
+                let a = 0.06 + sin(time * 0.3 + Double(row * 3 + col) * 0.15) * 0.02
                 let arm: CGFloat = 1.6
-
-                // Horizontal arm
-                ctx.fill(
-                    Path(CGRect(x: x - arm, y: y - 0.4, width: arm * 2, height: 0.8)),
-                    with: .color(.white.opacity(alpha))
-                )
-                // Vertical arm
-                ctx.fill(
-                    Path(CGRect(x: x - 0.4, y: y - arm, width: 0.8, height: arm * 2)),
-                    with: .color(.white.opacity(alpha))
-                )
+                ctx.fill(Path(CGRect(x: x - arm, y: y - 0.4, width: arm * 2, height: 0.8)),
+                          with: .color(.white.opacity(a)))
+                ctx.fill(Path(CGRect(x: x - 0.4, y: y - arm, width: 0.8, height: arm * 2)),
+                          with: .color(.white.opacity(a)))
             }
         }
     }
 
-    /// Monochrome ambient particles — white/grey, slow drift, no rainbow.
-    private func drawAmbientField(ctx: GraphicsContext, size: CGSize, time: Double) {
-        for i in 0 ..< 20 {
+    private func drawAmbient(ctx: GraphicsContext, size: CGSize, time: Double) {
+        for i in 0 ..< 18 {
             let s = Double(i)
-            let xNorm = fmod(s * 0.3717 + sin(time * 0.08 + s * 1.6) * 0.02, 1.0)
-            let yNorm = fmod(s * 0.4331 + time * (0.004 + fmod(s * 0.002, 0.006)), 1.0)
-            let dotSize: CGFloat = 2.0 + CGFloat(fmod(s * 0.41, 1.5))
+            let xN = fmod(s * 0.3717 + sin(time * 0.08 + s * 1.6) * 0.02, 1.0)
+            let yN = fmod(s * 0.4331 + time * (0.004 + fmod(s * 0.002, 0.006)), 1.0)
+            let sz: CGFloat = 2 + CGFloat(fmod(s * 0.41, 1.5))
             let pulse = 0.5 + sin(time * 0.8 + s * 0.9) * 0.5
-            let alpha = (0.06 + fmod(s * 0.018, 0.06)) * pulse
-
-            let px = CGFloat(xNorm) * size.width
-            let py = CGFloat(yNorm) * size.height
-
-            // Subtle white glow
-            let glowSize = dotSize * 3
-            ctx.fill(
-                Path(ellipseIn: CGRect(x: px - glowSize / 2, y: py - glowSize / 2,
-                                       width: glowSize, height: glowSize)),
-                with: .color(.white.opacity(alpha * 0.3))
-            )
-            ctx.fill(
-                Path(ellipseIn: CGRect(x: px - dotSize / 2, y: py - dotSize / 2,
-                                       width: dotSize, height: dotSize)),
-                with: .color(.white.opacity(alpha))
-            )
+            let a = (0.06 + fmod(s * 0.018, 0.06)) * pulse
+            let px = CGFloat(xN) * size.width
+            let py = CGFloat(yN) * size.height
+            let g = sz * 3
+            ctx.fill(Path(ellipseIn: CGRect(x: px - g / 2, y: py - g / 2, width: g, height: g)),
+                      with: .color(.white.opacity(a * 0.3)))
+            ctx.fill(Path(ellipseIn: CGRect(x: px - sz / 2, y: py - sz / 2, width: sz, height: sz)),
+                      with: .color(.white.opacity(a)))
         }
-    }
-
-    // MARK: - Circuit Connector
-
-    /// Clean vertical data-flow line between components with small arrow indicator.
-    private func circuitConnector(index: Int) -> some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-            Canvas { ctx, size in
-                let time = timeline.date.timeIntervalSinceReferenceDate
-                let midX = size.width / 2
-                let topY: CGFloat = 2
-                let bottomY = size.height - 2
-
-                // Dashed vertical line
-                let linePath = Path { p in
-                    p.move(to: CGPoint(x: midX, y: topY))
-                    p.addLine(to: CGPoint(x: midX, y: bottomY))
-                }
-                ctx.stroke(
-                    linePath,
-                    with: .color(Color(white: 0.3)),
-                    style: StrokeStyle(lineWidth: 1, dash: [4, 3])
-                )
-
-                // Downward arrow chevron at center
-                let arrowY = size.height / 2
-                let chevron = Path { p in
-                    p.move(to: CGPoint(x: midX - 4, y: arrowY - 3))
-                    p.addLine(to: CGPoint(x: midX, y: arrowY + 3))
-                    p.addLine(to: CGPoint(x: midX + 4, y: arrowY - 3))
-                }
-                ctx.stroke(
-                    chevron,
-                    with: .color(Color(white: 0.4)),
-                    style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round)
-                )
-
-                // Single small data-pulse dot travelling downward
-                let pulseT = fmod(time * 0.7 + Double(index) * 0.4, 1.0)
-                let pulseY = topY + CGFloat(pulseT) * (bottomY - topY)
-                let life = 1.0 - abs(pulseT - 0.5) * 2.0 // peaks at center
-
-                ctx.fill(
-                    Path(ellipseIn: CGRect(x: midX - 2, y: pulseY - 2, width: 4, height: 4)),
-                    with: .color(.white.opacity(life * 0.35))
-                )
-                // Glow ring
-                ctx.fill(
-                    Path(ellipseIn: CGRect(x: midX - 5, y: pulseY - 5, width: 10, height: 10)),
-                    with: .color(.white.opacity(life * 0.08))
-                )
-            }
-        }
-        .frame(height: connectorHeight)
-        .frame(maxWidth: .infinity)
-        .allowsHitTesting(false)
     }
 
     // MARK: - Success Banner
@@ -208,7 +440,6 @@ struct BlockCanvasView: View {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.green)
-
             Text("Architecture Correct — Tap blocks to begin quiz")
                 .font(.system(size: 14, weight: .semibold, design: .monospaced))
                 .foregroundStyle(.white.opacity(0.9))
@@ -226,102 +457,25 @@ struct BlockCanvasView: View {
         .shadow(color: .green.opacity(0.25), radius: 12, y: 4)
         .padding(.top, 8)
     }
+}
 
-    // MARK: - Block Row
+// MARK: - Floating Bob Animation
 
-    @ViewBuilder
-    private func blockRow(node: NodeType, index: Int) -> some View {
-        let isDraggingThis = draggingIndex == index
-        let quizDone = completedBlocks.contains(node)
+private struct FloatingBob: ViewModifier {
+    let seed: Int
+    @State private var isUp = false
 
-        ZStack(alignment: .topTrailing) {
-            ArchitectureBlockView(
-                nodeType: node,
-                isDragging: isDraggingThis,
-                isLocked: !isOrdered
-            )
-
-            if quizDone {
-                Image(systemName: "checkmark.seal.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(.green)
-                    .shadow(color: .green.opacity(0.5), radius: 4)
-                    .offset(x: -6, y: 4)
-                    .transition(.scale.combined(with: .opacity))
-            }
-        }
-        .offset(y: isDraggingThis ? dragOffset : 0)
-        .zIndex(isDraggingThis ? 10 : 0)
-        .background(
-            GeometryReader { geo in
-                Color.clear
-                    .onAppear {
-                        blockFrames[index] = geo.frame(in: .global)
-                    }
-                    .onChange(of: currentOrder) { _, _ in
-                        DispatchQueue.main.async {
-                            blockFrames[index] = geo.frame(in: .global)
-                        }
-                    }
-            }
-        )
-        .onTapGesture {
-            guard isOrdered else { return }
-            HapticManager.lightImpact()
-            onBlockTap(node)
-        }
-        .gesture(
-            DragGesture(coordinateSpace: .global)
-                .onChanged { value in
-                    guard !isOrdered else { return }
-                    if draggingIndex == nil {
-                        draggingIndex = index
-                        HapticManager.mediumImpact()
-                    }
-                    dragOffset = value.translation.height
-                    swapIfNeeded(draggingIndex: index, translation: value.translation.height)
+    func body(content: Content) -> some View {
+        content
+            .offset(y: isUp ? -5 : 5)
+            .onAppear {
+                withAnimation(
+                    .easeInOut(duration: 1.4 + Double(seed % 4) * 0.2)
+                    .repeatForever(autoreverses: true)
+                    .delay(Double(seed) * 0.12)
+                ) {
+                    isUp = true
                 }
-                .onEnded { _ in
-                    guard !isOrdered else { return }
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                        draggingIndex = nil
-                        dragOffset = 0
-                    }
-                }
-        )
-        .accessibilityAction(named: "Move up") {
-            guard index > 0 else { return }
-            swapBlocks(at: index, with: index - 1)
-        }
-        .accessibilityAction(named: "Move down") {
-            guard index < currentOrder.count - 1 else { return }
-            swapBlocks(at: index, with: index + 1)
-        }
-    }
-
-    // MARK: - Helpers
-
-    private func swapBlocks(at a: Int, with b: Int) {
-        guard a >= 0, b >= 0, a < currentOrder.count, b < currentOrder.count else { return }
-        var newOrder = currentOrder
-        newOrder.swapAt(a, b)
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-            currentOrder = newOrder
-        }
-        HapticManager.selection()
-    }
-
-    private func swapIfNeeded(draggingIndex idx: Int, translation: CGFloat) {
-        guard let currentFrame = blockFrames[idx] else { return }
-        let midY = currentFrame.midY + translation
-
-        for (otherIndex, otherFrame) in blockFrames {
-            guard otherIndex != idx else { continue }
-            if otherFrame.contains(CGPoint(x: otherFrame.midX, y: midY)) {
-                swapBlocks(at: idx, with: otherIndex)
-                self.draggingIndex = otherIndex
-                return
             }
-        }
     }
 }
