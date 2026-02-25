@@ -1,76 +1,94 @@
 import SwiftUI
 
-/// A single draggable architecture block tile.
+/// A single draggable architecture block — 2.5D glass card with icon glow halo.
 struct ArchitectureBlockView: View {
     let nodeType: NodeType
-    let index: Int
-    let isCorrectlyPlaced: Bool
     let isDragging: Bool
 
     var body: some View {
-        HStack(spacing: 16) {
-            // Index badge
-            Text("\(index + 1)")
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.6))
-                .frame(width: 24)
-
-            // Icon
+        HStack(spacing: 14) {
+            // Glowing icon
             ZStack {
+                // Outer glow halo
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                nodeType.accentColor.opacity(0.35),
+                                nodeType.accentColor.opacity(0.0)
+                            ],
+                            center: .center,
+                            startRadius: 6,
+                            endRadius: 28
+                        )
+                    )
+                    .frame(width: 56, height: 56)
+
+                // Inner disc
                 Circle()
                     .fill(nodeType.accentColor.opacity(0.2))
-                    .frame(width: 44, height: 44)
+                    .frame(width: 42, height: 42)
+                    .overlay {
+                        Circle()
+                            .strokeBorder(nodeType.accentColor.opacity(0.4), lineWidth: 1)
+                    }
+
                 Image(systemName: nodeType.sfSymbol)
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(nodeType.accentColor)
             }
 
-            // Name
-            VStack(alignment: .leading, spacing: 3) {
-                Text(nodeType.displayName)
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
-                Text("Tier \(nodeType.tierLevel) component")
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundStyle(.white.opacity(0.5))
-            }
+            // Name only — no tier hint
+            Text(nodeType.displayName)
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
 
             Spacer()
 
-            // Correct placement indicator
-            if isCorrectlyPlaced {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 20))
-                    .foregroundStyle(.green)
-                    .transition(.scale.combined(with: .opacity))
-            } else {
-                // Drag handle
-                Image(systemName: "line.3.horizontal")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.white.opacity(0.35))
+            // Drag grip dots
+            VStack(spacing: 3) {
+                ForEach(0 ..< 3, id: \.self) { _ in
+                    HStack(spacing: 3) {
+                        Circle().frame(width: 3, height: 3)
+                        Circle().frame(width: 3, height: 3)
+                    }
+                }
             }
+            .foregroundStyle(.white.opacity(isDragging ? 0.5 : 0.2))
         }
         .padding(.horizontal, 16)
+        .padding(.vertical, 4)
         .frame(height: 72)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(.white.opacity(isDragging ? 0.12 : 0.07))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder(
-                            isCorrectlyPlaced
-                                ? Color.green.opacity(0.6)
-                                : (isDragging ? nodeType.accentColor.opacity(0.6) : Color.white.opacity(0.12)),
-                            lineWidth: isCorrectlyPlaced ? 1.5 : 1
-                        )
-                }
+            ZStack {
+                // Glass fill
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(.ultraThinMaterial)
+                    .opacity(isDragging ? 0.9 : 0.6)
+
+                // Accent edge glow when dragging
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(nodeType.accentColor.opacity(isDragging ? 0.08 : 0.0))
+
+                // Border
+                RoundedRectangle(cornerRadius: 18)
+                    .strokeBorder(
+                        isDragging
+                            ? nodeType.accentColor.opacity(0.6)
+                            : .white.opacity(0.12),
+                        lineWidth: isDragging ? 1.5 : 0.8
+                    )
+            }
         }
-        .scaleEffect(isDragging ? 1.03 : 1.0)
-        .shadow(color: isDragging ? nodeType.accentColor.opacity(0.3) : .clear, radius: 12)
+        .scaleEffect(isDragging ? 1.04 : 1.0)
+        .shadow(
+            color: isDragging ? nodeType.accentColor.opacity(0.4) : .black.opacity(0.2),
+            radius: isDragging ? 16 : 6,
+            y: isDragging ? 0 : 4
+        )
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isDragging)
-        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: isCorrectlyPlaced)
-        .accessibilityLabel("\(nodeType.displayName), position \(index + 1)")
+        .accessibilityLabel(nodeType.displayName)
         .accessibilityAddTraits(.allowsDirectInteraction)
     }
 }

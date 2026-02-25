@@ -41,12 +41,12 @@ struct InstructionOverlay: View {
                     instructionRow(
                         icon: "arrow.up.arrow.down",
                         color: .blue,
-                        text: "Drag blocks to reorder from top (UI) to bottom (data)"
+                        text: "Drag blocks to arrange the correct architecture"
                     )
                     instructionRow(
                         icon: "checkmark.circle.fill",
                         color: .green,
-                        text: "Get all blocks in the correct order to unlock the quiz"
+                        text: "Correct order unlocks the quiz phase"
                     )
                     instructionRow(
                         icon: "questionmark.circle.fill",

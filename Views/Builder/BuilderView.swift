@@ -210,14 +210,12 @@ struct BuilderView: View {
 
     private var phaseLabel: some View {
         HStack(spacing: 8) {
-            Image(systemName: isOrdered
-                  ? "checkmark.circle.fill"
-                  : "arrow.up.arrow.down.circle.fill")
-                .font(.system(size: 13))
-                .foregroundStyle(isOrdered ? .green : .white.opacity(0.5))
+            Circle()
+                .fill(isOrdered ? Color.green : Color.white.opacity(0.25))
+                .frame(width: 6, height: 6)
             Text(phaseLabelText)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.white.opacity(0.55))
+                .foregroundStyle(.white.opacity(0.4))
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 10)
@@ -226,10 +224,10 @@ struct BuilderView: View {
     private var phaseLabelText: String {
         if isOrdered {
             return quizSession?.allBlocksComplete == true
-                ? "Tap 'Analyse' when ready"
-                : "Tap each block to answer its quiz"
+                ? "Ready to analyse"
+                : "Tap blocks to begin quiz"
         }
-        return "Drag blocks into the correct order"
+        return "Arrange the architecture"
     }
 
     // MARK: - Bottom Bar
