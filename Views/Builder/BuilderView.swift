@@ -216,10 +216,11 @@ struct BuilderView: View {
                 .frame(width: 6, height: 6)
             Text(phaseLabelText)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.white.opacity(0.4))
+                .foregroundStyle(isOrdered ? .green.opacity(0.8) : .white.opacity(0.4))
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 10)
+        .animation(.easeInOut(duration: 0.4), value: isOrdered)
     }
 
     private var phaseLabelText: String {
@@ -297,9 +298,22 @@ struct BuilderView: View {
 
     private func setup() {
         guard let problem else { return }
-        currentOrder = problem.blocks.shuffled()
+        currentOrder = Self.derangement(of: problem.blocks)
         secondsRemaining = timeLimitMinutes * 60
         startTimer()
+    }
+
+    /// Shuffles so that NO element remains at its original index.
+    private static func derangement(of items: [NodeType]) -> [NodeType] {
+        guard items.count > 1 else { return items }
+        var result = items
+        for _ in 0 ..< 200 {
+            result.shuffle()
+            let hasFixedPoint = zip(items, result).contains { $0 == $1 }
+            if !hasFixedPoint { return result }
+        }
+        // Fallback: reverse (guaranteed derangement for count >= 2)
+        return items.reversed()
     }
 
     // MARK: - Timer
@@ -428,7 +442,7 @@ struct BuilderView: View {
     }
 
     private func saveAttempt(session: QuizSession) {
-        guard let problem else { return }
+        guard problem != nil else { return }
 
         // Update tier stats
         if session.passed {

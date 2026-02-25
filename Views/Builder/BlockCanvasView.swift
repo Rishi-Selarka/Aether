@@ -15,6 +15,7 @@ struct BlockCanvasView: View {
     @State private var draggingIndex: Int?
     @State private var dragOffset: CGFloat = 0
     @State private var blockFrames: [Int: CGRect] = [:]
+    @State private var showSuccessBanner = false
 
     private let gridSpacing: CGFloat = 30
     private let connectorHeight: CGFloat = 44
@@ -44,7 +45,7 @@ struct BlockCanvasView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        // Fix overlap: when isOrdered flips, immediately settle any active drag
+        // Fix overlap + show success banner when correctly arranged
         .onChange(of: isOrdered) { _, ordered in
             if ordered {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
@@ -52,6 +53,21 @@ struct BlockCanvasView: View {
                     dragOffset = 0
                     blockFrames.removeAll()
                 }
+                withAnimation(.easeOut(duration: 0.35)) {
+                    showSuccessBanner = true
+                }
+                // Auto-dismiss banner after 2.5s
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                    withAnimation(.easeIn(duration: 0.3)) {
+                        showSuccessBanner = false
+                    }
+                }
+            }
+        }
+        .overlay(alignment: .top) {
+            if showSuccessBanner {
+                successBanner
+                    .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
     }
@@ -183,6 +199,32 @@ struct BlockCanvasView: View {
         .frame(height: connectorHeight)
         .frame(maxWidth: .infinity)
         .allowsHitTesting(false)
+    }
+
+    // MARK: - Success Banner
+
+    private var successBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.green)
+
+            Text("Architecture Correct — Tap blocks to begin quiz")
+                .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                .foregroundStyle(.white.opacity(0.9))
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(white: 0.10))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(.green.opacity(0.5), lineWidth: 1)
+                }
+        }
+        .shadow(color: .green.opacity(0.25), radius: 12, y: 4)
+        .padding(.top, 8)
     }
 
     // MARK: - Block Row
