@@ -4,9 +4,9 @@ import SwiftData
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    var onReset: (() -> Void)? = nil
 
     @AppStorage("isDarkMode") private var isDarkMode = false
-    @AppStorage("skipTutorials") private var skipTutorials = false
     @State private var showResetConfirmation = false
 
     var body: some View {
@@ -21,14 +21,7 @@ struct SettingsView: View {
                         .accessibilityHint("When on, the app uses a dark background with light lines")
                 }
 
-                Section("Demo") {
-                    Toggle("Skip Tutorials", isOn: $skipTutorials)
-                        .onChange(of: skipTutorials) { _, _ in
-                            HapticManager.selection()
-                        }
-                        .accessibilityLabel("Skip tutorials")
-                        .accessibilityHint("When on, tutorial overlays are skipped")
-
+                Section {
                     Button(role: .destructive) {
                         showResetConfirmation = true
                     } label: {
@@ -37,32 +30,6 @@ struct SettingsView: View {
                     .archsysMinTouchTarget()
                     .accessibilityLabel("Reset all progress")
                     .accessibilityHint("Erases all architectures, progress, and achievements. This cannot be undone.")
-                }
-
-                Section("Credits") {
-                    VStack(alignment: .leading, spacing: LayoutConstants.spacingXS) {
-                        Text("archsys")
-                            .font(Typography.headingMedium)
-                            .foregroundStyle(Color.archsysTextPrimary)
-                        Text("City Architect - Swift Student Challenge 2026")
-                            .font(Typography.bodySmall)
-                            .foregroundStyle(Color.archsysTextSecondary)
-                        Text("Learn mobile architecture through an interactive city-building metaphor.")
-                            .font(Typography.bodySmall)
-                            .foregroundStyle(Color.archsysTextTertiary)
-                            .padding(.top, 4)
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-
-                    creditsRow(
-                        title: "Built with",
-                        items: ["SwiftUI", "SwiftData", "SF Symbols"]
-                    )
-                    creditsRow(
-                        title: "Concepts taught",
-                        items: ["MVVM", "Repository Pattern", "Clean Architecture", "Event-Driven", "ML Integration"]
-                    )
                 }
             }
             .scrollContentBackground(.hidden)
@@ -83,6 +50,7 @@ struct SettingsView: View {
                 Button("Reset", role: .destructive) {
                     HapticManager.mediumImpact()
                     SwiftDataManager.resetAll(context: modelContext)
+                    onReset?()
                     dismiss()
                 }
                 Button("Cancel", role: .cancel) {
@@ -92,17 +60,5 @@ struct SettingsView: View {
                 Text("This will erase all architectures, progress, achievements, and tier completion. This cannot be undone.")
             }
         }
-    }
-
-    private func creditsRow(title: String, items: [String]) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(Typography.bodySmall)
-                .foregroundStyle(Color.archsysTextTertiary)
-            Text(items.joined(separator: " · "))
-                .font(Typography.bodyMedium)
-                .foregroundStyle(Color.archsysTextSecondary)
-        }
-        .listRowBackground(Color.archsysSurface)
     }
 }
