@@ -64,7 +64,7 @@ struct AIAnalysisService {
                 instructions: "You are a concise iOS system design educator. Explain concepts in 1-2 short sentences aimed at a student learning mobile architecture. Be direct and educational."
             )
             let response = try await session.respond(to: prompt, generating: GeneratedAnalysis.self)
-            let text = response.value.text.trimmingCharacters(in: .whitespacesAndNewlines)
+            let text = response.content.text.trimmingCharacters(in: .whitespacesAndNewlines)
             return text.isEmpty ? result.question.explanation : text
         } catch {
             return result.question.explanation

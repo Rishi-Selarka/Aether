@@ -65,7 +65,7 @@ struct AIQuizService {
             )
 
             let response = try await session.respond(to: prompt, generating: GeneratedQuizSet.self)
-            let generated = response.value.questions
+            let generated = response.content.questions
             guard generated.count == 3 else { return [] }
 
             return generated.enumerated().compactMap { i, q in
