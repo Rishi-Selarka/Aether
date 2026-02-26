@@ -41,6 +41,10 @@ struct TierMapView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView(onReset: rehydrateStatsCache)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(.ultraThinMaterial)
+                .presentationCornerRadius(28)
         }
         .navigationDestination(item: $selectedTierID) { tierID in
             InteriorView(tierID: tierID)

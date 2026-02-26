@@ -11,9 +11,9 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            dragHandle
             headerRow
                 .padding(.horizontal, 20)
+                .padding(.top, 20)
                 .padding(.bottom, 24)
 
             ScrollView(.vertical, showsIndicators: false) {
@@ -42,7 +42,7 @@ struct SettingsView: View {
                 .padding(.bottom, 40)
             }
         }
-        .background(Color(white: 0.10))
+        .background(.clear)
         .confirmationDialog("Reset All Progress?", isPresented: $showResetConfirmation) {
             Button("Reset", role: .destructive) {
                 HapticManager.mediumImpact()
@@ -60,19 +60,11 @@ struct SettingsView: View {
 
     // MARK: - Header
 
-    private var dragHandle: some View {
-        RoundedRectangle(cornerRadius: 2.5)
-            .fill(Color(white: 0.35))
-            .frame(width: 36, height: 5)
-            .padding(.top, 12)
-            .padding(.bottom, 16)
-    }
-
     private var headerRow: some View {
         ZStack {
             Text("Settings")
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
 
             HStack {
@@ -82,7 +74,7 @@ struct SettingsView: View {
                     dismiss()
                 }
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .accessibilityLabel("Done")
             }
         }
@@ -98,15 +90,18 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(header.uppercased())
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Color(white: 0.50))
+                .foregroundStyle(.secondary)
                 .tracking(0.6)
                 .padding(.leading, 4)
 
             VStack(spacing: 0) {
                 content()
             }
-            .background(Color(white: 0.16))
-            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
+            .overlay {
+                RoundedRectangle(cornerRadius: 14)
+                    .strokeBorder(.white.opacity(0.1), lineWidth: 0.5)
+            }
         }
     }
 
@@ -122,7 +117,7 @@ struct SettingsView: View {
             iconChip(icon: icon, color: iconColor)
             Text(label)
                 .font(.system(size: 16, weight: .regular))
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
             Spacer()
             Toggle("", isOn: isOn)
                 .labelsHidden()
@@ -146,11 +141,11 @@ struct SettingsView: View {
                 iconChip(icon: icon, color: iconColor)
                 Text(label)
                     .font(.system(size: 16, weight: .regular))
-                    .foregroundStyle(role == .destructive ? Color(red: 1.0, green: 0.32, blue: 0.28) : .white)
+                    .foregroundStyle(role == .destructive ? Color(red: 1.0, green: 0.32, blue: 0.28) : .primary)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color(white: 0.35))
+                    .foregroundStyle(.tertiary)
             }
             .padding(.horizontal, 14)
             .frame(height: 52)
