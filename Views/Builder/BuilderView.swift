@@ -206,9 +206,17 @@ struct BuilderView: View {
 
     private var phaseLabel: some View {
         HStack(spacing: 8) {
-            Circle()
-                .fill(isOrdered ? Color.green : Color.white.opacity(0.25))
-                .frame(width: 6, height: 6)
+            if isLoadingQuiz {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .scaleEffect(0.55)
+                    .tint(.white.opacity(0.5))
+                    .frame(width: 6, height: 6)
+            } else {
+                Circle()
+                    .fill(isOrdered ? Color.green : Color.white.opacity(0.25))
+                    .frame(width: 6, height: 6)
+            }
             Text(phaseLabelText)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(isOrdered ? .green.opacity(0.8) : .white.opacity(0.4))
@@ -216,9 +224,11 @@ struct BuilderView: View {
         .padding(.horizontal, 20)
         .padding(.bottom, 10)
         .animation(.easeInOut(duration: 0.4), value: isOrdered)
+        .animation(.easeInOut(duration: 0.3), value: isLoadingQuiz)
     }
 
     private var phaseLabelText: String {
+        if isLoadingQuiz { return "Preparing quiz…" }
         if isOrdered {
             return quizSession?.allBlocksComplete == true
                 ? "Ready to analyse"
@@ -292,7 +302,7 @@ struct BuilderView: View {
     // MARK: - Setup
 
     private func setup() {
-        guard let problem else { return }
+        guard problem != nil else { return }
         currentOrder = []          // blocks start unplaced in floating area
         secondsRemaining = timeLimitMinutes * 60
         startTimer()
@@ -354,20 +364,32 @@ struct BuilderView: View {
     @available(iOS 26, *)
     private func buildAIQuizSession(problem: InteriorProblem) async -> QuizSession {
         let service = AIQuizService()
-        var blockStates: [BlockQuizState] = []
+        let nodes = problem.blocks
+        let capturedTierName = tierName
 
-        for node in problem.blocks {
-            let aiQuestions = await service.generateQuestions(
-                blockType: node,
-                problemTitle: problem.title,
-                problemDescription: problem.description,
-                tierLevel: tierName
-            )
-            // Use AI questions if we got a full set; otherwise fall back to static
-            let questions = aiQuestions.count == 3
-                ? aiQuestions
-                : QuizContent.questions(for: node, problemID: problem.id)
-            blockStates.append(BlockQuizState(blockType: node, questions: questions))
+        // Generate questions for all blocks in parallel
+        let blockStates: [BlockQuizState] = await withTaskGroup(of: (Int, BlockQuizState).self) { group in
+            for (i, node) in nodes.enumerated() {
+                group.addTask {
+                    let aiQuestions = await service.generateQuestions(
+                        blockType: node,
+                        problemTitle: problem.title,
+                        problemDescription: problem.description,
+                        tierLevel: capturedTierName
+                    )
+                    let questions = aiQuestions.count == 3
+                        ? aiQuestions
+                        : QuizContent.questions(for: node, problemID: problem.id)
+                    return (i, BlockQuizState(blockType: node, questions: questions))
+                }
+            }
+
+            // Reassemble in original block order
+            var ordered: [BlockQuizState?] = Array(repeating: nil, count: nodes.count)
+            for await (i, state) in group {
+                ordered[i] = state
+            }
+            return ordered.compactMap { $0 }
         }
 
         return QuizSession(problem: problem, blockStates: blockStates)
