@@ -375,7 +375,8 @@ struct BuilderView: View {
 
     private func openQuizForBlock(_ node: NodeType) {
         guard isOrdered, let session = quizSession else { return }
-        guard let state = session.blockStates.first(where: { $0.blockType == node }) else { return }
+        guard let state = session.blockStates.first(where: { $0.blockType == node }),
+              !state.questions.isEmpty else { return }
         activeQuizBlock = state
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
             showQuizCard = true

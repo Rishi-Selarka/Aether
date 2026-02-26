@@ -228,7 +228,7 @@ struct AnalysisView: View {
 
             // Answers
             VStack(alignment: .leading, spacing: 6) {
-                if !result.isCorrect {
+                if !result.isCorrect && result.wasAnswered {
                     answerRow(
                         label: "Your answer",
                         text: result.userAnswerText,

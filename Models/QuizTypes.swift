@@ -32,7 +32,7 @@ struct QuizQuestion: Identifiable {
 
 struct QuizAnswer {
     let questionID: String
-    let selectedIndex: Int
+    let selectedIndex: Int?   // nil when question was not answered (e.g. timer expiry)
     let isCorrect: Bool
 }
 
@@ -45,8 +45,15 @@ struct QuizResult {
     var analysisText: String
 
     var isCorrect: Bool { answer.isCorrect }
-    var userAnswerText: String { question.options[answer.selectedIndex] }
-    var correctAnswerText: String { question.options[question.correctIndex] }
+    var wasAnswered: Bool { answer.selectedIndex != nil }
+    var userAnswerText: String {
+        guard let idx = answer.selectedIndex, idx < question.options.count else { return "–" }
+        return question.options[idx]
+    }
+    var correctAnswerText: String {
+        guard question.correctIndex < question.options.count else { return "–" }
+        return question.options[question.correctIndex]
+    }
 }
 
 // MARK: - Block Quiz State
@@ -94,12 +101,10 @@ struct QuizSession {
         blockStates.flatMap { state in
             state.questions.map { question in
                 let selectedIndex = state.answers[question.id]
-                let didAnswer = selectedIndex != nil
-                let idx = selectedIndex ?? 0
                 let answer = QuizAnswer(
                     questionID: question.id,
-                    selectedIndex: idx,
-                    isCorrect: didAnswer && idx == question.correctIndex
+                    selectedIndex: selectedIndex,
+                    isCorrect: selectedIndex != nil && selectedIndex == question.correctIndex
                 )
                 return QuizResult(
                     question: question,

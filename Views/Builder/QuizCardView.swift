@@ -32,7 +32,7 @@ struct QuizCardView: View {
     }
 
     private var canFinish: Bool {
-        isLastQuestion && selectedIndexForCurrent != nil
+        isLastQuestion && selectedAnswers.count == blockState.questions.count
     }
 
     var body: some View {
