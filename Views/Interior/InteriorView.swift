@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct InteriorView: View {
     let tierID: Int
@@ -6,6 +7,7 @@ struct InteriorView: View {
     @State private var currentProblemIndex = 0
     @State private var timeLimitMinutes = InteriorConstants.timeLimitDefault
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \Tier.id) private var tiers: [Tier]
 
     private var level: String {
         InteriorConstants.levels[tierID] ?? "Unknown"
@@ -13,6 +15,12 @@ struct InteriorView: View {
 
     private var problems: [InteriorProblem] {
         InteriorContent.problems(for: tierID)
+    }
+
+    /// Best score for the currently visible problem, or nil if never attempted.
+    private var currentProblemBestScore: Double? {
+        guard let tier = tiers.first(where: { $0.id == tierID }) else { return nil }
+        return tier.problemBestScores[currentProblemIndex]
     }
 
     var body: some View {
@@ -48,8 +56,21 @@ struct InteriorView: View {
                         }
                         .foregroundStyle(Color.red)
                         .shadow(color: .black.opacity(0.3), radius: 2)
+
+                        if let best = currentProblemBestScore {
+                            HStack(spacing: 6) {
+                                Image(systemName: "trophy.fill")
+                                    .font(.system(size: 12))
+                                Text("Best Score: \(Int(best))%")
+                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            }
+                            .foregroundStyle(.white.opacity(0.8))
+                            .shadow(color: .black.opacity(0.3), radius: 2)
+                            .transition(.opacity)
+                        }
                     }
                     .padding(.top, 24)
+                    .animation(.easeInOut(duration: 0.25), value: currentProblemIndex)
 
                     Spacer()
                 }

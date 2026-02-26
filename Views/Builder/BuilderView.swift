@@ -305,7 +305,15 @@ struct BuilderView: View {
         guard problem != nil else { return }
         currentOrder = []          // blocks start unplaced in floating area
         secondsRemaining = timeLimitMinutes * 60
+        recordAttemptEntry()
         startTimer()
+    }
+
+    /// Increments attempt count the moment the user enters the builder.
+    private func recordAttemptEntry() {
+        guard let tier = SwiftDataManager.fetchTier(id: tierID, context: modelContext) else { return }
+        tier.attemptsCount += 1
+        try? modelContext.save()
     }
 
     // MARK: - Timer
@@ -449,11 +457,11 @@ struct BuilderView: View {
     private func saveAttempt(session: QuizSession) {
         guard problem != nil else { return }
 
-        // Update tier stats
+        // Update tier stats (attempt already counted on entry)
         if session.passed {
-            SwiftDataManager.recordPass(tierID: tierID, score: session.scorePercent, context: modelContext)
+            SwiftDataManager.recordPass(tierID: tierID, problemIndex: selectedProblemIndex, score: session.scorePercent, context: modelContext)
         } else {
-            SwiftDataManager.recordAttempt(tierID: tierID, score: session.scorePercent, context: modelContext)
+            SwiftDataManager.recordFailedScore(tierID: tierID, problemIndex: selectedProblemIndex, score: session.scorePercent, context: modelContext)
         }
     }
 

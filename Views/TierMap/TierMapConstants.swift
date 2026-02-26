@@ -36,11 +36,11 @@ enum TierMapConstants {
 
     // Per-city skyline tint - applied as a color overlay on the shared skyline image
     static let cityTints: [Int: Color] = [
-        1: Color(red: 0.98, green: 0.28, blue: 0.56),  // Tokyo - sakura neon
-        2: Color(red: 0.16, green: 0.44, blue: 0.80),  // London - Thames blue
-        3: Color(red: 0.00, green: 0.74, blue: 0.68),  // Singapore - Marina Bay teal
-        4: Color(red: 0.96, green: 0.62, blue: 0.05),  // New York - Empire amber
-        5: Color(red: 0.94, green: 0.32, blue: 0.12)   // San Francisco - Golden Gate
+        1: Color(red: 163 / 255, green: 148 / 255, blue: 128 / 255), // Tokyo - burnished gold
+        2: Color(red: 112 / 255, green: 128 / 255, blue: 144 / 255), // London - slate blue
+        3: Color(red: 143 / 255, green: 110 / 255, blue: 102 / 255), // Singapore - rosewood
+        4: Color(red: 130 / 255, green: 155 / 255, blue: 140 / 255), // New York - hunter sage
+        5: Color(red: 148 / 255, green: 122 / 255, blue: 140 / 255)  // San Francisco - dusty plum
     ]
 
     // Card dimensions

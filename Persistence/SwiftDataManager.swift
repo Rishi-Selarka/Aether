@@ -3,10 +3,10 @@ import SwiftData
 
 @MainActor
 enum SwiftDataManager {
-    
+
     static func initializeIfNeeded(context: ModelContext) {
         let descriptor = FetchDescriptor<CityProgress>()
-        
+
         if (try? context.fetch(descriptor).first) == nil {
             let progress = CityProgress()
             context.insert(progress)
@@ -41,59 +41,65 @@ enum SwiftDataManager {
         }
         if changed { try? context.save() }
     }
-    
+
     static func fetchProgress(context: ModelContext) -> CityProgress? {
         let descriptor = FetchDescriptor<CityProgress>()
         return try? context.fetch(descriptor).first
     }
-    
+
     static func fetchTier(id: Int, context: ModelContext) -> Tier? {
         var descriptor = FetchDescriptor<Tier>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         return try? context.fetch(descriptor).first
     }
-    
+
     static func unlockTier(id: Int, context: ModelContext) {
         guard let progress = fetchProgress(context: context),
               let tier = fetchTier(id: id, context: context) else { return }
-        
+
         tier.unlocked = true
         if !progress.unlockedTierIDs.contains(id) {
-            progress.unlockedTierIDs.append(id)
+            var ids = progress.unlockedTierIDs
+            ids.append(id)
+            progress.unlockedTierIDs = ids
         }
         try? context.save()
     }
-    
+
     static func completeTier(id: Int, score: Double, time: TimeInterval?, context: ModelContext) {
         guard let progress = fetchProgress(context: context),
               let tier = fetchTier(id: id, context: context) else { return }
-        
+
         tier.completed = true
         tier.score = max(tier.score, score)
-        
+
         if let time {
             tier.bestTime = tier.bestTime.map { min($0, time) } ?? time
         }
-        
+
         if !progress.completedTierIDs.contains(id) {
-            progress.completedTierIDs.append(id)
+            var ids = progress.completedTierIDs
+            ids.append(id)
+            progress.completedTierIDs = ids
         }
-        
+
         if id < 5 {
             unlockTier(id: id + 1, context: context)
         }
-        
+
         try? context.save()
     }
-    
+
     static func unlockAchievement(_ achievement: String, context: ModelContext) {
         guard let progress = fetchProgress(context: context),
               !progress.achievements.contains(achievement) else { return }
-        
-        progress.achievements.append(achievement)
+
+        var list = progress.achievements
+        list.append(achievement)
+        progress.achievements = list
         try? context.save()
     }
-    
+
     /// Demo mode: reset all progress and reinitialize fresh state.
     static func resetAll(context: ModelContext) {
         let progressDescriptor = FetchDescriptor<CityProgress>()
@@ -109,25 +115,39 @@ enum SwiftDataManager {
     // MARK: - Quiz Attempt Recording
 
     /// Records a passing quiz attempt: increments passCount, marks tier completed.
-    static func recordPass(tierID: Int, score: Double = 0, context: ModelContext) {
+    /// Note: attemptsCount is already incremented on builder entry.
+    static func recordPass(tierID: Int, problemIndex: Int, score: Double = 0, context: ModelContext) {
         guard let tier = fetchTier(id: tierID, context: context) else { return }
         tier.passCount += 1
-        tier.attemptsCount += 1
         tier.completed = true
         if score > tier.score { tier.score = score }
+        updateProblemBestScore(tier: tier, problemIndex: problemIndex, score: score)
         if let progress = fetchProgress(context: context),
            !progress.completedTierIDs.contains(tierID) {
-            progress.completedTierIDs.append(tierID)
+            var ids = progress.completedTierIDs
+            ids.append(tierID)
+            progress.completedTierIDs = ids
         }
         try? context.save()
     }
 
-    /// Records a failed quiz attempt: increments attemptsCount only.
-    static func recordAttempt(tierID: Int, score: Double = 0, context: ModelContext) {
+    /// Records a failed quiz score (attemptsCount already incremented on builder entry).
+    static func recordFailedScore(tierID: Int, problemIndex: Int, score: Double = 0, context: ModelContext) {
         guard let tier = fetchTier(id: tierID, context: context) else { return }
-        tier.attemptsCount += 1
         if score > tier.score { tier.score = score }
+        updateProblemBestScore(tier: tier, problemIndex: problemIndex, score: score)
         try? context.save()
+    }
+
+    /// Updates the per-problem best score if the new score is higher.
+    /// Full reassignment forces SwiftData @Query to detect the change.
+    private static func updateProblemBestScore(tier: Tier, problemIndex: Int, score: Double) {
+        let current = tier.problemBestScores[problemIndex] ?? 0
+        if score > current {
+            var updated = tier.problemBestScores
+            updated[problemIndex] = score
+            tier.problemBestScores = updated
+        }
     }
 
 }

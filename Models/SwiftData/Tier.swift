@@ -12,6 +12,8 @@ final class Tier {
     var attemptsCount: Int
     /// Number of times this tier has been passed (score ≥ 75%).
     var passCount: Int
+    /// Best score per problem index (0, 1, 2). Key = problem index, Value = best score %.
+    var problemBestScores: [Int: Double]
 
     init(id: Int, name: String, unlocked: Bool = false) {
         self.id = id
@@ -22,5 +24,6 @@ final class Tier {
         self.bestTime = nil
         self.attemptsCount = 0
         self.passCount = 0
+        self.problemBestScores = [:]
     }
 }
