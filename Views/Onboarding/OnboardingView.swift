@@ -12,34 +12,11 @@ struct OnboardingView: View {
     private let autoAdvanceDelay = 5.0
 
     var body: some View {
-        ZStack {
-            SplashViewContent(
-                startTime: $startTime,
-                titleOpacity: $titleOpacity,
-                network: network
-            )
-
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    Button {
-                        HapticManager.selection()
-                        onComplete()
-                    } label: {
-                        Text("Skip")
-                            .font(Typography.bodyMedium)
-                            .foregroundStyle(Color.archsysTextSecondary)
-                            .padding(.horizontal, LayoutConstants.spacingM)
-                            .padding(.vertical, LayoutConstants.spacingS)
-                    }
-                    .archsysMinTouchTarget()
-                    .accessibilityLabel("Skip intro")
-                    .accessibilityHint("Double tap to skip the intro animation")
-                    .padding(LayoutConstants.spacingL)
-                }
-            }
-        }
+        SplashViewContent(
+            startTime: $startTime,
+            titleOpacity: $titleOpacity,
+            network: network
+        )
         .ignoresSafeArea()
         .onAppear {
             startTime = .now
