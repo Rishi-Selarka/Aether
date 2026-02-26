@@ -123,4 +123,29 @@ enum NodeType: String, Codable, CaseIterable, Identifiable {
         case .mlModel, .websocket, .eventBus, .stateMachine: return 5
         }
     }
+
+    /// One-sentence description of this component's role in iOS architecture.
+    /// Used as context in AI quiz/analysis prompts.
+    var architectureRole: String {
+        switch self {
+        case .ui:               return "Renders views, handles user input, delegates logic to ViewModel"
+        case .viewModel:        return "Holds UI state, transforms data, mediates between View and data layers"
+        case .database:         return "Persists data locally using SwiftData/Core Data/SQLite"
+        case .api:              return "Handles HTTP networking, request encoding, response decoding"
+        case .repository:       return "Abstracts data sources, provides single source of truth"
+        case .networkCache:     return "Caches network responses to reduce redundant API calls"
+        case .memoryCache:      return "In-memory store for fast repeated access to recently used data"
+        case .backgroundWorker: return "Offloads heavy computation off the main thread using structured concurrency"
+        case .imageCache:       return "Downloads, decodes, and caches images for smooth scrolling"
+        case .lazyLoader:       return "Defers resource loading until content is about to appear on screen"
+        case .circuitBreaker:   return "Prevents cascading failures by stopping calls to a failing service"
+        case .retryHandler:     return "Retries failed operations with configurable backoff strategies"
+        case .fallback:         return "Provides degraded but functional behavior when primary path fails"
+        case .healthMonitor:    return "Tracks system/service health and triggers recovery actions"
+        case .mlModel:          return "Runs Core ML inference on-device for predictions and classification"
+        case .websocket:        return "Maintains persistent bidirectional connection for real-time data"
+        case .eventBus:         return "Decouples publishers and subscribers for reactive data flow"
+        case .stateMachine:     return "Manages valid state transitions and prevents illegal state combinations"
+        }
+    }
 }

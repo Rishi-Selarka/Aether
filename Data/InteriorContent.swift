@@ -21,6 +21,17 @@ enum InteriorContent {
         }
     }
 
+    static func cityName(for tierID: Int) -> String {
+        switch tierID {
+        case 1: return "Tokyo"
+        case 2: return "London"
+        case 3: return "Singapore"
+        case 4: return "New York"
+        case 5: return "San Francisco"
+        default: return "City"
+        }
+    }
+
     // MARK: - Tier 1 (Tokyo — Lake)
 
     private static let tier1Problems: [InteriorProblem] = [

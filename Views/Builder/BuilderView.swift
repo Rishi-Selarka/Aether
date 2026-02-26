@@ -17,14 +17,7 @@ struct BuilderView: View {
     }
 
     private var tierName: String {
-        switch tierID {
-        case 1: return "Tokyo"
-        case 2: return "London"
-        case 3: return "Singapore"
-        case 4: return "New York"
-        case 5: return "San Francisco"
-        default: return "City"
-        }
+        InteriorContent.cityName(for: tierID)
     }
 
     // MARK: - Canvas State
