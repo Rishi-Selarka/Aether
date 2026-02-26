@@ -9,6 +9,7 @@ struct BuilderView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(TierStatsCache.self) private var statsCache
 
     // MARK: - Problem Data
 
@@ -48,6 +49,14 @@ struct BuilderView: View {
     @State private var timerTask: Task<Void, Never>?
     @State private var timerExpired = false
 
+    // MARK: - Hint
+
+    @State private var showHint = false
+    @State private var hintCooldownToast: String?
+
+    /// Prevents double-counting when onAppear fires again after dismissing AnalysisView (tap Done).
+    @State private var hasRecordedAttemptThisSession = false
+
     // MARK: - Body
 
     var body: some View {
@@ -85,6 +94,30 @@ struct BuilderView: View {
                 if isGeneratingAnalysis {
                     analysisLoadingOverlay
                         .zIndex(11)
+                }
+
+                if showHint {
+                    hintOverlay(blocks: problem.blocks)
+                        .zIndex(12)
+                }
+
+                if let toast = hintCooldownToast {
+                    VStack {
+                        Spacer()
+                        Text(toast)
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background {
+                                Capsule().fill(.ultraThinMaterial)
+                                    .overlay { Capsule().strokeBorder(.white.opacity(0.15), lineWidth: 0.5) }
+                            }
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .padding(.bottom, 90)
+                    }
+                    .zIndex(13)
+                    .animation(.spring(response: 0.35), value: hintCooldownToast)
                 }
             } else {
                 Text("Problem not found")
@@ -161,11 +194,52 @@ struct BuilderView: View {
 
             Spacer()
 
-            Color.clear.frame(width: 44, height: 44)
+            hintButton
         }
         .padding(.horizontal, 12)
         .padding(.top, 56)
         .padding(.bottom, 8)
+    }
+
+    // MARK: - Hint Button
+
+    private var secondsElapsed: Int {
+        timeLimitMinutes * 60 - secondsRemaining
+    }
+
+    private var hintUnlocked: Bool {
+        secondsElapsed >= 60
+    }
+
+    @ViewBuilder
+    private var hintButton: some View {
+        if !isOrdered {
+            Button {
+                if hintUnlocked {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        showHint = true
+                    }
+                    HapticManager.lightImpact()
+                } else {
+                    let remaining = 60 - secondsElapsed
+                    hintCooldownToast = "Available in \(remaining)s"
+                    HapticManager.error()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                        withAnimation(.easeOut(duration: 0.3)) { hintCooldownToast = nil }
+                    }
+                }
+            } label: {
+                Image(systemName: "lightbulb.min")
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundStyle(hintUnlocked ? .yellow : .white.opacity(0.2))
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityLabel(hintUnlocked ? "Show solution hint" : "Hint locked, wait \(60 - secondsElapsed) seconds")
+            .animation(.easeInOut(duration: 0.5), value: hintUnlocked)
+        } else {
+            Color.clear.frame(width: 44, height: 44)
+        }
     }
 
     // MARK: - Timer Bar
@@ -239,6 +313,71 @@ struct BuilderView: View {
 
     // MARK: - Bottom Bar
 
+    // MARK: - Hint Overlay
+
+    private func hintOverlay(blocks: [NodeType]) -> some View {
+        ZStack {
+            Color.black.opacity(0.7)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                        showHint = false
+                    }
+                }
+
+            VStack(spacing: 20) {
+                HStack(spacing: 8) {
+                    Image(systemName: "lightbulb.fill")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.yellow)
+                    Text("Correct Order")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                }
+
+                VStack(spacing: 0) {
+                    ForEach(Array(blocks.enumerated()), id: \.element) { index, block in
+                        HStack(spacing: 12) {
+                            Text("\(index + 1)")
+                                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                                .foregroundStyle(.white.opacity(0.4))
+                                .frame(width: 20)
+
+                            Text(block.displayName)
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.9))
+
+                            Spacer()
+                        }
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 16)
+
+                        if index < blocks.count - 1 {
+                            Rectangle()
+                                .fill(.white.opacity(0.08))
+                                .frame(height: 1)
+                                .padding(.leading, 48)
+                        }
+                    }
+                }
+                .background {
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(.white.opacity(0.06))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 14)
+                                .strokeBorder(.white.opacity(0.1), lineWidth: 0.5)
+                        }
+                }
+
+                Text("Tap anywhere to dismiss")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.3))
+            }
+            .padding(.horizontal, 48)
+            .transition(.scale(scale: 0.92).combined(with: .opacity))
+        }
+    }
+
     @ViewBuilder
     private var bottomBar: some View {
         if let session = quizSession, session.allBlocksComplete {
@@ -305,15 +444,17 @@ struct BuilderView: View {
         guard problem != nil else { return }
         currentOrder = []          // blocks start unplaced in floating area
         secondsRemaining = timeLimitMinutes * 60
-        recordAttemptEntry()
+        if !hasRecordedAttemptThisSession {
+            hasRecordedAttemptThisSession = true
+            recordAttemptEntry()
+        }
         startTimer()
     }
 
-    /// Increments attempt count the moment the user enters the builder.
+    /// Increments attempt count the moment the user enters the builder. Call once per session.
     private func recordAttemptEntry() {
-        guard let tier = SwiftDataManager.fetchTier(id: tierID, context: modelContext) else { return }
-        tier.attemptsCount += 1
-        try? modelContext.save()
+        SwiftDataManager.recordAttemptEntry(tierID: tierID, context: modelContext)
+        statsCache.incrementAttempts(tierID: tierID)
     }
 
     // MARK: - Timer
@@ -463,6 +604,7 @@ struct BuilderView: View {
         } else {
             SwiftDataManager.recordFailedScore(tierID: tierID, problemIndex: selectedProblemIndex, score: session.scorePercent, context: modelContext)
         }
+        statsCache.updateBestScore(tierID: tierID, problemIndex: selectedProblemIndex, score: session.scorePercent)
     }
 
     // MARK: - Navigation
@@ -486,6 +628,9 @@ struct BuilderView: View {
         analysisTexts = []
         isGeneratingAnalysis = false
         timerExpired = false
+        showHint = false
+        hintCooldownToast = nil
+        hasRecordedAttemptThisSession = false  // Reattempt = new attempt, count again
         canvasId = UUID()         // force-recreate BlockCanvasView with fresh slots
         setup()
     }

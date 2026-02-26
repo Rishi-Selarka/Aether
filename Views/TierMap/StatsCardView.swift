@@ -1,40 +1,19 @@
 import SwiftUI
 
 struct StatsCardView: View {
-    let tiers: [Tier]
-
-    // MARK: - Computed Metrics
-
-    private var citiesPassed: String {
-        let count = tiers.reduce(0) { total, tier in
-            total + tier.problemBestScores.values.filter { $0 >= 75 }.count
-        }
-        return "\(min(count, 15))/15"
-    }
-
-    private var totalAttempts: String {
-        "\(tiers.map { $0.attemptsCount }.reduce(0, +))"
-    }
-
-    private var bestScore: String {
-        let best = tiers.flatMap { $0.problemBestScores.values }.max() ?? 0
-        guard best > 0 else { return "-" }
-        return "\(Int(best))%"
-    }
-
-    // MARK: - Body
+    @Environment(TierStatsCache.self) private var statsCache
 
     var body: some View {
         HStack(spacing: 0) {
-            metric(value: citiesPassed, label: "Passed")
+            metric(value: statsCache.citiesPassed, label: "Passed")
             Divider()
                 .frame(height: 32)
                 .opacity(0.4)
-            metric(value: totalAttempts, label: "Attempts")
+            metric(value: statsCache.totalAttempts, label: "Attempts")
             Divider()
                 .frame(height: 32)
                 .opacity(0.4)
-            metric(value: bestScore, label: "Best Score")
+            metric(value: statsCache.bestScoreToday, label: "Best Today")
         }
         .frame(maxWidth: .infinity)
         .frame(height: 72)
@@ -46,8 +25,6 @@ struct StatsCardView: View {
         .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 3)
         .padding(.horizontal, 20)
     }
-
-    // MARK: - Metric Column
 
     private func metric(value: String, label: String) -> some View {
         VStack(spacing: 4) {

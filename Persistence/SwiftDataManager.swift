@@ -4,6 +4,9 @@ import SwiftData
 @MainActor
 enum SwiftDataManager {
 
+    /// Posted after tier stats (attempts, scores) are saved. StatsCardView listens to refresh.
+    static let tierStatsDidChangeNotification = Notification.Name("TierStatsDidChange")
+
     static func initializeIfNeeded(context: ModelContext) {
         let descriptor = FetchDescriptor<CityProgress>()
 
@@ -114,6 +117,14 @@ enum SwiftDataManager {
 
     // MARK: - Quiz Attempt Recording
 
+    /// Increments attempt count when user enters the builder. Call from BuilderView.onAppear.
+    static func recordAttemptEntry(tierID: Int, context: ModelContext) {
+        guard let tier = fetchTier(id: tierID, context: context) else { return }
+        tier.attemptsCount += 1
+        try? context.save()
+        NotificationCenter.default.post(name: tierStatsDidChangeNotification, object: nil)
+    }
+
     /// Records a passing quiz attempt: increments passCount, marks tier completed.
     /// Note: attemptsCount is already incremented on builder entry.
     static func recordPass(tierID: Int, problemIndex: Int, score: Double = 0, context: ModelContext) {
@@ -129,6 +140,7 @@ enum SwiftDataManager {
             progress.completedTierIDs = ids
         }
         try? context.save()
+        NotificationCenter.default.post(name: tierStatsDidChangeNotification, object: nil)
     }
 
     /// Records a failed quiz score (attemptsCount already incremented on builder entry).
@@ -137,6 +149,7 @@ enum SwiftDataManager {
         if score > tier.score { tier.score = score }
         updateProblemBestScore(tier: tier, problemIndex: problemIndex, score: score)
         try? context.save()
+        NotificationCenter.default.post(name: tierStatsDidChangeNotification, object: nil)
     }
 
     /// Updates the per-problem best score if the new score is higher.

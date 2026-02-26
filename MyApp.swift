@@ -7,9 +7,6 @@ struct MyApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [
-            CityProgress.self,
-            Tier.self
-        ])
+        .modelContainer(for: [CityProgress.self, Tier.self])
     }
 }

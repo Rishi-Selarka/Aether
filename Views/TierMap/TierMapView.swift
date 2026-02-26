@@ -2,7 +2,9 @@ import SwiftUI
 import SwiftData
 
 struct TierMapView: View {
-    @Query(sort: \Tier.id) private var tiers: [Tier]
+    @Environment(\.modelContext) private var modelContext
+    @Environment(TierStatsCache.self) private var statsCache
+    @State private var tiers: [Tier] = []
     @State private var selectedTierID: Int?
     @State private var routesRevealed = false
     @State private var showSettings = false
@@ -31,22 +33,50 @@ struct TierMapView: View {
         .background(mapBackground)
         .ignoresSafeArea()
         .overlay(alignment: .top) {
-            StatsCardView(tiers: tiers)
+            StatsCardView()
                 .padding(.top, 65)
         }
         .overlay(alignment: .topTrailing) {
             settingsButton
         }
         .sheet(isPresented: $showSettings) {
-            SettingsView()
+            SettingsView(onReset: rehydrateStatsCache)
         }
         .navigationDestination(item: $selectedTierID) { tierID in
             InteriorView(tierID: tierID)
         }
-        .onAppear { revealRoutes() }
+        .onAppear {
+            refreshTiers()
+            revealRoutes()
+        }
     }
 
     // MARK: - Tier Lookup
+
+    /// Fetches tiers from SwiftData for city markers (unlocked, completed state).
+    private func refreshTiers() {
+        let descriptor = FetchDescriptor<Tier>(sortBy: [SortDescriptor(\.id)])
+        tiers = (try? modelContext.fetch(descriptor)) ?? []
+    }
+
+    /// Rehydrates stats cache from SwiftData (e.g. after Settings reset).
+    private func rehydrateStatsCache() {
+        let descriptor = FetchDescriptor<Tier>(sortBy: [SortDescriptor(\.id)])
+        guard let fetched = try? modelContext.fetch(descriptor) else { return }
+        var attempts: [Int: Int] = [:]
+        var scores: [Int: [Int: Double]] = [:]
+        var scoresWithDate: [Int: [Int: ScoreRecord]] = [:]
+        for tier in fetched {
+            attempts[tier.id] = tier.attemptsCount
+            scores[tier.id] = tier.problemBestScores
+            scoresWithDate[tier.id] = tier.problemBestScoresWithDate()
+        }
+        statsCache.hydrate(
+            attemptsByTier: attempts,
+            bestScoresByTier: scores,
+            bestScoresWithDateByTier: scoresWithDate
+        )
+    }
 
     private func tier(for id: Int) -> Tier? {
         tiers.first(where: { $0.id == id })

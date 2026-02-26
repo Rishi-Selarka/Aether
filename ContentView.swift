@@ -34,9 +34,34 @@ struct ContentView: View {
 }
 
 struct MainContentView: View {
+    @Environment(\.modelContext) private var modelContext
+    @State private var tierStatsCache = TierStatsCache()
+
     var body: some View {
         NavigationStack {
             TierMapView()
         }
+        .environment(tierStatsCache)
+        .onAppear {
+            hydrateStatsCache()
+        }
+    }
+
+    private func hydrateStatsCache() {
+        let descriptor = FetchDescriptor<Tier>(sortBy: [SortDescriptor(\.id)])
+        guard let tiers = try? modelContext.fetch(descriptor) else { return }
+        var attempts: [Int: Int] = [:]
+        var scores: [Int: [Int: Double]] = [:]
+        var scoresWithDate: [Int: [Int: ScoreRecord]] = [:]
+        for tier in tiers {
+            attempts[tier.id] = tier.attemptsCount
+            scores[tier.id] = tier.problemBestScores
+            scoresWithDate[tier.id] = tier.problemBestScoresWithDate()
+        }
+        tierStatsCache.hydrate(
+            attemptsByTier: attempts,
+            bestScoresByTier: scores,
+            bestScoresWithDateByTier: scoresWithDate
+        )
     }
 }
