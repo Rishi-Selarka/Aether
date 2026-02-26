@@ -11,11 +11,11 @@ struct TierMapView: View {
 
     // Light mode: light bg, dark lines. Dark mode: dark bg, light lines (swapped).
     private let lightColor = Color(red: 234 / 255, green: 239 / 255, blue: 239 / 255)
-    private let darkColor = Color(red: 37 / 255, green: 52 / 255, blue: 63 / 255)
+    private let darkColor = Color(red: 12 / 255, green: 15 / 255, blue: 22 / 255)
     private var mapBackground: Color { isDarkMode ? darkColor : lightColor }
     private var mapLineColor: Color { isDarkMode ? lightColor : darkColor }
 
-    // Always iterate over these — markers render even if SwiftData is empty
+    // Always iterate over these - markers render even if SwiftData is empty
     private let tierIDs = [1, 2, 3, 4, 5]
 
     var body: some View {

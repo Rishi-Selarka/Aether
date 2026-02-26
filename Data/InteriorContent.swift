@@ -32,7 +32,7 @@ enum InteriorContent {
         }
     }
 
-    // MARK: - Tier 1 (Tokyo — Lake)
+    // MARK: - Tier 1 (Tokyo - Lake)
 
     private static let tier1Problems: [InteriorProblem] = [
         InteriorProblem(
@@ -52,13 +52,13 @@ enum InteriorContent {
         InteriorProblem(
             id: "t1_todo",
             title: "To-Do List",
-            description: "Build the architecture for a task manager with categories and priority flags. No internet required — all state lives locally.",
+            description: "Build the architecture for a task manager with categories and priority flags. No internet required - all state lives locally.",
             keywords: ["MVVM", "Clean Separation", "Value Types"],
             blocks: [.ui, .viewModel, .repository, .database]
         ),
     ]
 
-    // MARK: - Tier 2 (London — River)
+    // MARK: - Tier 2 (London - River)
 
     private static let tier2Problems: [InteriorProblem] = [
         InteriorProblem(
@@ -84,7 +84,7 @@ enum InteriorContent {
         ),
     ]
 
-    // MARK: - Tier 3 (Singapore — Sea)
+    // MARK: - Tier 3 (Singapore - Sea)
 
     private static let tier3Problems: [InteriorProblem] = [
         InteriorProblem(
@@ -110,7 +110,7 @@ enum InteriorContent {
         ),
     ]
 
-    // MARK: - Tier 4 (New York — Ocean)
+    // MARK: - Tier 4 (New York - Ocean)
 
     private static let tier4Problems: [InteriorProblem] = [
         InteriorProblem(
@@ -136,7 +136,7 @@ enum InteriorContent {
         ),
     ]
 
-    // MARK: - Tier 5 (San Francisco — Abyss)
+    // MARK: - Tier 5 (San Francisco - Abyss)
 
     private static let tier5Problems: [InteriorProblem] = [
         InteriorProblem(

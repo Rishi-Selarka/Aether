@@ -68,7 +68,7 @@ enum GlowRenderer {
         drawLayers(in: ctx, at: point, size: size, opacity: opacity, color: color)
     }
 
-    /// Trail behind a particle head — fading dots along the bezier path.
+    /// Trail behind a particle head - fading dots along the bezier path.
     static func drawTrail(
         in ctx: GraphicsContext,
         from: CGPoint,

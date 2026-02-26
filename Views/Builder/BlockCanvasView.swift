@@ -100,7 +100,7 @@ struct BlockCanvasView: View {
                 }
             }
 
-            // Drag ghost follows finger — same coordinate space as drag
+            // Drag ghost follows finger - same coordinate space as drag
             if isDragging, let block = draggedBlock {
                 ghostView(block: block)
             }
@@ -312,7 +312,7 @@ struct BlockCanvasView: View {
 
     private func targetSlotIndex(for location: CGPoint) -> Int? {
         for (index, frame) in slotFrames {
-            // Generous hit area — fingers are imprecise on touch screens
+            // Generous hit area - fingers are imprecise on touch screens
             let expanded = frame.insetBy(dx: -30, dy: -18)
             if expanded.contains(location) { return index }
         }
@@ -440,7 +440,7 @@ struct BlockCanvasView: View {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.green)
-            Text("Architecture Correct — Tap blocks to begin quiz")
+            Text("Architecture Correct - Tap blocks to begin quiz")
                 .font(.system(size: 14, weight: .semibold, design: .monospaced))
                 .foregroundStyle(.white.opacity(0.9))
         }

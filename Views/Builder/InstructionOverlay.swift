@@ -7,7 +7,7 @@ struct InstructionOverlay: View {
 
     var body: some View {
         ZStack {
-            // Dimming background — intercepted touches dismiss overlay
+            // Dimming background - intercepted touches dismiss overlay
             Color.black.opacity(0.45)
                 .ignoresSafeArea()
                 .onTapGesture { onDismiss() }

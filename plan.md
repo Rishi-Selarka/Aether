@@ -26,8 +26,8 @@ Educational iOS app teaching mobile architecture through interactive city-buildi
 
 > Each tier is named after a real city. The city name appears on the tier card and sets the visual identity and metaphor for that level of architecture.
 
-### Tier 1: Tokyo — Local Data Village
-**City Identity**: Tokyo — clean, organized, hyper-local. Everything works perfectly within the city limits.
+### Tier 1: Tokyo - Local Data Village
+**City Identity**: Tokyo - clean, organized, hyper-local. Everything works perfectly within the city limits.
 **Concepts**: UI Layer, ViewModel, Local Persistence, State Management
 **Components**: UI Node, ViewModel Node, Database Node
 **Challenge**: Build UI → ViewModel → Database architecture
@@ -36,14 +36,14 @@ Educational iOS app teaching mobile architecture through interactive city-buildi
 **Learning Outcome**: Separation of concerns, MVVM basics
 
 **Problem Statements** (pick any to build in the canvas):
-1. **Notes App** — Design the architecture for a personal notes app (like Apple Notes). Users can create, edit, and delete notes. Data is stored entirely on-device. *Focus: UI → ViewModel → LocalDB layering.*
-2. **Habit Tracker** — Architect a daily habit tracker that logs streaks and saves progress offline. Habits are checked off daily and totals persist between app launches. *Focus: state management, SwiftData-style local persistence.*
-3. **To-Do List** — Build the architecture for a task manager with categories and priority flags. No internet required — all state lives locally. *Focus: MVVM basics, clean separation of view and data layers.*
+1. **Notes App** - Design the architecture for a personal notes app (like Apple Notes). Users can create, edit, and delete notes. Data is stored entirely on-device. *Focus: UI → ViewModel → LocalDB layering.*
+2. **Habit Tracker** - Architect a daily habit tracker that logs streaks and saves progress offline. Habits are checked off daily and totals persist between app launches. *Focus: state management, SwiftData-style local persistence.*
+3. **To-Do List** - Build the architecture for a task manager with categories and priority flags. No internet required - all state lives locally. *Focus: MVVM basics, clean separation of view and data layers.*
 
 ---
 
-### Tier 2: London — Connected Town
-**City Identity**: London — a global hub of bridges and connections. Data flows across the channel to the outside world.
+### Tier 2: London - Connected Town
+**City Identity**: London - a global hub of bridges and connections. Data flows across the channel to the outside world.
 **Concepts**: API Layer, Repository Pattern, Async Operations, Error Handling
 **Components**: API Client, Repository, Network Cache
 **Challenge**: Build UI → ViewModel → Repository → API architecture
@@ -51,14 +51,14 @@ Educational iOS app teaching mobile architecture through interactive city-buildi
 **Learning Outcome**: Decoupling, dependency injection, network abstraction
 
 **Problem Statements** (pick any to build in the canvas):
-1. **Weather App** — Design the architecture for a weather app that fetches current conditions and a 7-day forecast from a remote API. Handle loading, success, and error states. *Focus: API Client + Repository pattern, async/await flow.*
-2. **News Reader** — Architect a news feed app that pulls headlines from an RSS/REST API and caches articles for offline reading. *Focus: Repository as the single source of truth, network cache layer.*
-3. **GitHub Profile Viewer** — Build the system design for an app where users search a GitHub username and see their public repos and stats. *Focus: ViewModel orchestrating async API calls, error propagation to UI.*
+1. **Weather App** - Design the architecture for a weather app that fetches current conditions and a 7-day forecast from a remote API. Handle loading, success, and error states. *Focus: API Client + Repository pattern, async/await flow.*
+2. **News Reader** - Architect a news feed app that pulls headlines from an RSS/REST API and caches articles for offline reading. *Focus: Repository as the single source of truth, network cache layer.*
+3. **GitHub Profile Viewer** - Build the system design for an app where users search a GitHub username and see their public repos and stats. *Focus: ViewModel orchestrating async API calls, error propagation to UI.*
 
 ---
 
-### Tier 3: Singapore — Performance Peak
-**City Identity**: Singapore — one of the world's most efficient, optimized cities. Every millisecond counts.
+### Tier 3: Singapore - Performance Peak
+**City Identity**: Singapore - one of the world's most efficient, optimized cities. Every millisecond counts.
 **Concepts**: Caching Strategies, Background Processing, Lazy Loading
 **Components**: Memory Cache, Background Worker, Image Cache, Lazy Loader
 **Challenge**: Optimize a slow architecture by adding caching and background processing
@@ -66,14 +66,14 @@ Educational iOS app teaching mobile architecture through interactive city-buildi
 **Learning Outcome**: Performance optimization patterns, caching strategies
 
 **Problem Statements** (pick any to build in the canvas):
-1. **Photo Feed** — Design an Instagram-style scrollable photo feed. Images must load smoothly without blocking the main thread. Add image caching so scrolling back is instant. *Focus: Image Cache node, lazy loading, background fetch.*
-2. **Restaurant Finder** — Architect an app that shows nearby restaurants. Location lookup and data fetch happen in the background; results appear without freezing the UI. *Focus: Background Worker, in-memory cache for repeat queries.*
-3. **Podcast Player** — Build the architecture for a podcast app that streams audio and pre-fetches the next episode in the background while the current one plays. *Focus: Background processing, cache-first data strategy.*
+1. **Photo Feed** - Design an Instagram-style scrollable photo feed. Images must load smoothly without blocking the main thread. Add image caching so scrolling back is instant. *Focus: Image Cache node, lazy loading, background fetch.*
+2. **Restaurant Finder** - Architect an app that shows nearby restaurants. Location lookup and data fetch happen in the background; results appear without freezing the UI. *Focus: Background Worker, in-memory cache for repeat queries.*
+3. **Podcast Player** - Build the architecture for a podcast app that streams audio and pre-fetches the next episode in the background while the current one plays. *Focus: Background processing, cache-first data strategy.*
 
 ---
 
-### Tier 4: New York — Resilient Fortress
-**City Identity**: New York — the city that never sleeps and never gives up. It absorbs every failure and keeps running.
+### Tier 4: New York - Resilient Fortress
+**City Identity**: New York - the city that never sleeps and never gives up. It absorbs every failure and keeps running.
 **Concepts**: Circuit Breaker, Retry Logic, Fallback Strategies, Monitoring
 **Components**: Circuit Breaker, Retry Handler, Fallback Provider, Health Monitor
 **Challenge**: Build architecture that gracefully handles failures
@@ -81,14 +81,14 @@ Educational iOS app teaching mobile architecture through interactive city-buildi
 **Learning Outcome**: Defensive programming, graceful degradation, fault tolerance
 
 **Problem Statements** (pick any to build in the canvas):
-1. **Banking Transfer Screen** — Design the architecture for a money-transfer feature. If the payment API fails, retry up to 3 times with exponential backoff. If it still fails, show a clear error and queue the transfer for later. *Focus: Retry Handler, Circuit Breaker, Fallback Provider.*
-2. **Ride-Sharing Live Tracker** — Architect a trip-tracking screen (like Uber) that shows a driver's location in real time. If the network drops, gracefully fall back to last-known location and reconnect automatically. *Focus: Health Monitor, retry logic, connection recovery.*
-3. **E-commerce Checkout** — Build the system design for a checkout flow. Payment processing must survive transient failures. A fallback should save the order locally if the server is unreachable. *Focus: Circuit Breaker protecting the payment API, Fallback Provider saving to local queue.*
+1. **Banking Transfer Screen** - Design the architecture for a money-transfer feature. If the payment API fails, retry up to 3 times with exponential backoff. If it still fails, show a clear error and queue the transfer for later. *Focus: Retry Handler, Circuit Breaker, Fallback Provider.*
+2. **Ride-Sharing Live Tracker** - Architect a trip-tracking screen (like Uber) that shows a driver's location in real time. If the network drops, gracefully fall back to last-known location and reconnect automatically. *Focus: Health Monitor, retry logic, connection recovery.*
+3. **E-commerce Checkout** - Build the system design for a checkout flow. Payment processing must survive transient failures. A fallback should save the order locally if the server is unreachable. *Focus: Circuit Breaker protecting the payment API, Fallback Provider saving to local queue.*
 
 ---
 
-### Tier 5: San Francisco — Smart City
-**City Identity**: San Francisco — Silicon Valley's heartbeat. The city where your phone learns from you and the world updates in real time.
+### Tier 5: San Francisco - Smart City
+**City Identity**: San Francisco - Silicon Valley's heartbeat. The city where your phone learns from you and the world updates in real time.
 **Concepts**: ML Integration, Real-time Updates, Advanced Patterns
 **Components**: ML Model, WebSocket, Event Bus, State Machine
 **Challenge**: Build modern app architecture with ML and real-time features
@@ -96,9 +96,9 @@ Educational iOS app teaching mobile architecture through interactive city-buildi
 **Learning Outcome**: Modern iOS patterns, ML integration, reactive programming
 
 **Problem Statements** (pick any to build in the canvas):
-1. **Smart Photo Organizer** — Design the architecture for a photo app that auto-categorizes images (food, travel, people) using on-device Core ML. New photos are classified in the background and the gallery updates in real time. *Focus: ML Model node feeding results into Event Bus, State Machine managing classification states.*
-2. **Live Sports Score App** — Architect a sports app where scores update the moment they change via WebSocket. Multiple screens (scoreboard, team detail, alerts) all react to the same live feed. *Focus: WebSocket → Event Bus → reactive ViewModels.*
-3. **Predictive Search** — Build the system design for a search feature that learns from past queries and suggests completions. An ML model ranks results; a State Machine manages the query → suggestion → selection flow. *Focus: ML Model + State Machine + Event Bus coordination.*
+1. **Smart Photo Organizer** - Design the architecture for a photo app that auto-categorizes images (food, travel, people) using on-device Core ML. New photos are classified in the background and the gallery updates in real time. *Focus: ML Model node feeding results into Event Bus, State Machine managing classification states.*
+2. **Live Sports Score App** - Architect a sports app where scores update the moment they change via WebSocket. Multiple screens (scoreboard, team detail, alerts) all react to the same live feed. *Focus: WebSocket → Event Bus → reactive ViewModels.*
+3. **Predictive Search** - Build the system design for a search feature that learns from past queries and suggests completions. An ML model ranks results; a State Machine manages the query → suggestion → selection flow. *Focus: ML Model + State Machine + Event Bus coordination.*
 
 ---
 

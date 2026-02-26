@@ -44,7 +44,7 @@ struct SettingsView: View {
                         Text("archsys")
                             .font(Typography.headingMedium)
                             .foregroundStyle(Color.archsysTextPrimary)
-                        Text("City Architect — Swift Student Challenge 2026")
+                        Text("City Architect - Swift Student Challenge 2026")
                             .font(Typography.bodySmall)
                             .foregroundStyle(Color.archsysTextSecondary)
                         Text("Learn mobile architecture through an interactive city-building metaphor.")

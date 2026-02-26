@@ -3,7 +3,7 @@ import SwiftUI
 enum TierMapConstants {
     static let canvasHeight: CGFloat = 1600
 
-    // City names derived from tier ID — no SwiftData migration needed
+    // City names derived from tier ID - no SwiftData migration needed
     static let cityNames: [Int: String] = [
         1: "Tokyo",
         2: "London",
@@ -34,13 +34,13 @@ enum TierMapConstants {
     static let completedColor = Color(red: 56 / 255, green: 166 / 255, blue: 92 / 255)
     static let unlockedColor = Color(red: 64 / 255, green: 133 / 255, blue: 217 / 255)
 
-    // Per-city skyline tint — applied as a color overlay on the shared skyline image
+    // Per-city skyline tint - applied as a color overlay on the shared skyline image
     static let cityTints: [Int: Color] = [
-        1: Color(red: 0.98, green: 0.28, blue: 0.56),  // Tokyo — sakura neon
-        2: Color(red: 0.16, green: 0.44, blue: 0.80),  // London — Thames blue
-        3: Color(red: 0.00, green: 0.74, blue: 0.68),  // Singapore — Marina Bay teal
-        4: Color(red: 0.96, green: 0.62, blue: 0.05),  // New York — Empire amber
-        5: Color(red: 0.94, green: 0.32, blue: 0.12)   // San Francisco — Golden Gate
+        1: Color(red: 0.98, green: 0.28, blue: 0.56),  // Tokyo - sakura neon
+        2: Color(red: 0.16, green: 0.44, blue: 0.80),  // London - Thames blue
+        3: Color(red: 0.00, green: 0.74, blue: 0.68),  // Singapore - Marina Bay teal
+        4: Color(red: 0.96, green: 0.62, blue: 0.05),  // New York - Empire amber
+        5: Color(red: 0.94, green: 0.32, blue: 0.12)   // San Francisco - Golden Gate
     ]
 
     // Card dimensions

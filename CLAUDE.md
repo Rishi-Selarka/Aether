@@ -3,12 +3,12 @@
 **Project**: City Architect (Swift Student Challenge 2026)
 **Platform**: iPad, Swift Playgrounds 4.6+ | iOS 17.0+
 **Stack**: Swift, SwiftUI, SwiftData
-**Spec**: `plan.md` (authoritative — tiers, features, architecture, file structure)
+**Spec**: `plan.md` (authoritative - tiers, features, architecture, file structure)
 **Deadline**: February 28, 2026
 
 ## Research Priority Order
 
-**ALL research MUST follow this priority — read docs before source code:**
+**ALL research MUST follow this priority - read docs before source code:**
 
 1. **Primary**: `plan.md` (authoritative spec: tiers, 14 screens, graph engine, particle system)
 2. **Secondary**: `Docs/01_Transcripts/`, `Docs/02_Planning/`, `Docs/04_Decisions/`, `Docs/06_Maintenance/Patterns/`
@@ -42,14 +42,14 @@ Docs/             Workflow documentation (Transcripts, Planning, Progress, Decis
 ### File & Function Size
 - Files: 200-400 lines typical, 800 max
 - Functions: under 50 lines, ideally 10-30
-- Max nesting depth: 4 levels — use `guard`/early returns to flatten
+- Max nesting depth: 4 levels - use `guard`/early returns to flatten
 
 ### Dependency Injection (CRITICAL)
-- ALWAYS decouple through protocols — never use concrete types as dependencies
+- ALWAYS decouple through protocols - never use concrete types as dependencies
 - Constructor injection for ViewModels and Services
 - `@EnvironmentObject` for SwiftUI view-layer DI
 - Composition root wires dependencies at app entry point
-- **No `.shared` inside class bodies** — inject through protocols
+- **No `.shared` inside class bodies** - inject through protocols
 - Protocol naming: `[TypeName]Protocol` (e.g., `ArchitectureGraphProtocol`)
 - Default parameter allowed in `init()` for convenience, but protocol type required
 
@@ -89,16 +89,16 @@ class BuilderViewModel: ObservableObject {
 - ALWAYS validate user input at system boundaries
 
 ### Anti-Patterns to Avoid
-1. God objects — classes that do too much
-2. Magic numbers — use named constants
-3. Deep nesting (>4 levels) — flatten with early returns
-4. Mutation — always create new objects
-5. Commented code — delete it, git has history
-6. Debug `print()` — remove before commit
-7. `Any` types — use proper types
-8. Force unwrapping — handle optionals properly
-9. Direct singleton access (`.shared`) — inject via protocol
-10. Concrete dependencies — depend on protocols, not concrete types
+1. God objects - classes that do too much
+2. Magic numbers - use named constants
+3. Deep nesting (>4 levels) - flatten with early returns
+4. Mutation - always create new objects
+5. Commented code - delete it, git has history
+6. Debug `print()` - remove before commit
+7. `Any` types - use proper types
+8. Force unwrapping - handle optionals properly
+9. Direct singleton access (`.shared`) - inject via protocol
+10. Concrete dependencies - depend on protocols, not concrete types
 
 ### Code Quality Checklist
 Before marking work complete:
@@ -131,11 +131,11 @@ struct ContentView: View {
 ```
 
 ### State Management
-- `@State` — view-owned simple values
-- `@StateObject` — view-owned objects (create once)
-- `@ObservedObject` — passed-in objects (don't own)
-- `@EnvironmentObject` — dependency injection
-- `@Binding` — two-way connection
+- `@State` - view-owned simple values
+- `@StateObject` - view-owned objects (create once)
+- `@ObservedObject` - passed-in objects (don't own)
+- `@EnvironmentObject` - dependency injection
+- `@Binding` - two-way connection
 
 ### Memory Management
 - Use `[weak self]` in closures to prevent retain cycles
@@ -162,25 +162,25 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ### Commit Prefixes
 
 **Workflow Prefixes** (Docs/ changes):
-- `plan:` — Planning docs, specs (Step 1-2)
-- `audit:` — Audit reports (Step 3)
-- `resolve:` — Decisions/ADRs (Step 4)
-- `track:` — Checklists, progress (Step 5)
-- `log:` — Session logs (Step 8)
-- `pattern:` — Design patterns (Step 9)
-- `docs:` — Transcripts, READMEs (Step 10)
+- `plan:` - Planning docs, specs (Step 1-2)
+- `audit:` - Audit reports (Step 3)
+- `resolve:` - Decisions/ADRs (Step 4)
+- `track:` - Checklists, progress (Step 5)
+- `log:` - Session logs (Step 8)
+- `pattern:` - Design patterns (Step 9)
+- `docs:` - Transcripts, READMEs (Step 10)
 
 **Code Prefixes** (Source code changes):
-- `feat:` — New feature
-- `fix:` — Bug fix
-- `refactor:` — Code restructuring
-- `perf:` — Performance improvement
-- `test:` — Tests only
-- `style:` — Formatting/whitespace
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `refactor:` - Code restructuring
+- `perf:` - Performance improvement
+- `test:` - Tests only
+- `style:` - Formatting/whitespace
 
 **Maintenance Prefixes**:
-- `chore:` — Dependencies, build scripts
-- `ci:` — CI/CD configuration
+- `chore:` - Dependencies, build scripts
+- `ci:` - CI/CD configuration
 
 ### Prefix Auto-Detection
 - `Docs/02_Planning/` -> `plan:`
@@ -218,7 +218,7 @@ Split into separate commits when changes represent distinct logical units (diffe
 
 ## Security
 
-**City Architect is offline** — no network, no API keys. Focus on:
+**City Architect is offline** - no network, no API keys. Focus on:
 - Input validation (connection rules, node positions)
 - Data integrity (SwiftData validation)
 - No hardcoded secrets
@@ -227,7 +227,7 @@ Split into separate commits when changes represent distinct logical units (diffe
 
 ## Testing (Optional)
 
-Testing is optional for this student challenge — prioritize shipping over coverage.
+Testing is optional for this student challenge - prioritize shipping over coverage.
 
 **When testing is useful**: Graph validation, connection rules, particle physics edge cases.
 
@@ -246,9 +246,9 @@ Testing is optional for this student challenge — prioritize shipping over cove
 ```
 
 ### Phases & Checkpoints
-- **Phase 1 — Planning (Steps 1-5)**: Think before coding
-- **Phase 2 — Implementation (Steps 6-7)**: Write and validate code
-- **Phase 3 — Documentation (Steps 8-10)**: Capture knowledge
+- **Phase 1 - Planning (Steps 1-5)**: Think before coding
+- **Phase 2 - Implementation (Steps 6-7)**: Write and validate code
+- **Phase 3 - Documentation (Steps 8-10)**: Capture knowledge
 
 ### Step Summary
 | Step | Purpose | Output Location |
@@ -273,7 +273,7 @@ Testing is optional for this student challenge — prioritize shipping over cove
 - **Default**: Auto-run with 3 phase checkpoints (after Steps 5, 7, 10)
 - "Auto-approve everything" -> No checkpoints
 - "Ask before each step" -> Approve every step individually
-- "Pause" / "Continue" / "Skip to step [N]" / "Status" — available anytime
+- "Pause" / "Continue" / "Skip to step [N]" / "Status" - available anytime
 
 ### Build Verification
 - Run `swift build` after implementation changes

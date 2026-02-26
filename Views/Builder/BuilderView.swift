@@ -337,7 +337,7 @@ struct BuilderView: View {
 
     // MARK: - Quiz Logic
 
-    /// Loads quiz session — tries AI generation on iOS 26+, falls back to static.
+    /// Loads quiz session - tries AI generation on iOS 26+, falls back to static.
     private func loadQuizSession(problem: InteriorProblem) {
         if #available(iOS 26, *) {
             isLoadingQuiz = true

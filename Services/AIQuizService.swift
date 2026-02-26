@@ -13,7 +13,7 @@ struct GeneratedQuizQuestion {
     @Guide(description: "Exactly 4 answer options, each 25-70 characters with similar lengths")
     var options: [String]
 
-    @Guide(description: "Integer 0-3 indicating which option is correct — vary this across questions")
+    @Guide(description: "Integer 0-3 indicating which option is correct - vary this across questions")
     var correct: Int
 
     @Guide(description: "1-2 sentence explanation of why the correct answer is right")
@@ -32,7 +32,7 @@ struct GeneratedQuizSet {
 
 /// On-device AI quiz generation using Apple Foundation Models (iOS 26+).
 /// Generates dynamic MCQ questions for each architecture block using structured output.
-/// Returns an empty array on failure — caller falls back to static questions.
+/// Returns an empty array on failure - caller falls back to static questions.
 @available(iOS 26, *)
 struct AIQuizService {
 

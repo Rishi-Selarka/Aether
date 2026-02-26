@@ -82,7 +82,7 @@ struct AIAnalysisService {
 
         Question: \(result.question.questionText)
         Correct answer: "\(result.correctAnswerText)"
-        Student answered: "\(result.userAnswerText)" — \(wasCorrect ? "Correct" : "Incorrect")
+        Student answered: "\(result.userAnswerText)" - \(wasCorrect ? "Correct" : "Incorrect")
 
         \(wasCorrect
           ? "Reinforce why '\(result.correctAnswerText)' is correct in iOS architecture."

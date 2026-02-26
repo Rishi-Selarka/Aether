@@ -19,7 +19,7 @@ enum HapticManager {
         UISelectionFeedbackGenerator().selectionChanged()
     }
     
-    /// Impact feedback — light (e.g. node tap, button tap)
+    /// Impact feedback - light (e.g. node tap, button tap)
     static func impact(style: UIImpactFeedbackGenerator.FeedbackStyle = .light) {
         UIImpactFeedbackGenerator(style: style).impactOccurred()
     }

@@ -18,7 +18,7 @@ struct ArchitectureBlockView: View {
                     .fill(nodeType.accentColor.opacity(isDragging ? 0.12 : 0.06))
                     .frame(width: 44, height: 44)
 
-                // Port notch (top) — schematic in-port
+                // Port notch (top) - schematic in-port
                 RoundedRectangle(cornerRadius: 1)
                     .fill(nodeType.accentColor.opacity(0.5))
                     .frame(width: 8, height: 3)
@@ -48,7 +48,7 @@ struct ArchitectureBlockView: View {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(white: 0.10))
 
-                // Blueprint border — double stroke
+                // Blueprint border - double stroke
                 RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(
                         isDragging
@@ -75,7 +75,7 @@ struct ArchitectureBlockView: View {
             }
         }
         .overlay(alignment: .topTrailing) {
-            // Corner bracket — schematic feel
+            // Corner bracket - schematic feel
             CornerBracket()
                 .stroke(Color(white: 0.25), lineWidth: 0.8)
                 .frame(width: 10, height: 10)

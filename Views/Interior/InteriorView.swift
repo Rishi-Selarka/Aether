@@ -18,7 +18,7 @@ struct InteriorView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                // Background image — full screen
+                // Background image - full screen
                 backgroundImage(size: geo.size)
 
                 // Content layered on top

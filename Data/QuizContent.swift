@@ -869,7 +869,7 @@ enum QuizContent {
                     "A typed error the ViewModel can present to users"
                 ],
                 correctIndex: 3,
-                explanation: "A typed error allows the ViewModel to decide how to present the failure—showing an error view, suggesting retry, or falling back gracefully."),
+                explanation: "A typed error allows the ViewModel to decide how to present the failure-showing an error view, suggesting retry, or falling back gracefully."),
             QuizQuestion(id: "t2w_repo_3", blockType: .repository,
                 questionText: "How should the Weather Repository handle rapid duplicate location requests?",
                 options: [

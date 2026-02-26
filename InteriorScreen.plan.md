@@ -1,4 +1,4 @@
-# Interior Screen — Comprehensive Implementation Plan
+# Interior Screen - Comprehensive Implementation Plan
 
 A new "Interior" screen shown when the user taps a city on the TierMap. The screen uses water-level branding (Lake, River, Sea, Ocean, Abyss), displays a swipeable glass card with problem statements and time limit, background images from Interior_assets, and a gradient blue Enter button that navigates to the Builder.
 
@@ -40,7 +40,7 @@ static let interiorLevels: [Int: String] = [
 
 ```
 ┌─────────────────────────────────────────┐
-│              Interior — Lake            │  ← Title, center top
+│              Interior - Lake            │  ← Title, center top
 │                                         │
 │  ┌─────────────────────────────────┐   │
 │  │   [Background: interior_lake]     │   │
@@ -63,7 +63,7 @@ static let interiorLevels: [Int: String] = [
 
 ---
 
-## 3. Background Images — Interior_assets
+## 3. Background Images - Interior_assets
 
 **Folder structure** (user will provide images):
 
@@ -84,9 +84,9 @@ archsys.swiftpm/
 
 ---
 
-## 4. Title — Center Top
+## 4. Title - Center Top
 
-- Text: `"Interior — [Level]"` (e.g. "Interior — Lake").
+- Text: `"Interior - [Level]"` (e.g. "Interior - Lake").
 - Typography: `.system(size: 28, weight: .bold, design: .rounded)` or similar.
 - Color: White with subtle shadow for contrast on varied backgrounds.
 - Position: `.frame(maxWidth: .infinity)`, `.padding(.top, 60)` (safe area).
@@ -94,7 +94,7 @@ archsys.swiftpm/
 
 ---
 
-## 5. Glass Card — Design Spec
+## 5. Glass Card - Design Spec
 
 **Material**: `.ultraThinMaterial` or `.regularMaterial` with:
 - `RoundedRectangle(cornerRadius: 24)`
@@ -104,16 +104,16 @@ archsys.swiftpm/
 
 **Content** (top to bottom):
 
-1. **Problem Title** — Bold, e.g. "Notes App"
-2. **Problem Description** — Body text, 2–4 lines, wrapping
-3. **System Design Keywords** — Horizontal row of pill/badge tags, e.g. `MVVM`, `UI → ViewModel → DB`, `Local Persistence`
+1. **Problem Title** - Bold, e.g. "Notes App"
+2. **Problem Description** - Body text, 2–4 lines, wrapping
+3. **System Design Keywords** - Horizontal row of pill/badge tags, e.g. `MVVM`, `UI → ViewModel → DB`, `Local Persistence`
 4. **Time Limit Row**:
    - Label: "Time limit"
    - Value: "5 min" (default)
-   - Stepper: `[−] 5 min [+]` — on-screen arrow-style buttons (not literal keyboard arrows)
+   - Stepper: `[−] 5 min [+]` - on-screen arrow-style buttons (not literal keyboard arrows)
    - Range: 3–15 minutes (or 1–20, configurable)
    - Use `.focusable()` if you want physical keyboard arrow support
-5. **Swipe Hint** — "Swipe for more problems" or pagination dots (1 of 3, 2 of 3, 3 of 3)
+5. **Swipe Hint** - "Swipe for more problems" or pagination dots (1 of 3, 2 of 3, 3 of 3)
 
 **Swipe behavior**: `TabView` with `.tabViewStyle(.page(indexDisplayMode: .automatic))` or custom `DragGesture` + `@State currentProblemIndex`. Cycle through 3 problems per tier.
 

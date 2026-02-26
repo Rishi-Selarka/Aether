@@ -111,7 +111,7 @@ struct AnalysisView: View {
                         Capsule().fill(.white.opacity(0.12))
                     }
             }
-            .accessibilityLabel("Done — return to city map")
+            .accessibilityLabel("Done - return to city map")
         }
         .padding(.top, 60)
     }
@@ -360,7 +360,7 @@ struct AnalysisView: View {
             Text("Drowned")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
-            Text("Score below 75% — the city drowned")
+            Text("Score below 75% - the city drowned")
                 .font(.system(size: 15))
                 .foregroundStyle(.white.opacity(0.6))
         }

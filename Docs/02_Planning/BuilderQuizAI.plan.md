@@ -1,16 +1,16 @@
-# Builder Canvas + Quiz + AI Analysis — Implementation Plan
+# Builder Canvas + Quiz + AI Analysis - Implementation Plan
 
 ## Context
 
 When a user taps "Enter" on the Interior screen, they currently land on an empty `BuilderView`. This plan implements the full learning flow: an instruction overlay → block-ordering canvas → per-block MCQ quiz → AI-powered analysis → history tracking. The goal is to teach iOS system design through interactive challenges with the water-level / city metaphor intact (pass = survive, fail = drown).
 
 **Target**: iOS 26+ (Foundation Models for on-device AI analysis)
-**Content**: Pre-authored blocks, ordering, and MCQ questions — AI generates personalized analysis only
+**Content**: Pre-authored blocks, ordering, and MCQ questions - AI generates personalized analysis only
 **Phases**: 3 phases, each independently shippable
 
 ---
 
-## Phase 1 — Canvas: Block Ordering + Instructions Overlay
+## Phase 1 - Canvas: Block Ordering + Instructions Overlay
 
 ### Files to Create
 
@@ -28,7 +28,7 @@ When a user taps "Enter" on the Interior screen, they currently land on an empty
 | `Views/Builder/BuilderView.swift` | Replace placeholder with `BlockCanvasView`, show `InstructionOverlay` on appear, add title |
 | `Data/InteriorContent.swift` | Add `blocks: [NodeType]` array to `InteriorProblem` (correct order) |
 
-### Data Model — `ChallengeContent`
+### Data Model - `ChallengeContent`
 
 Each problem gets 4 or 6 `NodeType` blocks in correct top→bottom order. On canvas load, blocks are shuffled into a wrong arrangement.
 
@@ -54,7 +54,7 @@ Tier 5 problems: 6 blocks each (ui, viewModel, mlModel/websocket, eventBus, stat
 - `ScrollView(.vertical)` containing a `VStack`
 - Each block: rounded rectangle with `NodeType.sfSymbol`, `NodeType.displayName`, `NodeType.accentColor`
 - Vertical connection lines drawn between blocks (simple `Rectangle` dividers, dashed)
-- Drag to reorder: `DragGesture` on each block — when dropped on another block's zone, they swap positions
+- Drag to reorder: `DragGesture` on each block - when dropped on another block's zone, they swap positions
 - After each swap, check if order matches correct order
 - On correct order: `HapticManager.success()`, green checkmark animation, short delay → enable "Continue" button
 - "Continue" advances to Phase 2 (quiz)
@@ -76,12 +76,12 @@ ScrollView {
   Block 4  ←─ draggable
 }
 ─────────────────────────
-[Continue button — appears after correct ordering]
+[Continue button - appears after correct ordering]
 ```
 
 ---
 
-## Phase 2 — MCQ Quiz per Block + Analysis Screen
+## Phase 2 - MCQ Quiz per Block + Analysis Screen
 
 ### Files to Create
 
@@ -91,7 +91,7 @@ ScrollView {
 | `Models/QuizTypes.swift` | `QuizQuestion`, `QuizOption`, `QuizAnswer`, `QuizResult` structs |
 | `Views/Builder/QuizCardView.swift` | Glass card overlay: question text, 4 option buttons, left/right arrows, finish button |
 | `Views/Builder/AnalysisView.swift` | Score display, per-question breakdown, reattempt + done buttons |
-| `Services/AIAnalysisService.swift` | Foundation Models integration — generates personalized feedback from quiz results |
+| `Services/AIAnalysisService.swift` | Foundation Models integration - generates personalized feedback from quiz results |
 
 ### Files to Modify
 
@@ -101,7 +101,7 @@ ScrollView {
 | `Views/Builder/BuilderView.swift` | Track quiz state, navigation to `AnalysisView` |
 | `Package.swift` | **DO NOT MODIFY** (auto-generated). Foundation Models is a system framework, no package change needed |
 
-### Quiz Data — `QuizContent`
+### Quiz Data - `QuizContent`
 
 Per block per problem: 3 MCQ questions, each with 3-4 options.
 
@@ -129,13 +129,13 @@ Example (Tier 1, Notes App, ViewModel block):
 - Glass card overlay (same blur-behind pattern as instructions)
 - Top: block name + icon
 - Question text (1 of 3)
-- 4 option buttons — liquid/pill style, highlight on select
+- 4 option buttons - liquid/pill style, highlight on select
 - Navigation: `←` arrow (top-left) and `→` arrow (top-right) to move between questions
 - Finish button: appears ONLY when user is on question 3 AND has selected an answer
 - Track answered questions per block with checkmark badges on canvas blocks
 - All blocks must be completed before analysis
 
-### Analysis View — Full Screen
+### Analysis View - Full Screen
 
 - **Score section**: circular progress (reuse pattern from `InspectorView.swift`), percentage, pass/fail badge
 - **Pass threshold**: 75% (≥75% = pass, <75% = drowned)
@@ -187,13 +187,13 @@ struct AIAnalysisService {
 
 ---
 
-## Phase 3 — History, Persistence, Progress Tracking
+## Phase 3 - History, Persistence, Progress Tracking
 
 ### Files to Create
 
 | File | Purpose |
 |------|---------|
-| `Models/SwiftData/QuizAttempt.swift` | `@Model` — stores each attempt: tierID, problemIndex, score, answers, timestamp, passed |
+| `Models/SwiftData/QuizAttempt.swift` | `@Model` - stores each attempt: tierID, problemIndex, score, answers, timestamp, passed |
 | `Views/History/HistoryView.swift` | Sheet view: list of attempts grouped by city, filter chips |
 | `Views/History/AttemptDetailView.swift` | Single attempt detail: score, answers, AI analysis |
 
@@ -205,7 +205,7 @@ struct AIAnalysisService {
 | `Views/TierMap/StatsCardView.swift` | Change "Cities Unlocked" → show pass counts (e.g., "3/5 Cities") |
 | `Persistence/SwiftDataManager.swift` | Add `saveQuizAttempt()`, `fetchAttempts(tierID:)`, `fetchAllAttempts()` |
 | `Models/SwiftData/Tier.swift` | Add `passCount: Int` field (number of successful passes) |
-| `Models/SwiftData/CityProgress.swift` | No change needed — tiers relationship already covers it |
+| `Models/SwiftData/CityProgress.swift` | No change needed - tiers relationship already covers it |
 | `MyApp.swift` | Add `QuizAttempt.self` to `.modelContainer(for:)` |
 
 ### QuizAttempt Model
@@ -267,7 +267,7 @@ Phase 3:  QuizAttempt model → SwiftDataManager updates → HistoryView
 ## Verification
 
 After each phase:
-1. Build with Xcode (Swift Playgrounds project — `swift build` won't work)
+1. Build with Xcode (Swift Playgrounds project - `swift build` won't work)
 2. Test flow: TierMap → tap city → Interior → Enter → Builder canvas
 3. Phase 1: verify block drag-swap works, correct order triggers success
 4. Phase 2: verify quiz card appears per block, finish → analysis screen, reattempt/done navigation
@@ -275,8 +275,8 @@ After each phase:
 
 ## Key Existing Code to Reuse
 
-- `NodeType` (`Models/NodeType.swift`) — block icons, colors, names
-- `HapticManager` (`Utilities/Managers/HapticManager.swift`) — all feedback
+- `NodeType` (`Models/NodeType.swift`) - block icons, colors, names
+- `HapticManager` (`Utilities/Managers/HapticManager.swift`) - all feedback
 - `InspectorView` score circle pattern (`Views/Evaluation/InspectorView.swift`)
 - `TutorialOverlayView` overlay pattern (`Views/Tutorial/TutorialOverlayView.swift`)
 - `InteriorGlassCard` glass material pattern (`Views/Interior/InteriorGlassCard.swift`)

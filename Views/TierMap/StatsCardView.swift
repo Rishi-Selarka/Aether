@@ -6,8 +6,8 @@ struct StatsCardView: View {
     // MARK: - Computed Metrics
 
     private var citiesPassed: String {
-        let count = tiers.filter { $0.passCount > 0 }.count
-        return "\(count)/5"
+        let count = min(tiers.map(\.passCount).reduce(0, +), 15)
+        return "\(count)/15"
     }
 
     private var totalAttempts: String {
@@ -16,7 +16,7 @@ struct StatsCardView: View {
 
     private var bestScore: String {
         let best = tiers.map { $0.score }.max() ?? 0
-        guard best > 0 else { return "—" }
+        guard best > 0 else { return "-" }
         return "\(Int(best))%"
     }
 
