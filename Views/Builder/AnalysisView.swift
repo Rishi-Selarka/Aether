@@ -1,9 +1,11 @@
 import SwiftUI
 
 /// Full-screen analysis shown after completing all block quizzes.
+/// Section 1 (fixed): Done/Export buttons + score ring + pass/fail badge.
+/// Section 2 (scrollable): Per-question result cards + reattempt button.
 struct AnalysisView: View {
     let session: QuizSession
-    let analysisTexts: [String]     // AI-generated or fallback, parallel to session.results()
+    let analysisTexts: [String]
     let tierName: String
     let onDone: () -> Void
     let onReattempt: () -> Void
@@ -11,7 +13,6 @@ struct AnalysisView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showContent = false
     @State private var waterLevel: CGFloat = 0
-    @State private var wavePhase: CGFloat = 0
     @State private var showDrownedText = false
     @State private var particleOpacity: Double = 0
     @State private var isExporting = false
@@ -35,9 +36,7 @@ struct AnalysisView: View {
 
     var body: some View {
         ZStack {
-            // Background
-            Color(red: 0.09, green: 0.09, blue: 0.12)
-                .ignoresSafeArea()
+            Color.black.ignoresSafeArea()
 
             // Drowning water effect (fail only)
             if !session.passed {
@@ -49,113 +48,131 @@ struct AnalysisView: View {
                 successGlowOverlay
             }
 
-            // Main content
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 0) {
-                    // Done button at top-right
-                    doneButtonRow
-
-                    // Score section
-                    scoreSection
-                        .padding(.top, 8)
-
-                    // Pass/fail badge
-                    passFailBadge
-                        .padding(.top, 16)
-
-                    // Divider
-                    Divider()
-                        .opacity(0.15)
-                        .padding(.vertical, 24)
-                        .padding(.horizontal, 24)
-
-                    // Per-question results
-                    if !results.isEmpty {
-                        resultsSection
-                    }
-
-                    // Reattempt button
-                    reattemptButton
-                        .padding(.top, 32)
-                        .padding(.bottom, 48)
-                }
-                .padding(.horizontal, 24)
+            // Main layout: fixed header + scrollable body
+            VStack(spacing: 0) {
+                section1
+                section2
             }
             .opacity(showContent ? 1 : 0)
 
-            // Drowned overlay text
+            // Drowned text overlay
             if !session.passed && showDrownedText {
                 drownedOverlay
             }
         }
         .navigationBarHidden(true)
+        .environment(\.colorScheme, .dark)
         .onAppear { runEntranceAnimation() }
     }
 
-    // MARK: - Done Button
+    // MARK: - Section 1: Fixed Header
 
-    private var doneButtonRow: some View {
-        HStack(spacing: 12) {
-            Spacer()
-
-            // Export button
-            Button {
-                isExporting = true
-                Task {
-                    await ArchitectureExportService.exportAndShare(
-                        session: session,
-                        tierName: tierName,
-                        onComplete: { isExporting = false }
-                    )
-                }
-            } label: {
-                HStack(spacing: 6) {
-                    if isExporting {
-                        ProgressView()
-                            .tint(.white)
-                            .scaleEffect(0.7)
-                    } else {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 14, weight: .semibold))
+    private var section1: some View {
+        VStack(spacing: 0) {
+            // Top row: Done (leading) | Export (trailing)
+            HStack(spacing: 12) {
+                Button {
+                    dismiss()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        onDone()
                     }
-                    Text("Export")
+                } label: {
+                    Text("Done")
                         .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background { Capsule().fill(.white.opacity(0.12)) }
                 }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .background {
-                    Capsule().fill(.white.opacity(0.12))
-                }
-            }
-            .disabled(isExporting)
-            .accessibilityLabel("Export architecture analysis as PDF")
+                .accessibilityLabel("Done - return to city map")
 
-            Button {
-                dismiss()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    onDone()
-                }
-            } label: {
-                Text("Done")
-                    .font(.system(size: 17, weight: .semibold))
+                Spacer()
+
+                Button {
+                    isExporting = true
+                    Task {
+                        await ArchitectureExportService.exportAndShare(
+                            session: session,
+                            tierName: tierName,
+                            onComplete: { isExporting = false }
+                        )
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        if isExporting {
+                            ProgressView()
+                                .tint(.white)
+                                .scaleEffect(0.7)
+                        } else {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        Text("Export")
+                            .font(.system(size: 17, weight: .semibold))
+                    }
                     .foregroundStyle(.white)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
-                    .background {
-                        Capsule().fill(.white.opacity(0.12))
-                    }
+                    .background { Capsule().fill(.white.opacity(0.12)) }
+                }
+                .disabled(isExporting)
+                .accessibilityLabel("Export architecture analysis as PDF")
             }
-            .accessibilityLabel("Done - return to city map")
+            .padding(.top, 60)
+            .padding(.horizontal, 24)
+
+            // Score ring
+            scoreSection
+                .padding(.top, 20)
+
+            // Pass/fail badge
+            passFailBadge
+                .padding(.top, 16)
+
+            // Divider separating fixed from scrollable
+            Divider()
+                .opacity(0.15)
+                .padding(.vertical, 20)
+                .padding(.horizontal, 24)
         }
-        .padding(.top, 60)
+    }
+
+    // MARK: - Section 2: Scrollable Content
+
+    private var section2: some View {
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 12) {
+                if !results.isEmpty {
+                    Text("Question Breakdown")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.5))
+                        .tracking(0.8)
+                        .padding(.horizontal, 4)
+
+                    ForEach(
+                        Array(results.enumerated()),
+                        id: \.element.question.id
+                    ) { i, result in
+                        resultCard(
+                            result: result,
+                            analysisText: analysisTexts[safe: i]
+                                ?? result.question.explanation
+                        )
+                    }
+                }
+
+                reattemptButton
+                    .padding(.top, 20)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 48)
+        }
     }
 
     // MARK: - Score Section
 
     private var scoreSection: some View {
         VStack(spacing: 16) {
-            // Circular score ring
             ZStack {
                 Circle()
                     .stroke(.white.opacity(0.1), lineWidth: 12)
@@ -213,35 +230,20 @@ struct AnalysisView: View {
                 .overlay {
                     Capsule()
                         .strokeBorder(
-                            session.passed ? Color.green.opacity(0.5) : Color.blue.opacity(0.5),
+                            session.passed
+                                ? Color.green.opacity(0.5)
+                                : Color.blue.opacity(0.5),
                             lineWidth: 1
                         )
                 }
         }
     }
 
-    // MARK: - Results Section
-
-    private var resultsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Question Breakdown")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.5))
-                .tracking(0.8)
-                .padding(.horizontal, 4)
-
-            ForEach(Array(results.enumerated()), id: \.element.question.id) { i, result in
-                resultCard(
-                    result: result,
-                    analysisText: analysisTexts[safe: i] ?? result.question.explanation
-                )
-            }
-        }
-    }
+    // MARK: - Result Card
 
     private func resultCard(result: QuizResult, analysisText: String) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Block type + correct/wrong indicator
+            // Block icon + question text + correct/wrong indicator
             HStack(spacing: 10) {
                 Image(systemName: result.question.blockType.sfSymbol)
                     .font(.system(size: 13))
@@ -256,7 +258,9 @@ struct AnalysisView: View {
 
                 Spacer()
 
-                Image(systemName: result.isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                Image(systemName: result.isCorrect
+                      ? "checkmark.circle.fill"
+                      : "xmark.circle.fill")
                     .font(.system(size: 18))
                     .foregroundStyle(result.isCorrect ? .green : .red)
             }
@@ -277,25 +281,22 @@ struct AnalysisView: View {
                 )
             }
 
-            // AI analysis text
+            // AI analysis
             Text(analysisText)
-                .font(.system(size: 13, weight: .regular))
+                .font(.system(size: 13))
                 .foregroundStyle(.white.opacity(0.6))
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(16)
-        .background {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(.white.opacity(0.05))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder(
-                            result.isCorrect
-                                ? Color.green.opacity(0.2)
-                                : Color.red.opacity(0.2),
-                            lineWidth: 1
-                        )
-                }
+        .glossyCardBackground(cornerRadius: 14)
+        .overlay {
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(
+                    result.isCorrect
+                        ? Color.green.opacity(0.3)
+                        : Color.red.opacity(0.25),
+                    lineWidth: 1
+                )
         }
     }
 
@@ -343,7 +344,7 @@ struct AnalysisView: View {
     // MARK: - Drowning Effect
 
     private var drowningWaterOverlay: some View {
-        GeometryReader { geo in
+        GeometryReader { _ in
             TimelineView(.animation) { timeline in
                 let t = timeline.date.timeIntervalSinceReferenceDate
                 Canvas { ctx, size in
@@ -375,12 +376,13 @@ struct AnalysisView: View {
         path.addLine(to: CGPoint(x: w, y: h))
         path.closeSubpath()
 
-        let topColor = Color(red: 0.0, green: 0.3, blue: 0.7).opacity(0.45)
-        let bottomColor = Color(red: 0.0, green: 0.1, blue: 0.4).opacity(0.55)
         ctx.fill(
             path,
             with: .linearGradient(
-                Gradient(colors: [topColor, bottomColor]),
+                Gradient(colors: [
+                    Color(red: 0.0, green: 0.3, blue: 0.7).opacity(0.45),
+                    Color(red: 0.0, green: 0.1, blue: 0.4).opacity(0.55)
+                ]),
                 startPoint: CGPoint(x: 0, y: riseY),
                 endPoint: CGPoint(x: 0, y: h)
             )
@@ -402,11 +404,10 @@ struct AnalysisView: View {
         .transition(.opacity.combined(with: .scale(scale: 0.9)))
     }
 
-    // MARK: - Success Glow Effect
+    // MARK: - Success Glow
 
     private var successGlowOverlay: some View {
         ZStack {
-            // Radial golden glow
             RadialGradient(
                 colors: [.yellow.opacity(0.12), .orange.opacity(0.06), .clear],
                 center: .top,
@@ -415,7 +416,6 @@ struct AnalysisView: View {
             )
             .ignoresSafeArea()
 
-            // Particle burst (static golden dots)
             Canvas { ctx, size in
                 for i in 0 ..< 30 {
                     let angle = Double(i) / 30.0 * .pi * 2
@@ -425,7 +425,10 @@ struct AnalysisView: View {
                     let r = Double.random(in: 2 ... 5)
                     var path = Path()
                     path.addEllipse(in: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2))
-                    ctx.fill(path, with: .color(.yellow.opacity(Double.random(in: 0.3 ... 0.8))))
+                    ctx.fill(
+                        path,
+                        with: .color(.yellow.opacity(Double.random(in: 0.3 ... 0.8)))
+                    )
                 }
             }
             .opacity(particleOpacity)
@@ -438,11 +441,12 @@ struct AnalysisView: View {
     private func runEntranceAnimation() {
         if session.passed {
             HapticManager.success()
+            SoundManager.playSuccessSound()
             withAnimation(.easeOut(duration: 0.6)) { showContent = true }
             withAnimation(.easeIn(duration: 0.8).delay(0.3)) { particleOpacity = 1.0 }
         } else {
             HapticManager.error()
-            // Water rises before content fades in
+            SoundManager.playDrownSound()
             withAnimation(.easeIn(duration: 1.8)) { waterLevel = 0.35 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 withAnimation(.easeIn(duration: 0.4)) { showDrownedText = true }

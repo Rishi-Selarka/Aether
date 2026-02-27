@@ -81,7 +81,7 @@ struct QuestionOfTheDayCard: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background { glossyBackground }
+        .glossyCardBackground(cornerRadius: 12)
         .onAppear {
             // Restore previous answer if already answered today
             if let saved = q.selectedIndex {
@@ -181,49 +181,6 @@ struct QuestionOfTheDayCard: View {
         .background(Color.homeAccentMuted, in: RoundedRectangle(cornerRadius: 10))
     }
 
-    // MARK: - Glossy Background
-
-    private var glossyBackground: some View {
-        let isDark = colorScheme == .dark
-        let baseColor: Color = isDark ? .black : .white
-        let sheenColor: Color = isDark ? .white : .black
-
-        return ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(baseColor)
-
-            // Diagonal glossy sheen
-            RoundedRectangle(cornerRadius: 12)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            sheenColor.opacity(isDark ? 0.12 : 0.04),
-                            sheenColor.opacity(isDark ? 0.03 : 0.01),
-                            .clear,
-                            sheenColor.opacity(isDark ? 0.05 : 0.02)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-
-            // Edge highlight
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(
-                    LinearGradient(
-                        colors: [
-                            sheenColor.opacity(isDark ? 0.25 : 0.12),
-                            sheenColor.opacity(isDark ? 0.08 : 0.04),
-                            sheenColor.opacity(isDark ? 0.04 : 0.02)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 0.5
-                )
-        }
-    }
-
     private var placeholder: some View {
         VStack(alignment: .leading, spacing: 12) {
             RoundedRectangle(cornerRadius: 4)
@@ -242,6 +199,6 @@ struct QuestionOfTheDayCard: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background { glossyBackground }
+        .glossyCardBackground(cornerRadius: 12)
     }
 }
