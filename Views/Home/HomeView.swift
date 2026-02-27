@@ -51,7 +51,23 @@ struct HomeView: View {
             .padding(.bottom, 16)
         }
         .scrollBounceBehavior(.basedOnSize)
-        .background(Color.archsysBackground)
+        .background {
+            ZStack(alignment: .bottom) {
+                Color.archsysBackground
+
+                // Light blue sky gradient rising from the bottom
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.55, green: 0.75, blue: 0.95).opacity(0.25),
+                        Color(red: 0.60, green: 0.80, blue: 1.0).opacity(0.10),
+                        Color.clear
+                    ],
+                    startPoint: .bottom,
+                    endPoint: .init(x: 0.5, y: 0.55)
+                )
+            }
+            .ignoresSafeArea()
+        }
         .overlay(alignment: .center) {
             EmptyView() // reserve for future overlays
         }
