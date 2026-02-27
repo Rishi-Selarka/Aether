@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Home screen — single viewport, no scroll.
+/// Home screen — scrollable when content exceeds viewport.
 /// Shows stats, daily challenge, and Dare to Dive CTA with quote.
 struct HomeView: View {
     @Environment(TierStatsCache.self) private var statsCache
@@ -15,42 +15,42 @@ struct HomeView: View {
     var onReset: (() -> Void)? = nil
 
     var body: some View {
-        VStack(spacing: 12) {
-            // Settings row – right-aligned
-            HStack {
-                Spacer()
-                settingsButton
-            }
-
-            // Metrics card
-            StatsCardView()
-
-            // Daily Challenge
-            QuestionOfTheDayCard(
-                question: question,
-                onAnswer: { index in
-                    DailyContentService.saveAnswer(selectedIndex: index)
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 12) {
+                // Settings row – right-aligned
+                HStack {
+                    Spacer()
+                    settingsButton
                 }
-            )
 
-            Spacer(minLength: 8)
+                // Metrics card
+                StatsCardView()
 
-            // Dare to Dive CTA with GIF
-            DareToDiveCard(onTap: onDareToDive)
+                // Daily Challenge
+                QuestionOfTheDayCard(
+                    question: question,
+                    onAnswer: { index in
+                        DailyContentService.saveAnswer(selectedIndex: index)
+                    }
+                )
 
-            // Quote — plain text, no card, no author
-            if let quoteText = quote?.text, !quoteText.isEmpty {
-                Text(quoteText)
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundStyle(Color.archsysTextTertiary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(2)
-                    .padding(.horizontal, 12)
+                // Dare to Dive CTA with GIF
+                DareToDiveCard(onTap: onDareToDive)
+
+                // Quote — plain text, no card, no author
+                if let quoteText = quote?.text, !quoteText.isEmpty {
+                    Text(quoteText)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(Color.archsysTextTertiary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(2)
+                        .padding(.horizontal, 12)
+                }
             }
-
-            Spacer(minLength: 8)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 16)
         }
-        .padding(.horizontal, 20)
+        .scrollBounceBehavior(.basedOnSize)
         .background(Color.archsysBackground)
         .overlay(alignment: .center) {
             EmptyView() // reserve for future overlays
