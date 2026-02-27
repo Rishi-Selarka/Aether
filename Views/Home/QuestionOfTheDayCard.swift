@@ -4,7 +4,9 @@ import SwiftUI
 struct QuestionOfTheDayCard: View {
     let question: DailyQuestion?
     let onAnswer: (Int) -> Void
+    var onRefresh: (() -> Void)?
 
+    @Environment(\.colorScheme) private var colorScheme
     @State private var selectedIndex: Int?
     @State private var showExplanation = false
 
@@ -22,7 +24,7 @@ struct QuestionOfTheDayCard: View {
 
     private func loadedContent(_ q: DailyQuestion) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header label
+            // Header label + refresh
             HStack(spacing: 5) {
                 Image(systemName: "questionmark.circle")
                     .font(.system(size: 11, weight: .semibold))
@@ -31,6 +33,23 @@ struct QuestionOfTheDayCard: View {
                     .font(.system(size: 9, weight: .semibold))
                     .foregroundStyle(Color.archsysTextTertiary)
                     .tracking(1.0)
+
+                Spacer()
+
+                if let onRefresh {
+                    Button {
+                        HapticManager.lightImpact()
+                        selectedIndex = nil
+                        showExplanation = false
+                        onRefresh()
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(Color.archsysTextTertiary)
+                            .frame(width: 28, height: 28)
+                    }
+                    .accessibilityLabel("Reload question")
+                }
             }
             .padding(.bottom, 8)
 
@@ -62,7 +81,7 @@ struct QuestionOfTheDayCard: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.archsysSurface, in: RoundedRectangle(cornerRadius: 12))
+        .background { glossyBackground }
         .onAppear {
             // Restore previous answer if already answered today
             if let saved = q.selectedIndex {
@@ -77,18 +96,22 @@ struct QuestionOfTheDayCard: View {
         let isCorrect = index == correctIndex
         let revealed = isAnswered
 
+        let isDark = colorScheme == .dark
+        let defaultBg: Color = isDark ? .white.opacity(0.08) : .black.opacity(0.05)
+        let defaultBorder: Color = isDark ? .white.opacity(0.12) : .black.opacity(0.10)
+
         let bgColor: Color = {
-            guard revealed else { return Color.archsysSurfaceElevated }
+            guard revealed else { return defaultBg }
             if isCorrect { return Color.archsysSuccess.opacity(0.15) }
             if isSelected && !isCorrect { return Color.archsysError.opacity(0.15) }
-            return Color.archsysSurfaceElevated
+            return defaultBg
         }()
 
         let borderColor: Color = {
-            guard revealed else { return Color.archsysBorder }
+            guard revealed else { return defaultBorder }
             if isCorrect { return Color.archsysSuccess.opacity(0.6) }
             if isSelected && !isCorrect { return Color.archsysError.opacity(0.5) }
-            return Color.archsysBorder
+            return defaultBorder
         }()
 
         let labelPrefix = ["A", "B", "C", "D"][index]
@@ -158,6 +181,49 @@ struct QuestionOfTheDayCard: View {
         .background(Color.homeAccentMuted, in: RoundedRectangle(cornerRadius: 10))
     }
 
+    // MARK: - Glossy Background
+
+    private var glossyBackground: some View {
+        let isDark = colorScheme == .dark
+        let baseColor: Color = isDark ? .black : .white
+        let sheenColor: Color = isDark ? .white : .black
+
+        return ZStack {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(baseColor)
+
+            // Diagonal glossy sheen
+            RoundedRectangle(cornerRadius: 12)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            sheenColor.opacity(isDark ? 0.12 : 0.04),
+                            sheenColor.opacity(isDark ? 0.03 : 0.01),
+                            .clear,
+                            sheenColor.opacity(isDark ? 0.05 : 0.02)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+
+            // Edge highlight
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [
+                            sheenColor.opacity(isDark ? 0.25 : 0.12),
+                            sheenColor.opacity(isDark ? 0.08 : 0.04),
+                            sheenColor.opacity(isDark ? 0.04 : 0.02)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 0.5
+                )
+        }
+    }
+
     private var placeholder: some View {
         VStack(alignment: .leading, spacing: 12) {
             RoundedRectangle(cornerRadius: 4)
@@ -176,6 +242,6 @@ struct QuestionOfTheDayCard: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.archsysSurface, in: RoundedRectangle(cornerRadius: 14))
+        .background { glossyBackground }
     }
 }

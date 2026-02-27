@@ -17,7 +17,7 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 12) {
+            VStack(spacing: 24) {
                 // Top bar – chatbot left, settings right
                 HStack {
                     chatbotButton
@@ -36,6 +36,13 @@ struct HomeView: View {
                     question: question,
                     onAnswer: { index in
                         DailyContentService.saveAnswer(selectedIndex: index)
+                    },
+                    onRefresh: {
+                        Task {
+                            question = nil
+                            let fresh = await DailyContentService.loadFreshQuestion()
+                            question = fresh
+                        }
                     }
                 )
 

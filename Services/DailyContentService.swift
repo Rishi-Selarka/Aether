@@ -142,6 +142,13 @@ enum DailyContentService {
         return generated
     }
 
+    /// Bypasses cache and generates a fresh question.
+    static func loadFreshQuestion() async -> DailyQuestion {
+        let generated = await generateQuestion()
+        persist(question: generated)
+        return generated
+    }
+
     static func saveAnswer(selectedIndex: Int) {
         guard var question = cachedQuestion() else { return }
         question.selectedIndex = selectedIndex
