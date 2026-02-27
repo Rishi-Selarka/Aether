@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum TierMapConstants {
-    static let canvasHeight: CGFloat = 1600
+    static let canvasHeight: CGFloat = 1400
 
     // City names derived from tier ID - no SwiftData migration needed
     static let cityNames: [Int: String] = [
@@ -23,11 +23,11 @@ enum TierMapConstants {
 
     // City positions on canvas: (xFraction of width, absolute Y)
     static let positions: [Int: (xFraction: CGFloat, y: CGFloat)] = [
-        1: (0.25, 280),
-        2: (0.70, 530),
-        3: (0.35, 830),
-        4: (0.75, 1130),
-        5: (0.45, 1430)
+        1: (0.25, 200),
+        2: (0.70, 380),
+        3: (0.35, 680),
+        4: (0.75, 980),
+        5: (0.45, 1280)
     ]
 
     // Muted blueprint-compatible status colors

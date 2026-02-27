@@ -8,11 +8,8 @@ struct CityMarkerView: View {
     let isUnlocked: Bool
     let isCompleted: Bool
     let lineColor: Color
-    let index: Int
+    let isRevealed: Bool
     let onTap: () -> Void
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var didAppear = false
 
     private var tintColor: Color {
         TierMapConstants.cityTints[tierID] ?? TierMapConstants.unlockedColor
@@ -39,16 +36,8 @@ struct CityMarkerView: View {
             }
         }
         .buttonStyle(CityMarkerButtonStyle())
-        .opacity(didAppear ? 1 : 0)
-        .scaleEffect(didAppear ? 1.0 : 0.75)
-        .onAppear {
-            withAnimation(
-                reduceMotion ? .none : .spring(response: 0.5, dampingFraction: 0.72)
-                    .delay(Double(index) * 0.12)
-            ) {
-                didAppear = true
-            }
-        }
+        .opacity(isRevealed ? 1 : 0)
+        .scaleEffect(isRevealed ? 1.0 : 0.75)
         .accessibilityLabel("Tier \(tierID), \(cityName)")
         .accessibilityHint(isUnlocked ? "Double tap to open" : "Locked")
         .accessibilityAddTraits(isUnlocked ? .isButton : [])
