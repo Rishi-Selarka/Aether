@@ -16,25 +16,24 @@ struct StatsCardView: View {
             metric(value: statsCache.bestScoreToday, label: "Best Today")
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 72)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
+        .frame(height: 64)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
         .overlay {
-            RoundedRectangle(cornerRadius: 18)
+            RoundedRectangle(cornerRadius: 14)
                 .strokeBorder(.white.opacity(0.25), lineWidth: 0.5)
         }
-        .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 3)
-        .padding(.horizontal, 20)
+        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
     }
 
     private func metric(value: String, label: String) -> some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 3) {
             Text(value)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundStyle(.primary)
                 .monospacedDigit()
 
             Text(label.uppercased())
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(size: 9, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .tracking(0.8)
         }

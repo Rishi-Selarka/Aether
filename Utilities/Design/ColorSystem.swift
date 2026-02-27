@@ -43,4 +43,32 @@ extension Color {
             })
             : Color.archsysBorder
     }
+
+    // MARK: - Home Screen
+
+    static let homeAccent = Color(UIColor { t in
+        t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.35, green: 0.55, blue: 0.85, alpha: 1)
+            : UIColor(red: 0.20, green: 0.42, blue: 0.75, alpha: 1)
+    })
+
+    static let homeAccentMuted = Color(UIColor { t in
+        t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.35, green: 0.55, blue: 0.85, alpha: 0.25)
+            : UIColor(red: 0.20, green: 0.42, blue: 0.75, alpha: 0.12)
+    })
+
+    /// Success/correct state (e.g. quiz correct answer).
+    static let archsysSuccess = Color(UIColor { t in
+        t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.2, green: 0.6, blue: 0.3, alpha: 1)
+            : UIColor(red: 0.15, green: 0.5, blue: 0.25, alpha: 1)
+    })
+
+    /// Error/incorrect state (e.g. quiz wrong answer).
+    static let archsysError = Color(UIColor { t in
+        t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.7, green: 0.2, blue: 0.2, alpha: 1)
+            : UIColor(red: 0.75, green: 0.2, blue: 0.2, alpha: 1)
+    })
 }

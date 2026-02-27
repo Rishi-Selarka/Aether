@@ -36,10 +36,34 @@ struct ContentView: View {
 struct MainContentView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var tierStatsCache = TierStatsCache()
+    @State private var showCities = false
 
     var body: some View {
         NavigationStack {
-            TierMapView()
+            if showCities {
+                TierMapView()
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button {
+                                HapticManager.lightImpact()
+                                showCities = false
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "chevron.left")
+                                        .font(.system(size: 14, weight: .semibold))
+                                    Text("Home")
+                                        .font(.system(size: 17))
+                                }
+                                .foregroundStyle(.primary)
+                            }
+                        }
+                    }
+            } else {
+                HomeView(
+                    onDareToDive: { showCities = true },
+                    onReset: { hydrateStatsCache() }
+                )
+            }
         }
         .environment(tierStatsCache)
         .onAppear {
