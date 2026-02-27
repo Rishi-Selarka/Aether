@@ -3,6 +3,7 @@ import SwiftUI
 // MARK: - Chat State
 
 /// Observable state manager for the chatbot conversation and typewriter animation.
+@MainActor
 @Observable
 final class ChatState {
     private(set) var messages: [ChatMessage] = []
@@ -32,7 +33,7 @@ final class ChatState {
 
         let historySnapshot = Array(messages)
 
-        Task { @MainActor in
+        Task {
             let response = await Self.getResponse(
                 userMessage: text,
                 history: historySnapshot
@@ -46,7 +47,6 @@ final class ChatState {
 
     // MARK: - Typewriter Animation
 
-    @MainActor
     private func startTypewriter(fullText: String) async {
         let reduceMotion = UIAccessibility.isReduceMotionEnabled
         if reduceMotion {
@@ -59,7 +59,7 @@ final class ChatState {
         responseState = .typing(fullText: fullText, revealedCount: 0)
 
         typewriterTask?.cancel()
-        typewriterTask = Task { @MainActor in
+        typewriterTask = Task {
             let characters = Array(fullText)
 
             for i in characters.indices {
@@ -96,7 +96,7 @@ final class ChatState {
 
     // MARK: - AI Integration
 
-    private static func getResponse(
+    private nonisolated static func getResponse(
         userMessage: String,
         history: [ChatMessage]
     ) async -> String {
