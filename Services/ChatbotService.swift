@@ -110,8 +110,21 @@ struct ChatbotService {
 
 enum ChatbotFallback {
 
+    /// Used when query is clearly outside system design (e.g. politics, celebrities).
+    private static let offTopicResponse = """
+        I specialise in system design and mobile architecture. Try asking about \
+        patterns like MVVM, Repository, caching strategies, or networking layers.
+        """
+
     static func findResponse(for query: String) -> String {
-        let lowered = query.lowercased()
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return genericResponse }
+
+        let lowered = trimmed.lowercased()
+
+        if isOffTopic(lowered) {
+            return offTopicResponse
+        }
 
         for entry in responses {
             if entry.keywords.contains(where: { lowered.contains($0) }) {
@@ -120,6 +133,18 @@ enum ChatbotFallback {
         }
 
         return genericResponse
+    }
+
+    /// Detects queries outside system design / software architecture.
+    private static func isOffTopic(_ lowered: String) -> Bool {
+        let offTopicPatterns = [
+            "who is", "who was", "who are",
+            "what is a person", "president", "trump", "biden", "obama",
+            "capital of", "population of", "country",
+            "weather", "sports", "movie", "song", "celebrity",
+            "recipe", "cooking", "food"
+        ]
+        return offTopicPatterns.contains { lowered.contains($0) }
     }
 
     // MARK: - Generic Response
@@ -141,6 +166,23 @@ enum ChatbotFallback {
     }
 
     private static let responses: [FallbackEntry] = [
+        FallbackEntry(
+            keywords: ["difference between mvvm and mvc", "mvvm vs mvc", "mvc vs mvvm", "difference between mvc and mvvm", "compare mvvm mvc", "mvvm and mvc"],
+            answer: """
+                MVC: The Controller mediates between Model and View. In UIKit, UIViewController \
+                often becomes a "Massive View Controller" because it handles UI logic, business \
+                logic, data formatting, and navigation all in one place. The View talks directly \
+                to the Controller, which updates the Model and the View.
+
+                MVVM: The ViewModel sits between View and Model. The View observes the ViewModel \
+                (via @StateObject or @ObservedObject in SwiftUI) and never touches the Model. \
+                The ViewModel transforms Model data for display and exposes @Published properties. \
+                Key difference: the ViewModel has no reference to the View — it is independently \
+                testable and SwiftUI-agnostic. MVVM avoids the Massive View Controller problem \
+                by moving logic out of the view layer. SwiftUI's declarative style fits MVVM \
+                naturally; MVC was designed for UIKit's imperative flow.
+                """
+        ),
         FallbackEntry(
             keywords: ["mvvm", "model-view-viewmodel", "viewmodel", "view model"],
             answer: """
@@ -279,6 +321,19 @@ enum ChatbotFallback {
                 FetchDescriptor with predicates and sort descriptors. Keep your \
                 SwiftData models in a dedicated layer and access them through a \
                 repository or data manager protocol to maintain testability.
+                """
+        ),
+        FallbackEntry(
+            keywords: ["instagram", "design an app", "build an app", "how to design", "how to build", "app architecture", "social app"],
+            answer: """
+                To design an app like Instagram at the system level, start with \
+                MVVM and a Repository layer. The feed needs an Image Cache for \
+                photos, a Repository that combines network + local cache, and \
+                pagination for infinite scroll. Use a Background Worker for \
+                prefetching and SwiftData or Core Data for offline support. \
+                For real-time features (likes, comments), add a WebSocket or \
+                polling layer. Break the architecture into: UI → ViewModel → \
+                Repository → API/Cache → Database.
                 """
         )
     ]
