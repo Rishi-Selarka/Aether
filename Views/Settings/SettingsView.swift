@@ -66,7 +66,7 @@ struct SettingsView: View {
         }
         // Fill the sheet height so glassEffect covers it completely
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .glassEffect(in: .rect(cornerRadius: 32))
+        .modifier(GlassSheetModifier())
         .preferredColorScheme(isDarkMode ? .dark : .light)
         .confirmationDialog("Reset All Progress?", isPresented: $showResetConfirmation) {
             Button("Reset", role: .destructive) {
@@ -98,7 +98,7 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 content()
             }
-            .glassEffect(in: RoundedRectangle(cornerRadius: 14))
+            .modifier(GlassCardModifier())
         }
     }
 
@@ -155,6 +155,36 @@ struct SettingsView: View {
             Image(systemName: icon)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(.white)
+        }
+    }
+}
+
+// MARK: - Availability-gated glass modifiers
+
+private struct GlassSheetModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content.glassEffect(in: .rect(cornerRadius: 32))
+        } else {
+            content
+                .background(.ultraThinMaterial)
+                .clipShape(.rect(cornerRadius: 32))
+        }
+    }
+}
+
+private struct GlassCardModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content.glassEffect(in: RoundedRectangle(cornerRadius: 14))
+        } else {
+            content
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(.white.opacity(0.1), lineWidth: 0.5)
+                }
         }
     }
 }
