@@ -14,6 +14,7 @@ struct AnalysisView: View {
     @State private var wavePhase: CGFloat = 0
     @State private var showDrownedText = false
     @State private var particleOpacity: Double = 0
+    @State private var isExporting = false
 
     private let results: [QuizResult]
 
@@ -94,8 +95,42 @@ struct AnalysisView: View {
     // MARK: - Done Button
 
     private var doneButtonRow: some View {
-        HStack {
+        HStack(spacing: 12) {
             Spacer()
+
+            // Export button
+            Button {
+                isExporting = true
+                Task {
+                    await ArchitectureExportService.exportAndShare(
+                        session: session,
+                        tierName: tierName,
+                        onComplete: { isExporting = false }
+                    )
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    if isExporting {
+                        ProgressView()
+                            .tint(.white)
+                            .scaleEffect(0.7)
+                    } else {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    Text("Export")
+                        .font(.system(size: 17, weight: .semibold))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background {
+                    Capsule().fill(.white.opacity(0.12))
+                }
+            }
+            .disabled(isExporting)
+            .accessibilityLabel("Export architecture analysis as PDF")
+
             Button {
                 dismiss()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
