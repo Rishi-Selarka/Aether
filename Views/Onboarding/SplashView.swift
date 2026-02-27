@@ -6,8 +6,8 @@ struct SplashView: View {
     @State private var titleOpacity: Double = 0.0
     @State private var network = SplashNetwork.generate()
 
-    // 0→1.3s fade in (edges first), 1.3→2.8s roam, 2.8→4.3s dissolve out, 4.6s title
-    private let fadeEnd = 4.3
+    // 0→0.5s fast fade in, 0.5→2.2s roam, 2.2→3.6s slow dissolve, ~2.8s title appears
+    private let fadeEnd = 3.6
 
     private var edgeWhiteLevel: Double { colorScheme == .dark ? 0.40 : 0.55 }
     private var dotWhiteLevel: Double { colorScheme == .dark ? 0.75 : 0.25 }
@@ -52,8 +52,9 @@ struct SplashView: View {
         .ignoresSafeArea()
         .onAppear {
             startTime = .now
-            DispatchQueue.main.asyncAfter(deadline: .now() + fadeEnd + 0.3) {
-                withAnimation(.easeOut(duration: 1.0)) {
+            // Show text while network is still dissolving
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) {
+                withAnimation(.easeOut(duration: 0.8)) {
                     titleOpacity = 1.0
                 }
             }
@@ -72,8 +73,8 @@ struct SplashView: View {
         let h = Double(size.height)
         let positions = network.nodes.map { $0.position(t: t, w: w, h: h) }
 
-        let breathe = 0.85 + 0.15 * sin(t * 1.8)
-        let appearDuration = 0.6
+        let breathe = 0.85 + 0.15 * sin(t * 2.4)
+        let appearDuration = 0.2
         func appearFactor(_ t: Double, delay: Double) -> Double {
             let elapsed = t - delay
             guard elapsed > 0 else { return 0 }
@@ -115,8 +116,8 @@ struct SplashView: View {
             let rawOp: Double
             if t < node.fadeStart {
                 rawOp = 1.0
-            } else if t < node.fadeStart + 0.5 {
-                let p = (t - node.fadeStart) / 0.5
+            } else if t < node.fadeStart + 0.8 {
+                let p = (t - node.fadeStart) / 0.8
                 rawOp = (1.0 - p) * (1.0 - p)
             } else {
                 continue
@@ -172,20 +173,20 @@ struct SplashNetwork: Sendable {
                 let baseY = (Double(r) + 0.5) / Double(rows)
                     + (hash(seed * 269.5 + 183.3) - 0.5) * 0.06
 
-                let driftX = (hash(seed * 419.2 + 371.9) - 0.5) * 0.022
-                let driftY = (hash(seed * 523.7 + 247.1) - 0.5) * 0.022
+                let driftX = (hash(seed * 419.2 + 371.9) - 0.5) * 0.055
+                let driftY = (hash(seed * 523.7 + 247.1) - 0.5) * 0.055
 
                 let dx = baseX - 0.5
                 let dy = baseY - 0.5
                 let dist = min(sqrt(dx * dx + dy * dy) / 0.75, 1.0)
 
-                // Appear: edges of screen first (dist=1 → delay=0), center last (dist=0 → delay=1.0)
-                let appearDelay = (1.0 - dist) * 1.0
-                    + (hash(seed * 953.7 + 287.1) - 0.5) * 0.2
+                // Appear: edges of screen first (dist=1 → delay=0), center last (dist=0 → delay=0.4)
+                let appearDelay = (1.0 - dist) * 0.4
+                    + (hash(seed * 953.7 + 287.1) - 0.5) * 0.1
 
-                // Dissolve: edges first, center last
-                let fadeStart = 2.8 + (1.0 - dist) * 1.2
-                    + (hash(seed * 631.4 + 159.3) - 0.5) * 0.5
+                // Dissolve: edges first, center last (slower)
+                let fadeStart = 2.2 + (1.0 - dist) * 1.4
+                    + (hash(seed * 631.4 + 159.3) - 0.5) * 0.3
 
                 nodes.append(NetNode(baseX: baseX, baseY: baseY,
                                      driftX: driftX, driftY: driftY,
@@ -224,14 +225,14 @@ struct SplashNetwork: Sendable {
         let dy = midY - 0.5
         let dist = min(sqrt(dx * dx + dy * dy) / 0.75, 1.0)
 
-        // Appear: edges first
-        let appearDelay = (1.0 - dist) * 1.0
-            + (hash(Double(a * 41 + b * 67) * 953.7) - 0.5) * 0.2
+        // Appear: edges first (fast)
+        let appearDelay = (1.0 - dist) * 0.4
+            + (hash(Double(a * 41 + b * 67) * 953.7) - 0.5) * 0.1
 
-        // Dissolve: edges first
-        let fadeStart = 2.8 + (1.0 - dist) * 1.2
-            + (hash(Double(a * 97 + b * 31)) - 0.5) * 0.5
-        let fadeDuration = 0.4 + hash(Double(a * 53 + b * 71) * 743.1) * 0.5
+        // Dissolve: edges first (slower)
+        let fadeStart = 2.2 + (1.0 - dist) * 1.4
+            + (hash(Double(a * 97 + b * 31)) - 0.5) * 0.3
+        let fadeDuration = 0.5 + hash(Double(a * 53 + b * 71) * 743.1) * 0.5
 
         return NetEdge(nodeA: a, nodeB: b,
                        appearDelay: max(0, appearDelay),

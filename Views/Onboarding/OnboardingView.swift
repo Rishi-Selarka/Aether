@@ -8,8 +8,8 @@ struct OnboardingView: View {
     @State private var titleOpacity: Double = 0.0
     @State private var network = SplashNetwork.generate()
 
-    private let fadeEnd = 4.3
-    private let autoAdvanceDelay = 5.0
+    private let fadeEnd = 3.6
+    private let autoAdvanceDelay = 5.2
 
     var body: some View {
         SplashViewContent(
@@ -20,8 +20,9 @@ struct OnboardingView: View {
         .ignoresSafeArea()
         .onAppear {
             startTime = .now
-            DispatchQueue.main.asyncAfter(deadline: .now() + fadeEnd + 0.3) {
-                let animation: Animation? = reduceMotion ? nil : .easeOut(duration: 1.0)
+            // Show text while network is still ~30% visible (dissolve runs 2.2→3.6)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) {
+                let animation: Animation? = reduceMotion ? nil : .easeOut(duration: 0.8)
                 withAnimation(animation) {
                     titleOpacity = 1.0
                 }
