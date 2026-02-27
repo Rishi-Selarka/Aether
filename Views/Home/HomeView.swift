@@ -26,6 +26,9 @@ struct HomeView: View {
                 // Metrics card
                 StatsCardView()
 
+                // Dare to Dive CTA with GIF
+                DareToDiveCard(onTap: onDareToDive)
+
                 // Daily Challenge
                 QuestionOfTheDayCard(
                     question: question,
@@ -33,9 +36,6 @@ struct HomeView: View {
                         DailyContentService.saveAnswer(selectedIndex: index)
                     }
                 )
-
-                // Dare to Dive CTA with GIF
-                DareToDiveCard(onTap: onDareToDive)
 
                 // Quote — plain text, no card, no author
                 if let quoteText = quote?.text, !quoteText.isEmpty {
