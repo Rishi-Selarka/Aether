@@ -6,6 +6,7 @@ struct HomeView: View {
     @Environment(TierStatsCache.self) private var statsCache
     @AppStorage("isDarkMode") private var isDarkMode = false
     @State private var showSettings = false
+    @State private var showChatbot = false
 
     // Daily content
     @State private var quote: DailyQuote?
@@ -17,8 +18,9 @@ struct HomeView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 12) {
-                // Settings row – right-aligned
+                // Top bar – chatbot left, settings right
                 HStack {
+                    chatbotButton
                     Spacer()
                     settingsButton
                 }
@@ -71,6 +73,12 @@ struct HomeView: View {
         .overlay(alignment: .center) {
             EmptyView() // reserve for future overlays
         }
+        .sheet(isPresented: $showChatbot) {
+            ChatbotView()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(32)
+        }
         .sheet(isPresented: $showSettings) {
             SettingsView(onReset: onReset)
                 .presentationDetents([.medium, .large])
@@ -81,6 +89,27 @@ struct HomeView: View {
         .task {
             await loadDailyContent()
         }
+    }
+
+    // MARK: - Chatbot
+
+    private var chatbotButton: some View {
+        Button {
+            HapticManager.lightImpact()
+            showChatbot = true
+        } label: {
+            Image(systemName: "bubble.left.and.text.bubble.right")
+                .font(.system(size: 17, weight: .medium))
+                .foregroundStyle(Color.archsysTextSecondary)
+                .frame(width: 40, height: 40)
+                .background(.ultraThinMaterial, in: Circle())
+                .overlay {
+                    Circle()
+                        .strokeBorder(.white.opacity(0.15), lineWidth: 0.5)
+                }
+        }
+        .accessibilityLabel("System Design Assistant")
+        .accessibilityHint("Open the architecture chatbot")
     }
 
     // MARK: - Settings
