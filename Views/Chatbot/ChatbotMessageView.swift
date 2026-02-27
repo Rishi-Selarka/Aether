@@ -77,12 +77,7 @@ struct ChatbotMessageView: View {
             RoundedRectangle(cornerRadius: LayoutConstants.cornerRadiusM)
                 .fill(Color.homeAccent)
         } else {
-            RoundedRectangle(cornerRadius: LayoutConstants.cornerRadiusM)
-                .fill(.ultraThinMaterial)
-                .overlay {
-                    RoundedRectangle(cornerRadius: LayoutConstants.cornerRadiusM)
-                        .strokeBorder(.white.opacity(0.15), lineWidth: 0.5)
-                }
+            Color.clear
         }
     }
 }

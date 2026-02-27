@@ -1,23 +1,6 @@
 import Foundation
 import FoundationModels
 
-// MARK: - AI-Generated Response Type
-
-@available(iOS 26, *)
-@Generable
-struct GeneratedChatResponse {
-    @Guide(description: """
-        A helpful, educational response about mobile system design or iOS architecture. \
-        Use clear language suitable for a university student learning mobile development. \
-        If the question involves code, include brief Swift code examples using markdown \
-        code blocks (```swift). Keep responses concise: 2-6 sentences for simple questions, \
-        up to 3 short paragraphs for complex topics. Never use emojis. If a question is \
-        outside system design or software architecture, politely redirect the student \
-        to ask about architecture topics instead.
-        """)
-    var text: String
-}
-
 // MARK: - Chatbot Service (iOS 26+)
 
 @available(iOS 26, *)
@@ -41,12 +24,8 @@ struct ChatbotService {
                 history: conversationHistory
             )
 
-            let response = try await session.respond(
-                to: prompt,
-                generating: GeneratedChatResponse.self
-            )
-
-            let text = response.content.text
+            let response = try await session.respond(to: prompt)
+            let text = response.content
                 .trimmingCharacters(in: .whitespacesAndNewlines)
 
             return text.isEmpty
