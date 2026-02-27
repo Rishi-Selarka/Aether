@@ -5,6 +5,12 @@ import SwiftData
 // a .medium presentationDetent sheet. NavigationStack reserves nav-bar
 // height that overflows the fixed detent bounds; List doesn't honour the
 // constrained height. Plain VStack + ScrollView solves this cleanly.
+//
+// The sheet's .presentationBackground(.thinMaterial) provides the liquid
+// glass translucency. GIFImage (UIViewRepresentable) content behind the
+// sheet is composited by UIKit, which .thinMaterial blurs correctly.
+// A .clear background + manual .glassEffect() does NOT work because
+// SwiftUI's blur compositor can't sample UIKit-hosted views.
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -16,7 +22,7 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header — no NavigationStack needed
+            // Header
             ZStack {
                 Text("Settings")
                     .font(.system(size: 17, weight: .semibold))
@@ -37,7 +43,7 @@ struct SettingsView: View {
             .padding(.top, 20)
             .padding(.bottom, 24)
 
-            // Content — ScrollView so height is always content-driven
+            // Content
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
                     section(header: "Appearance") {
@@ -64,9 +70,7 @@ struct SettingsView: View {
                 .padding(.bottom, 48)
             }
         }
-        // Fill the sheet height so glassEffect covers it completely
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .modifier(GlassSheetModifier())
+        // No explicit background — the sheet's .thinMaterial shows through
         .preferredColorScheme(isDarkMode ? .dark : .light)
         .confirmationDialog("Reset All Progress?", isPresented: $showResetConfirmation) {
             Button("Reset", role: .destructive) {
@@ -98,7 +102,11 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 content()
             }
-            .modifier(GlassCardModifier())
+            .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 14))
+            .overlay {
+                RoundedRectangle(cornerRadius: 14)
+                    .strokeBorder(.white.opacity(0.12), lineWidth: 0.5)
+            }
         }
     }
 
@@ -155,36 +163,6 @@ struct SettingsView: View {
             Image(systemName: icon)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(.white)
-        }
-    }
-}
-
-// MARK: - Availability-gated glass modifiers
-
-private struct GlassSheetModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
-            content.glassEffect(in: .rect(cornerRadius: 32))
-        } else {
-            content
-                .background(.ultraThinMaterial)
-                .clipShape(.rect(cornerRadius: 32))
-        }
-    }
-}
-
-private struct GlassCardModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
-            content.glassEffect(in: RoundedRectangle(cornerRadius: 14))
-        } else {
-            content
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 14)
-                        .strokeBorder(.white.opacity(0.1), lineWidth: 0.5)
-                }
         }
     }
 }
