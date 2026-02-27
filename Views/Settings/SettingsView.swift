@@ -1,6 +1,11 @@
 import SwiftUI
 import SwiftData
 
+// NOTE: No NavigationStack or List — both cause content clipping inside
+// a .medium presentationDetent sheet. NavigationStack reserves nav-bar
+// height that overflows the fixed detent bounds; List doesn't honour the
+// constrained height. Plain VStack + ScrollView solves this cleanly.
+
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -11,14 +16,31 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            headerRow
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-                .padding(.bottom, 24)
+            // Header — no NavigationStack needed
+            ZStack {
+                Text("Settings")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity)
 
+                HStack {
+                    Spacer()
+                    Button("Done") {
+                        HapticManager.lightImpact()
+                        dismiss()
+                    }
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(.primary)
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 20)
+            .padding(.bottom, 24)
+
+            // Content — ScrollView so height is always content-driven
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 28) {
-                    settingsSection(header: "Appearance") {
+                VStack(alignment: .leading, spacing: 24) {
+                    section(header: "Appearance") {
                         toggleRow(
                             icon: "moon.fill",
                             iconColor: Color(red: 0.30, green: 0.35, blue: 0.70),
@@ -27,22 +49,25 @@ struct SettingsView: View {
                         )
                     }
 
-                    settingsSection(header: "Data") {
+                    section(header: "Data") {
                         buttonRow(
                             icon: "arrow.counterclockwise",
-                            iconColor: Color(red: 0.75, green: 0.22, blue: 0.18),
+                            iconColor: Color(red: 0.80, green: 0.22, blue: 0.18),
                             label: "Reset All Progress",
-                            role: .destructive
+                            isDestructive: true
                         ) {
                             showResetConfirmation = true
                         }
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 40)
+                .padding(.bottom, 48)
             }
         }
-        .background(.clear)
+        // Fill the sheet height so glassEffect covers it completely
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .glassEffect(in: .rect(cornerRadius: 32))
+        .preferredColorScheme(isDarkMode ? .dark : .light)
         .confirmationDialog("Reset All Progress?", isPresented: $showResetConfirmation) {
             Button("Reset", role: .destructive) {
                 HapticManager.mediumImpact()
@@ -50,40 +75,16 @@ struct SettingsView: View {
                 onReset?()
                 dismiss()
             }
-            Button("Cancel", role: .cancel) {
-                HapticManager.selection()
-            }
+            Button("Cancel", role: .cancel) { HapticManager.selection() }
         } message: {
-            Text("This will erase all architectures, progress, achievements, and tier completion. This cannot be undone.")
+            Text("This will erase all progress, achievements, and tier completion. This cannot be undone.")
         }
     }
 
-    // MARK: - Header
-
-    private var headerRow: some View {
-        ZStack {
-            Text("Settings")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity)
-
-            HStack {
-                Spacer()
-                Button("Done") {
-                    HapticManager.lightImpact()
-                    dismiss()
-                }
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.primary)
-                .accessibilityLabel("Done")
-            }
-        }
-    }
-
-    // MARK: - Section Builder
+    // MARK: - Section
 
     @ViewBuilder
-    private func settingsSection<Content: View>(
+    private func section<Content: View>(
         header: String,
         @ViewBuilder content: () -> Content
     ) -> some View {
@@ -97,15 +98,11 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 content()
             }
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
-            .overlay {
-                RoundedRectangle(cornerRadius: 14)
-                    .strokeBorder(.white.opacity(0.1), lineWidth: 0.5)
-            }
+            .glassEffect(in: RoundedRectangle(cornerRadius: 14))
         }
     }
 
-    // MARK: - Row Types
+    // MARK: - Rows
 
     private func toggleRow(
         icon: String,
@@ -116,14 +113,12 @@ struct SettingsView: View {
         HStack(spacing: 14) {
             iconChip(icon: icon, color: iconColor)
             Text(label)
-                .font(.system(size: 16, weight: .regular))
+                .font(.system(size: 16))
                 .foregroundStyle(.primary)
             Spacer()
             Toggle("", isOn: isOn)
                 .labelsHidden()
-                .onChange(of: isOn.wrappedValue) { _, _ in
-                    HapticManager.selection()
-                }
+                .onChange(of: isOn.wrappedValue) { _, _ in HapticManager.selection() }
         }
         .padding(.horizontal, 14)
         .frame(height: 52)
@@ -133,15 +128,15 @@ struct SettingsView: View {
         icon: String,
         iconColor: Color,
         label: String,
-        role: ButtonRole? = nil,
+        isDestructive: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
-        Button(role: role, action: action) {
+        Button(action: action) {
             HStack(spacing: 14) {
                 iconChip(icon: icon, color: iconColor)
                 Text(label)
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundStyle(role == .destructive ? Color(red: 1.0, green: 0.32, blue: 0.28) : .primary)
+                    .font(.system(size: 16))
+                    .foregroundStyle(isDestructive ? Color(red: 1.0, green: 0.27, blue: 0.23) : .primary)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))

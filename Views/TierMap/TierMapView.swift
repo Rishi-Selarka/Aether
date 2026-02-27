@@ -3,11 +3,9 @@ import SwiftData
 
 struct TierMapView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(TierStatsCache.self) private var statsCache
     @State private var tiers: [Tier] = []
     @State private var selectedTierID: Int?
     @State private var routesRevealed = false
-    @State private var showSettings = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage("isDarkMode") private var isDarkMode = false
 
@@ -32,20 +30,6 @@ struct TierMapView: View {
         }
         .background(mapBackground)
         .ignoresSafeArea()
-        .overlay(alignment: .top) {
-            StatsCardView()
-                .padding(.top, 65)
-        }
-        .overlay(alignment: .topTrailing) {
-            settingsButton
-        }
-        .sheet(isPresented: $showSettings) {
-            SettingsView(onReset: rehydrateStatsCache)
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
-                .presentationBackground(.ultraThinMaterial)
-                .presentationCornerRadius(28)
-        }
         .navigationDestination(item: $selectedTierID) { tierID in
             InteriorView(tierID: tierID)
         }
@@ -61,25 +45,6 @@ struct TierMapView: View {
     private func refreshTiers() {
         let descriptor = FetchDescriptor<Tier>(sortBy: [SortDescriptor(\.id)])
         tiers = (try? modelContext.fetch(descriptor)) ?? []
-    }
-
-    /// Rehydrates stats cache from SwiftData (e.g. after Settings reset).
-    private func rehydrateStatsCache() {
-        let descriptor = FetchDescriptor<Tier>(sortBy: [SortDescriptor(\.id)])
-        guard let fetched = try? modelContext.fetch(descriptor) else { return }
-        var attempts: [Int: Int] = [:]
-        var scores: [Int: [Int: Double]] = [:]
-        var scoresWithDate: [Int: [Int: ScoreRecord]] = [:]
-        for tier in fetched {
-            attempts[tier.id] = tier.attemptsCount
-            scores[tier.id] = tier.problemBestScores
-            scoresWithDate[tier.id] = tier.problemBestScoresWithDate()
-        }
-        statsCache.hydrate(
-            attemptsByTier: attempts,
-            bestScoresByTier: scores,
-            bestScoresWithDateByTier: scoresWithDate
-        )
     }
 
     private func tier(for id: Int) -> Tier? {
@@ -186,23 +151,6 @@ struct TierMapView: View {
 
         }
         .frame(width: canvasWidth, height: TierMapConstants.canvasHeight)
-    }
-
-    // MARK: - Settings Button
-
-    private var settingsButton: some View {
-        Button {
-            HapticManager.lightImpact()
-            showSettings = true
-        } label: {
-            Image(systemName: "gearshape.fill")
-                .font(.system(size: 20, weight: .medium))
-                .foregroundStyle(mapLineColor)
-                .frame(width: 44, height: 44)
-        }
-        .padding(.trailing, 20)
-        .accessibilityLabel("Settings")
-        .accessibilityHint("Open settings and credits")
     }
 
     // MARK: - Actions
