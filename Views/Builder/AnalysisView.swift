@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// Full-screen analysis shown after completing all block quizzes.
-/// Section 1 (fixed): Done/Export buttons + score ring + pass/fail badge.
-/// Section 2 (scrollable): Per-question result cards + reattempt button.
+/// Section 1 (fixed, top 35%): Export/Done buttons + score ring + status + concepts.
+/// Section 2 (scrollable, bottom 65%): Per-question result cards + reattempt button.
 struct AnalysisView: View {
     let session: QuizSession
     let analysisTexts: [String]
@@ -35,29 +35,34 @@ struct AnalysisView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
+        GeometryReader { geo in
+            ZStack {
+                Color.black.ignoresSafeArea()
 
-            // Drowning water effect (fail only)
-            if !session.passed {
-                drowningWaterOverlay
-            }
+                // Drowning water — fades out as content appears
+                if !session.passed {
+                    drowningWaterOverlay
+                        .opacity(showContent ? 0 : 1)
+                        .animation(.easeOut(duration: 0.6), value: showContent)
+                }
 
-            // Success glow (pass only)
-            if session.passed {
-                successGlowOverlay
-            }
+                // Success glow
+                if session.passed {
+                    successGlowOverlay
+                }
 
-            // Main layout: fixed header + scrollable body
-            VStack(spacing: 0) {
-                section1
-                section2
-            }
-            .opacity(showContent ? 1 : 0)
+                // Main layout
+                VStack(spacing: 0) {
+                    section1
+                        .frame(height: geo.size.height * 0.35)
+                    section2
+                }
+                .opacity(showContent ? 1 : 0)
 
-            // Drowned text overlay
-            if !session.passed && showDrownedText {
-                drownedOverlay
+                // Drowned text — also fades out as content appears
+                if !session.passed && showDrownedText && !showContent {
+                    drownedOverlay
+                }
             }
         }
         .navigationBarHidden(true)
@@ -65,29 +70,12 @@ struct AnalysisView: View {
         .onAppear { runEntranceAnimation() }
     }
 
-    // MARK: - Section 1: Fixed Header
+    // MARK: - Section 1: Fixed Header (35% of screen)
 
     private var section1: some View {
         VStack(spacing: 0) {
-            // Top row: Done (leading) | Export (trailing)
+            // Buttons: Export (leading) | Done (trailing)
             HStack(spacing: 12) {
-                Button {
-                    dismiss()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                        onDone()
-                    }
-                } label: {
-                    Text("Done")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background { Capsule().fill(.white.opacity(0.12)) }
-                }
-                .accessibilityLabel("Done - return to city map")
-
-                Spacer()
-
                 Button {
                     isExporting = true
                     Task {
@@ -117,113 +105,97 @@ struct AnalysisView: View {
                 }
                 .disabled(isExporting)
                 .accessibilityLabel("Export architecture analysis as PDF")
+
+                Spacer()
+
+                Button {
+                    dismiss()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        onDone()
+                    }
+                } label: {
+                    Text("Done")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background { Capsule().fill(.white.opacity(0.12)) }
+                }
+                .accessibilityLabel("Done - return to city map")
             }
-            .padding(.top, 60)
+            .padding(.top, 54)
             .padding(.horizontal, 24)
 
-            // Score ring
-            scoreSection
-                .padding(.top, 20)
+            Spacer(minLength: 0)
 
-            // Pass/fail badge
-            passFailBadge
-                .padding(.top, 16)
+            // Score ring (left) + status & concepts (right)
+            HStack(alignment: .center, spacing: 20) {
+                scoreRing
+                    .frame(width: 100, height: 100)
 
-            // Divider separating fixed from scrollable
+                VStack(alignment: .leading, spacing: 10) {
+                    passFailBadge
+                    conceptChips
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 24)
+
+            Spacer(minLength: 0)
+
             Divider()
                 .opacity(0.15)
-                .padding(.vertical, 20)
                 .padding(.horizontal, 24)
+                .padding(.bottom, 4)
         }
     }
 
-    // MARK: - Section 2: Scrollable Content
+    // MARK: - Score Ring
 
-    private var section2: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 12) {
-                if !results.isEmpty {
-                    Text("Question Breakdown")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.5))
-                        .tracking(0.8)
-                        .padding(.horizontal, 4)
+    private var scoreRing: some View {
+        ZStack {
+            Circle()
+                .stroke(.white.opacity(0.1), lineWidth: 10)
 
-                    ForEach(
-                        Array(results.enumerated()),
-                        id: \.element.question.id
-                    ) { i, result in
-                        resultCard(
-                            result: result,
-                            analysisText: analysisTexts[safe: i]
-                                ?? result.question.explanation
-                        )
-                    }
-                }
+            Circle()
+                .trim(from: 0, to: showContent ? CGFloat(session.scorePercent / 100) : 0)
+                .stroke(
+                    LinearGradient(
+                        colors: session.passed ? [.green, .mint] : [.blue, .cyan],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    style: StrokeStyle(lineWidth: 10, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+                .animation(.easeOut(duration: 1.2).delay(0.3), value: showContent)
 
-                reattemptButton
-                    .padding(.top, 20)
+            VStack(spacing: 2) {
+                Text("\(Int(session.scorePercent))%")
+                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("\(session.totalCorrect)/\(session.totalQuestions)")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.5))
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 48)
-        }
-    }
-
-    // MARK: - Score Section
-
-    private var scoreSection: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .stroke(.white.opacity(0.1), lineWidth: 12)
-                    .frame(width: 160, height: 160)
-
-                Circle()
-                    .trim(from: 0, to: showContent ? CGFloat(session.scorePercent / 100) : 0)
-                    .stroke(
-                        LinearGradient(
-                            colors: session.passed
-                                ? [.green, .mint]
-                                : [.blue, .cyan],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 12, lineCap: .round)
-                    )
-                    .frame(width: 160, height: 160)
-                    .rotationEffect(.degrees(-90))
-                    .animation(.easeOut(duration: 1.2).delay(0.3), value: showContent)
-
-                VStack(spacing: 4) {
-                    Text("\(Int(session.scorePercent))%")
-                        .font(.system(size: 44, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                    Text("\(session.totalCorrect)/\(session.totalQuestions)")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.55))
-                }
-            }
-
-            Text(session.problem.title)
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.7))
         }
     }
 
     // MARK: - Pass/Fail Badge
 
     private var passFailBadge: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             Image(systemName: session.passed ? "checkmark.shield.fill" : "drop.fill")
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(session.passed ? .green : .blue)
 
-            Text(session.passed ? "You survived \(tierName)!" : "Drowned")
-                .font(.system(size: 16, weight: .bold, design: .rounded))
+            Text(session.passed ? "Survived \(tierName)" : "Drowned")
+                .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
         .background {
             Capsule()
                 .fill(session.passed ? Color.green.opacity(0.15) : Color.blue.opacity(0.15))
@@ -239,11 +211,61 @@ struct AnalysisView: View {
         }
     }
 
+    // MARK: - Concept Chips
+
+    private var conceptChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(session.problem.blocks, id: \.rawValue) { node in
+                    HStack(spacing: 4) {
+                        Image(systemName: node.sfSymbol)
+                            .font(.system(size: 9))
+                            .foregroundStyle(node.accentColor)
+                        Text(node.displayName)
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(.white.opacity(0.08), in: Capsule())
+                    .overlay {
+                        Capsule()
+                            .strokeBorder(.white.opacity(0.1), lineWidth: 0.5)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Section 2: Scrollable Content
+
+    private var section2: some View {
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(
+                    Array(results.enumerated()),
+                    id: \.element.question.id
+                ) { i, result in
+                    resultCard(
+                        result: result,
+                        analysisText: analysisTexts[safe: i]
+                            ?? result.question.explanation
+                    )
+                }
+
+                reattemptButton
+                    .padding(.top, 20)
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 16)
+            .padding(.bottom, 48)
+        }
+    }
+
     // MARK: - Result Card
 
     private func resultCard(result: QuizResult, analysisText: String) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Block icon + question text + correct/wrong indicator
             HStack(spacing: 10) {
                 Image(systemName: result.question.blockType.sfSymbol)
                     .font(.system(size: 13))
@@ -259,13 +281,12 @@ struct AnalysisView: View {
                 Spacer()
 
                 Image(systemName: result.isCorrect
-                      ? "checkmark.circle.fill"
-                      : "xmark.circle.fill")
+                    ? "checkmark.circle.fill"
+                    : "xmark.circle.fill")
                     .font(.system(size: 18))
                     .foregroundStyle(result.isCorrect ? .green : .red)
             }
 
-            // Answers
             VStack(alignment: .leading, spacing: 6) {
                 if !result.isCorrect && result.wasAnswered {
                     answerRow(
@@ -281,7 +302,6 @@ struct AnalysisView: View {
                 )
             }
 
-            // AI analysis
             Text(analysisText)
                 .font(.system(size: 13))
                 .foregroundStyle(.white.opacity(0.6))
@@ -397,7 +417,7 @@ struct AnalysisView: View {
             Text("Drowned")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
-            Text("Score below 75% - the city drowned")
+            Text("Score below 75% — the city drowned")
                 .font(.system(size: 15))
                 .foregroundStyle(.white.opacity(0.6))
         }
@@ -447,12 +467,13 @@ struct AnalysisView: View {
         } else {
             HapticManager.error()
             SoundManager.playDrownSound()
+            // Water rises, drowned text appears, then both fade as content comes in
             withAnimation(.easeIn(duration: 1.8)) { waterLevel = 0.35 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 withAnimation(.easeIn(duration: 0.4)) { showDrownedText = true }
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                withAnimation(.easeOut(duration: 0.5)) { showContent = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                withAnimation(.easeOut(duration: 0.6)) { showContent = true }
             }
         }
     }
