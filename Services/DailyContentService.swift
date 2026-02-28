@@ -206,17 +206,25 @@ enum DailyContentService {
     }
 
     private static func fallbackQuestion() -> DailyQuestion {
-        DailyQuestion(
-            question: "Which pattern separates UI state from business logic via an observable object?",
-            options: [
-                "Model-View-Controller",
-                "Model-View-ViewModel",
-                "Model-View-Presenter",
-                "Entity-Component-System"
-            ],
-            correctIndex: 1,
-            explanation: "MVVM uses an observable ViewModel to hold UI state and mediate between the View and Model layers, enabling reactive updates without the View knowing about the data source.",
-            dateKey: todayKey
-        )
+        let fallbacks: [(String, [String], Int, String)] = [
+            ("Which pattern separates UI state from business logic via an observable object?",
+             ["Model-View-Controller", "Model-View-ViewModel", "Model-View-Presenter", "Entity-Component-System"],
+             1, "MVVM uses an observable ViewModel to hold UI state and mediate between the View and Model layers."),
+            ("What is the main benefit of the Repository pattern?",
+             ["It caches all data in memory", "It abstracts data sources behind one interface", "It reduces API calls", "It enforces MVVM"],
+             1, "Repository hides whether data comes from network, cache, or database behind a single clean interface."),
+            ("When should a ViewModel perform work off the main actor?",
+             ["Never, ViewModels must stay on main", "For heavy computations or I/O", "Only when loading images", "Only during initial setup"],
+             1, "Heavy work should run off the main actor to keep the UI responsive; use @MainActor for UI updates."),
+            ("What does dependency injection improve?",
+             ["Runtime performance", "Testability and flexibility", "Compile times", "Memory usage"],
+             1, "Injecting dependencies makes code testable with mocks and allows swapping implementations."),
+            ("Why use a Coordinator or Router in an app?",
+             ["To cache navigation state", "To decouple navigation from views", "To reduce view count", "To enable dark mode"],
+             1, "Coordinators own navigation flow, so views stay reusable and don't know about each other.")
+        ]
+        let index = (Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1) % fallbacks.count
+        let (q, opts, correct, expl) = fallbacks[index]
+        return DailyQuestion(question: q, options: opts, correctIndex: correct, explanation: expl, dateKey: todayKey)
     }
 }
