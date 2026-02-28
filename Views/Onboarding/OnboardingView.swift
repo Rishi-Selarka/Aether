@@ -62,6 +62,11 @@ struct SplashViewContent: View {
                     let t = startTime.map { timeline.date.timeIntervalSince($0) } ?? 0
                     let edgeLevel = edgeWhiteLevel
                     let dotLevel = dotWhiteLevel
+                    let subtitleFull = "The Abyss of Cities"
+                    let subtitleStart = 3.3
+                    let subtitleChars = t >= subtitleStart
+                        ? min(Int((t - subtitleStart) / 0.065), subtitleFull.count)
+                        : 0
 
                     ZStack {
                         Canvas { gfx, canvasSize in
@@ -75,11 +80,18 @@ struct SplashViewContent: View {
                         .frame(width: size.width, height: size.height)
                         .allowsHitTesting(false)
 
-                        Text("archsys")
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
-                            .tracking(6)
-                            .foregroundColor(titleColor)
-                            .opacity(titleOpacity)
+                        VStack(spacing: 10) {
+                            Text("Aether")
+                                .font(.system(size: 34, weight: .bold, design: .rounded))
+                                .tracking(6)
+                                .foregroundColor(titleColor)
+                                .opacity(titleOpacity)
+
+                            Text(String(subtitleFull.prefix(subtitleChars)))
+                                .font(.system(size: 15, weight: .medium, design: .monospaced))
+                                .foregroundColor(titleColor.opacity(0.55))
+                                .opacity(subtitleChars > 0 ? 1.0 : 0.0)
+                        }
                     }
                     .frame(width: size.width, height: size.height)
                 }
