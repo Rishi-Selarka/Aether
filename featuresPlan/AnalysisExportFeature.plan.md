@@ -81,7 +81,7 @@ flowchart TB
   - Pattern name: block display names joined by arrow (e.g. "UI Layer → ViewModel → Repository → Database")
   - Evaluation score: quiz score percentage (e.g. "92%")
 - **Visual:** Minimal representation of the architecture (block icons or a simple diagram, no question/answer text)
-- **Footer:** "City Architect" or app branding
+- **Footer:** "Aether" or app branding
 
 **Layout and styling:**
 - Fixed aspect ratio (e.g. 4:3 or 3:4 for vertical share)

@@ -50,7 +50,7 @@ struct HomeView: View {
                 if let quoteText = quote?.text, !quoteText.isEmpty {
                     Text(quoteText)
                         .font(.system(size: 12, weight: .regular))
-                        .foregroundStyle(Color.archsysTextTertiary)
+                        .foregroundStyle(Color.aetherTextTertiary)
                         .multilineTextAlignment(.center)
                         .lineSpacing(2)
                         .padding(.horizontal, 12)
@@ -62,7 +62,7 @@ struct HomeView: View {
         .scrollBounceBehavior(.basedOnSize)
         .background {
             ZStack(alignment: .bottom) {
-                Color.archsysBackground
+                Color.aetherBackground
 
                 // Light blue sky gradient rising from the bottom
                 LinearGradient(
@@ -101,7 +101,7 @@ struct HomeView: View {
         } label: {
             Image(systemName: "gearshape.fill")
                 .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(Color.archsysTextSecondary)
+                .foregroundStyle(Color.aetherTextSecondary)
                 .frame(width: 30, height: 30)
         }
         .buttonStyle(.glass)

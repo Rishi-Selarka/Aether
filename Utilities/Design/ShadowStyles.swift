@@ -25,7 +25,7 @@ enum ShadowStyle {
 }
 
 extension View {
-    func archsysShadow(_ style: ShadowStyle) -> some View {
+    func aetherShadow(_ style: ShadowStyle) -> some View {
         shadow(color: style.color, radius: style.radius, x: 0, y: style.y)
     }
 }

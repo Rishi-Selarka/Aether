@@ -1,4 +1,4 @@
-# City Architect - Swift Student Challenge 2026
+# Aether - Swift Student Challenge 2026
 
 ## Overview
 

@@ -11,7 +11,7 @@ Relevant files:
 - [TierMapView.swift](Views/TierMap/TierMapView.swift) — cities map, StatsCardView overlay, Settings button
 - [StatsCardView.swift](Views/TierMap/StatsCardView.swift) — metrics card (Passed, Attempts, Best Today)
 - [AIQuizService.swift](Services/AIQuizService.swift) — existing Foundation Models usage pattern
-- [ColorSystem.swift](Utilities/Design/ColorSystem.swift) — current semantic colors (archsysBackground, archsysSurface, etc.)
+- [ColorSystem.swift](Utilities/Design/ColorSystem.swift) — current semantic colors (aetherBackground, aetherSurface, etc.)
 
 ---
 

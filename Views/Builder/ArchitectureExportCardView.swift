@@ -149,7 +149,7 @@ struct ArchitectureExportCardView: View {
             Image(systemName: "building.2.fill")
                 .font(.system(size: 12))
                 .foregroundStyle(.white.opacity(0.3))
-            Text("archsys")
+            Text("Aether")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.3))
         }

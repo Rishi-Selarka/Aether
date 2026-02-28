@@ -28,10 +28,10 @@ struct QuestionOfTheDayCard: View {
             HStack(spacing: 5) {
                 Image(systemName: "questionmark.circle")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(Color.archsysTextTertiary)
+                    .foregroundStyle(Color.aetherTextTertiary)
                 Text("DAILY CHALLENGE")
                     .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(Color.archsysTextTertiary)
+                    .foregroundStyle(Color.aetherTextTertiary)
                     .tracking(1.0)
 
                 Spacer()
@@ -45,7 +45,7 @@ struct QuestionOfTheDayCard: View {
                     } label: {
                         Image(systemName: "arrow.clockwise")
                             .font(.system(size: 11, weight: .semibold))
-                            .foregroundStyle(Color.archsysTextTertiary)
+                            .foregroundStyle(Color.aetherTextTertiary)
                             .frame(width: 28, height: 28)
                     }
                     .buttonStyle(.glass)
@@ -57,7 +57,7 @@ struct QuestionOfTheDayCard: View {
             // Question text
             Text(q.question)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Color.archsysTextPrimary)
+                .foregroundStyle(Color.aetherTextPrimary)
                 .fixedSize(horizontal: false, vertical: true)
                 .lineSpacing(2)
                 .padding(.bottom, 10)
@@ -103,15 +103,15 @@ struct QuestionOfTheDayCard: View {
 
         let bgColor: Color = {
             guard revealed else { return defaultBg }
-            if isCorrect { return Color.archsysSuccess.opacity(0.15) }
-            if isSelected && !isCorrect { return Color.archsysError.opacity(0.15) }
+            if isCorrect { return Color.aetherSuccess.opacity(0.15) }
+            if isSelected && !isCorrect { return Color.aetherError.opacity(0.15) }
             return defaultBg
         }()
 
         let borderColor: Color = {
             guard revealed else { return defaultBorder }
-            if isCorrect { return Color.archsysSuccess.opacity(0.6) }
-            if isSelected && !isCorrect { return Color.archsysError.opacity(0.5) }
+            if isCorrect { return Color.aetherSuccess.opacity(0.6) }
+            if isSelected && !isCorrect { return Color.aetherError.opacity(0.5) }
             return defaultBorder
         }()
 
@@ -129,12 +129,12 @@ struct QuestionOfTheDayCard: View {
             HStack(spacing: 10) {
                 Text(labelPrefix)
                     .font(.system(size: 11, weight: .bold, design: .monospaced))
-                    .foregroundStyle(revealed && isCorrect ? Color.archsysSuccess : Color.archsysTextTertiary)
+                    .foregroundStyle(revealed && isCorrect ? Color.aetherSuccess : Color.aetherTextTertiary)
                     .frame(width: 18)
 
                 Text(text)
                     .font(.system(size: 13))
-                    .foregroundStyle(Color.archsysTextPrimary)
+                    .foregroundStyle(Color.aetherTextPrimary)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -143,11 +143,11 @@ struct QuestionOfTheDayCard: View {
                 if revealed && isCorrect {
                     Image(systemName: "checkmark")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Color.archsysSuccess)
+                        .foregroundStyle(Color.aetherSuccess)
                 } else if revealed && isSelected && !isCorrect {
                     Image(systemName: "xmark")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Color.archsysError)
+                        .foregroundStyle(Color.aetherError)
                 }
             }
             .padding(.horizontal, 12)
@@ -174,7 +174,7 @@ struct QuestionOfTheDayCard: View {
 
             Text(text)
                 .font(.system(size: 13))
-                .foregroundStyle(Color.archsysTextSecondary)
+                .foregroundStyle(Color.aetherTextSecondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .lineSpacing(2)
         }
@@ -186,16 +186,16 @@ struct QuestionOfTheDayCard: View {
     private var placeholder: some View {
         VStack(alignment: .leading, spacing: 12) {
             RoundedRectangle(cornerRadius: 4)
-                .fill(Color.archsysSurfaceElevated)
+                .fill(Color.aetherSurfaceElevated)
                 .frame(height: 14)
                 .frame(maxWidth: 200)
             RoundedRectangle(cornerRadius: 4)
-                .fill(Color.archsysSurfaceElevated)
+                .fill(Color.aetherSurfaceElevated)
                 .frame(height: 14)
 
             ForEach(0..<4, id: \.self) { _ in
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.archsysSurfaceElevated)
+                    .fill(Color.aetherSurfaceElevated)
                     .frame(height: 44)
             }
         }

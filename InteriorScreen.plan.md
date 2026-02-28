@@ -68,7 +68,7 @@ static let interiorLevels: [Int: String] = [
 **Folder structure** (user will provide images):
 
 ```
-archsys.swiftpm/
+aether.swiftpm/
 ├── Interior_assets/
 │   ├── interior_lake.png      (Tier 1 - Tokyo)
 │   ├── interior_river.png    (Tier 2 - London)

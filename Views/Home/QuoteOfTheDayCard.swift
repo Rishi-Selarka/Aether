@@ -25,38 +25,38 @@ struct QuoteOfTheDayCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(quote.text)
                     .font(.system(size: 15, weight: .regular))
-                    .foregroundStyle(Color.archsysTextPrimary)
+                    .foregroundStyle(Color.aetherTextPrimary)
                     .fixedSize(horizontal: false, vertical: true)
                     .lineSpacing(3)
 
                 Text("— \(quote.attribution)")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Color.archsysTextTertiary)
+                    .foregroundStyle(Color.aetherTextTertiary)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.archsysSurface, in: RoundedRectangle(cornerRadius: 14))
+        .background(Color.aetherSurface, in: RoundedRectangle(cornerRadius: 14))
         .overlay {
             RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(Color.archsysBorder, lineWidth: 0.5)
+                .strokeBorder(Color.aetherBorder, lineWidth: 0.5)
         }
     }
 
     private var placeholder: some View {
         HStack(spacing: 14) {
             RoundedRectangle(cornerRadius: 1.5)
-                .fill(Color.archsysBorder)
+                .fill(Color.aetherBorder)
                 .frame(width: 3, height: 40)
 
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.archsysSurface)
+                    .fill(Color.aetherSurface)
                     .frame(height: 14)
                     .frame(maxWidth: 240)
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.archsysSurface)
+                    .fill(Color.aetherSurface)
                     .frame(height: 14)
                     .frame(maxWidth: 160)
             }
@@ -64,6 +64,6 @@ struct QuoteOfTheDayCard: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.archsysSurface, in: RoundedRectangle(cornerRadius: 14))
+        .background(Color.aetherSurface, in: RoundedRectangle(cornerRadius: 14))
     }
 }

@@ -56,7 +56,7 @@ struct SplashViewContent: View {
             let cy = size.height / 2
 
             ZStack {
-                Color.archsysBackground.ignoresSafeArea()
+                Color.aetherBackground.ignoresSafeArea()
 
                 TimelineView(.animation) { timeline in
                     let t = startTime.map { timeline.date.timeIntervalSince($0) } ?? 0

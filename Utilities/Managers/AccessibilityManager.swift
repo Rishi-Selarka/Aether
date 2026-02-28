@@ -38,7 +38,7 @@ struct MinTouchTargetModifier: ViewModifier {
 
 extension View {
     /// Ensures minimum 44x44 pt touch target (scales with Dynamic Type).
-    func archsysMinTouchTarget() -> some View {
+    func aetherMinTouchTarget() -> some View {
         modifier(MinTouchTargetModifier())
     }
 }

@@ -8,15 +8,15 @@ import PackageDescription
 import AppleProductTypes
 
 let package = Package(
-    name: "archsys",
+    name: "Aether",
     platforms: [
         .iOS("26.0")
     ],
     products: [
         .iOSApplication(
-            name: "archsys",
+            name: "Aether",
             targets: ["AppModule"],
-            bundleIdentifier: "com.rishiselarka.archsys",
+            bundleIdentifier: "com.rishiselarka.aether",
             teamIdentifier: "S8LD68K2KG",
             displayVersion: "1.0",
             bundleVersion: "1",

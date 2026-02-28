@@ -52,8 +52,8 @@ struct GeneratedDailyQuestion {
 /// Content is keyed by calendar day and persisted in UserDefaults.
 enum DailyContentService {
 
-    private static let quoteKey = "archsys_daily_quote"
-    private static let questionKey = "archsys_daily_question"
+    private static let quoteKey = "aether_daily_quote"
+    private static let questionKey = "aether_daily_question"
 
     private static let dateFormatter: DateFormatter = {
         let f = DateFormatter()

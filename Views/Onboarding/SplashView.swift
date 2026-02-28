@@ -20,7 +20,7 @@ struct SplashView: View {
             let cy = size.height / 2
 
             ZStack {
-                Color.archsysBackground.ignoresSafeArea()
+                Color.aetherBackground.ignoresSafeArea()
 
                 TimelineView(.animation) { timeline in
                     let t = startTime.map { timeline.date.timeIntervalSince($0) } ?? 0
@@ -137,17 +137,17 @@ struct SplashView: View {
 
             let opacity = rawOp * appear * breathe
 
-            // Glow — soft blue halo
+            // Glow — dark blue halo
             let gr: CGFloat = 5
             gfx.fill(
                 Path(ellipseIn: CGRect(x: pos.x - gr, y: pos.y - gr, width: gr * 2, height: gr * 2)),
-                with: .color(Color(red: 0.38, green: 0.68, blue: 1.0).opacity(opacity * 0.30))
+                with: .color(Color(red: 0.10, green: 0.20, blue: 0.45).opacity(opacity * 0.35))
             )
-            // Dot — vivid gradient blue
+            // Dot — deep navy blue
             let r: CGFloat = 1.8
             gfx.fill(
                 Path(ellipseIn: CGRect(x: pos.x - r, y: pos.y - r, width: r * 2, height: r * 2)),
-                with: .color(Color(red: 0.48, green: 0.78, blue: 1.0).opacity(opacity))
+                with: .color(Color(red: 0.12, green: 0.25, blue: 0.55).opacity(opacity))
             )
         }
     }
