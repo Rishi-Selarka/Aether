@@ -38,6 +38,7 @@ struct CityMarkerView: View {
         .buttonStyle(.plain)
         .opacity(isRevealed ? 1 : 0)
         .scaleEffect(isRevealed ? 1.0 : 0.75)
+        .allowsHitTesting(isRevealed)
         .accessibilityLabel("Tier \(tierID), \(cityName)")
         .accessibilityHint(isUnlocked ? "Double tap to open" : "Locked")
         .accessibilityAddTraits(isUnlocked ? .isButton : [])

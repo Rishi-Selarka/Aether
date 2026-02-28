@@ -19,6 +19,7 @@ struct BlockCanvasView: View {
     @Binding var currentOrder: [NodeType]
     let completedBlocks: Set<NodeType>
     let isOrdered: Bool
+    let isPaused: Bool
     let onBlockTap: (NodeType) -> Void
 
     // MARK: - Placement State
@@ -51,12 +52,14 @@ struct BlockCanvasView: View {
         currentOrder: Binding<[NodeType]>,
         completedBlocks: Set<NodeType>,
         isOrdered: Bool,
+        isPaused: Bool = false,
         onBlockTap: @escaping (NodeType) -> Void
     ) {
         self.correctOrder = correctOrder
         self._currentOrder = currentOrder
         self.completedBlocks = completedBlocks
         self.isOrdered = isOrdered
+        self.isPaused = isPaused
         self.onBlockTap = onBlockTap
         self._slots = State(initialValue: Array(repeating: nil, count: correctOrder.count))
     }
@@ -64,8 +67,15 @@ struct BlockCanvasView: View {
     // MARK: - Computed
 
     private var unplacedBlocks: [NodeType] {
-        let placed = Set(slots.compactMap { $0 })
-        return correctOrder.filter { !placed.contains($0) }
+        // Use multiset subtraction so duplicate NodeType values are handled correctly.
+        // Each placed block removes exactly one occurrence from the pool.
+        var remaining = correctOrder
+        for placed in slots.compactMap({ $0 }) {
+            if let idx = remaining.firstIndex(of: placed) {
+                remaining.remove(at: idx)
+            }
+        }
+        return remaining
     }
 
     // MARK: - Body
@@ -368,7 +378,7 @@ struct BlockCanvasView: View {
     // MARK: - Connector Line
 
     private func connectorLine(index: Int) -> some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: isPaused)) { timeline in
             Canvas { ctx, size in
                 let time = timeline.date.timeIntervalSinceReferenceDate
                 let midX = size.width / 2
@@ -414,7 +424,7 @@ struct BlockCanvasView: View {
     // MARK: - Blueprint Background
 
     private var blueprintBackground: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 24.0)) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 24.0, paused: isPaused)) { timeline in
             Canvas { ctx, size in
                 let time = timeline.date.timeIntervalSinceReferenceDate
                 drawGrid(ctx: ctx, size: size, time: time)

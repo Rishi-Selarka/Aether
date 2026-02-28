@@ -256,8 +256,10 @@ struct NetNode: Sendable {
     let fadeStart: Double
 
     func position(t: Double, w: Double, h: Double) -> CGPoint {
-        CGPoint(x: (baseX + driftX * t) * w,
-                y: (baseY + driftY * t) * h)
+        // Clamp to a modest off-screen margin so nodes don't drift arbitrarily far.
+        let x = min(max(baseX + driftX * t, -0.15), 1.15)
+        let y = min(max(baseY + driftY * t, -0.15), 1.15)
+        return CGPoint(x: x * w, y: y * h)
     }
 }
 

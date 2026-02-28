@@ -30,7 +30,7 @@ struct InstructionOverlay: View {
                             Image(systemName: "xmark")
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundStyle(.white.opacity(0.8))
-                                .frame(width: 28, height: 28)
+                                .frame(width: 44, height: 44)
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel("Dismiss instructions")

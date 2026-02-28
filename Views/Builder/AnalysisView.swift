@@ -16,6 +16,17 @@ struct AnalysisView: View {
     @State private var showDrownedText = false
     @State private var particleOpacity: Double = 0
     @State private var isExporting = false
+    @State private var isDismissing = false
+
+    // Pre-computed stable particle configs to avoid Double.random inside Canvas (which flickers).
+    private let particleConfigs: [(angle: Double, radius: Double, size: Double, opacity: Double)] = (0..<30).map { i in
+        (
+            angle: Double(i) / 30.0 * .pi * 2,
+            radius: Double.random(in: 80...220),
+            size: Double.random(in: 2...5),
+            opacity: Double.random(in: 0.3...0.8)
+        )
+    }
 
     private let results: [QuizResult]
 
@@ -124,6 +135,8 @@ struct AnalysisView: View {
 
     private var doneButton: some View {
         Button {
+            guard !isDismissing else { return }
+            isDismissing = true
             dismiss()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 onDone()
@@ -352,6 +365,8 @@ struct AnalysisView: View {
 
     private var reattemptButton: some View {
         Button {
+            guard !isDismissing else { return }
+            isDismissing = true
             dismiss()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 onReattempt()
@@ -447,18 +462,12 @@ struct AnalysisView: View {
             .ignoresSafeArea()
 
             Canvas { ctx, size in
-                for i in 0 ..< 30 {
-                    let angle = Double(i) / 30.0 * .pi * 2
-                    let radius = Double.random(in: 80 ... 220)
-                    let x = size.width / 2 + cos(angle) * radius
-                    let y = size.height * 0.25 + sin(angle) * radius * 0.6
-                    let r = Double.random(in: 2 ... 5)
+                for p in particleConfigs {
+                    let x = size.width / 2 + cos(p.angle) * p.radius
+                    let y = size.height * 0.25 + sin(p.angle) * p.radius * 0.6
                     var path = Path()
-                    path.addEllipse(in: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2))
-                    ctx.fill(
-                        path,
-                        with: .color(.yellow.opacity(Double.random(in: 0.3 ... 0.8)))
-                    )
+                    path.addEllipse(in: CGRect(x: x - p.size, y: y - p.size, width: p.size * 2, height: p.size * 2))
+                    ctx.fill(path, with: .color(.yellow.opacity(p.opacity)))
                 }
             }
             .opacity(particleOpacity)

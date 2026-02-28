@@ -168,6 +168,7 @@ struct BuilderView: View {
                 currentOrder: $currentOrder,
                 completedBlocks: completedBlocks,
                 isOrdered: isOrdered,
+                isPaused: showQuizCard || showHint,
                 onBlockTap: { node in openQuizForBlock(node) }
             )
             .id(canvasId)
@@ -186,7 +187,7 @@ struct BuilderView: View {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(.white)
-                        .frame(width: 36, height: 36)
+                        .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.glass)
                 .accessibilityLabel("Back")
@@ -229,7 +230,7 @@ struct BuilderView: View {
                     }
                     HapticManager.lightImpact()
                 } else {
-                    let remaining = 60 - secondsElapsed
+                    let remaining = max(0, 60 - secondsElapsed)
                     hintCooldownToast = "Available in \(remaining)s"
                     HapticManager.error()
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
@@ -240,7 +241,7 @@ struct BuilderView: View {
                 Image(systemName: "lightbulb.min")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(hintUnlocked ? .yellow : .white.opacity(0.2))
-                    .frame(width: 36, height: 36)
+                    .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.glass)
@@ -535,12 +536,17 @@ struct BuilderView: View {
                 }
             }
 
-            // Reassemble in original block order
+            // Reassemble in original block order; fall back to static questions for any missing slot
             var ordered: [BlockQuizState?] = Array(repeating: nil, count: nodes.count)
             for await (i, state) in group {
                 ordered[i] = state
             }
-            return ordered.compactMap { $0 }
+            return ordered.enumerated().map { i, state in
+                state ?? BlockQuizState(
+                    blockType: nodes[i],
+                    questions: QuizContent.questions(for: nodes[i], problemID: problem.id)
+                )
+            }
         }
 
         return QuizSession(problem: problem, blockStates: blockStates)

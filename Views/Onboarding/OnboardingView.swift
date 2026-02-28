@@ -7,6 +7,7 @@ struct OnboardingView: View {
     @State private var startTime: Date?
     @State private var titleOpacity: Double = 0.0
     @State private var network = SplashNetwork.generate()
+    @State private var hasCompleted = false
 
     private let fadeEnd = 3.6
     private let autoAdvanceDelay = 5.2
@@ -28,6 +29,8 @@ struct OnboardingView: View {
                 }
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + autoAdvanceDelay) {
+                guard !hasCompleted else { return }
+                hasCompleted = true
                 onComplete()
             }
         }

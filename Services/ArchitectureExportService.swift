@@ -700,7 +700,7 @@ enum ArchitectureExportService {
 
         guard let windowScene = UIApplication.shared.connectedScenes
             .compactMap({ $0 as? UIWindowScene }).first,
-              let rootVC = windowScene.windows.first?.rootViewController
+              let rootVC = windowScene.keyWindow?.rootViewController
         else {
             onComplete?()
             return

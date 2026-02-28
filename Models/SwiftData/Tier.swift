@@ -41,7 +41,8 @@ extension Tier {
         }
         set {
             let existing = Tier.decodeScoresWithDate(problemBestScoresData ?? Data())
-            var updated: [Int: ScoreRecord] = [:]
+            // Start with all existing records so partial updates don't wipe unrelated keys.
+            var updated = existing
             for (k, score) in newValue {
                 let oldRecord = existing[k]
                 let date: Date

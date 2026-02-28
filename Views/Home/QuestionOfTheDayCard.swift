@@ -115,7 +115,7 @@ struct QuestionOfTheDayCard: View {
             return defaultBorder
         }()
 
-        let labelPrefix = ["A", "B", "C", "D"][index]
+        let labelPrefix = ["A", "B", "C", "D"][safe: index] ?? ""
 
         return Button {
             guard !isAnswered else { return }
@@ -202,5 +202,13 @@ struct QuestionOfTheDayCard: View {
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .glossyCardBackground(cornerRadius: 12)
+    }
+}
+
+// MARK: - Safe Array Subscript
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }

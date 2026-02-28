@@ -3,7 +3,7 @@ import SwiftData
 
 struct TierMapView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var tiers: [Tier] = []
+    @Query(sort: \Tier.id) private var tiers: [Tier]
     @State private var selectedTierID: Int?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage("isDarkMode") private var isDarkMode = false
@@ -36,17 +36,11 @@ struct TierMapView: View {
             InteriorView(tierID: tierID)
         }
         .onAppear {
-            refreshTiers()
             startRevealSequence()
         }
     }
 
     // MARK: - Tier Lookup
-
-    private func refreshTiers() {
-        let descriptor = FetchDescriptor<Tier>(sortBy: [SortDescriptor(\.id)])
-        tiers = (try? modelContext.fetch(descriptor)) ?? []
-    }
 
     private func tier(for id: Int) -> Tier? {
         tiers.first(where: { $0.id == id })

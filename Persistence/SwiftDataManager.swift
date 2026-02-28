@@ -27,7 +27,7 @@ enum SwiftDataManager {
                 progress.tiers.append(tier)
             }
 
-            try? context.save()
+            saveContext(context)
         } else {
             ensureAllTiersUnlocked(context: context)
         }
@@ -42,7 +42,16 @@ enum SwiftDataManager {
             tier.unlocked = true
             changed = true
         }
-        if changed { try? context.save() }
+        if changed { saveContext(context) }
+    }
+
+    /// Saves the model context, asserting in DEBUG builds if save fails.
+    private static func saveContext(_ context: ModelContext) {
+        do {
+            try context.save()
+        } catch {
+            assertionFailure("SwiftData save failed: \(error)")
+        }
     }
 
     static func fetchProgress(context: ModelContext) -> CityProgress? {
@@ -66,7 +75,7 @@ enum SwiftDataManager {
             ids.append(id)
             progress.unlockedTierIDs = ids
         }
-        try? context.save()
+        saveContext(context)
     }
 
     static func completeTier(id: Int, score: Double, time: TimeInterval?, context: ModelContext) {
@@ -90,7 +99,7 @@ enum SwiftDataManager {
             unlockTier(id: id + 1, context: context)
         }
 
-        try? context.save()
+        saveContext(context)
     }
 
     static func unlockAchievement(_ achievement: String, context: ModelContext) {
@@ -100,18 +109,16 @@ enum SwiftDataManager {
         var list = progress.achievements
         list.append(achievement)
         progress.achievements = list
-        try? context.save()
+        saveContext(context)
     }
 
     /// Demo mode: reset all progress and reinitialize fresh state.
+    /// Deletes CityProgress only — cascade delete rule handles child Tier objects.
     static func resetAll(context: ModelContext) {
         let progressDescriptor = FetchDescriptor<CityProgress>()
-        let tierDescriptor = FetchDescriptor<Tier>()
-        guard let progressList = try? context.fetch(progressDescriptor),
-              let tierList = try? context.fetch(tierDescriptor) else { return }
+        guard let progressList = try? context.fetch(progressDescriptor) else { return }
         for p in progressList { context.delete(p) }
-        for t in tierList { context.delete(t) }
-        try? context.save()
+        saveContext(context)
         initializeIfNeeded(context: context)
     }
 
@@ -121,7 +128,7 @@ enum SwiftDataManager {
     static func recordAttemptEntry(tierID: Int, context: ModelContext) {
         guard let tier = fetchTier(id: tierID, context: context) else { return }
         tier.attemptsCount += 1
-        try? context.save()
+        saveContext(context)
         NotificationCenter.default.post(name: tierStatsDidChangeNotification, object: nil)
     }
 
@@ -139,7 +146,7 @@ enum SwiftDataManager {
             ids.append(tierID)
             progress.completedTierIDs = ids
         }
-        try? context.save()
+        saveContext(context)
         NotificationCenter.default.post(name: tierStatsDidChangeNotification, object: nil)
     }
 
@@ -148,7 +155,7 @@ enum SwiftDataManager {
         guard let tier = fetchTier(id: tierID, context: context) else { return }
         if score > tier.score { tier.score = score }
         updateProblemBestScore(tier: tier, problemIndex: problemIndex, score: score)
-        try? context.save()
+        saveContext(context)
         NotificationCenter.default.post(name: tierStatsDidChangeNotification, object: nil)
     }
 

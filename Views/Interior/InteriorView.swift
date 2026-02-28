@@ -31,9 +31,9 @@ struct InteriorView: View {
 
                 // Content layered on top
                 VStack(spacing: 0) {
-                    // Title zone: fixed height, title slightly below top
+                    // Title zone: fixed height, title below the navigation bar.
                     titleSection
-                        .padding(.top, 170)
+                        .padding(.top, geo.safeAreaInsets.top + 16)
                         .frame(height: geo.safeAreaInsets.top + 120)
 
                     // Equal spacers around card group → card stays centered

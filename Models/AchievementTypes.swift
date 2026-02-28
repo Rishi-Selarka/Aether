@@ -36,7 +36,11 @@ struct Achievement: Identifiable {
     ]
 
     static func achievement(for id: AchievementID) -> Achievement {
-        all.first { $0.id == id } ?? all[0]
+        guard let found = all.first(where: { $0.id == id }) else {
+            assertionFailure("Achievement missing for ID: \(id.rawValue)")
+            return all[0]
+        }
+        return found
     }
 
     static func achievement(for rawID: String) -> Achievement? {

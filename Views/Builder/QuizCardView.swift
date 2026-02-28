@@ -28,7 +28,8 @@ struct QuizCardView: View {
     }
 
     private var isLastQuestion: Bool {
-        currentQuestionIndex == blockState.questions.count - 1
+        guard !blockState.questions.isEmpty else { return true }
+        return currentQuestionIndex == blockState.questions.count - 1
     }
 
     private var canFinish: Bool {
@@ -41,21 +42,26 @@ struct QuizCardView: View {
                 .ignoresSafeArea()
                 .onTapGesture { onDismiss() }
 
-            VStack(spacing: 0) {
-                cardContent
+            if !blockState.questions.isEmpty {
+                VStack(spacing: 0) {
+                    cardContent
+                }
+                .background {
+                    RoundedRectangle(cornerRadius: 28)
+                        .fill(.ultraThinMaterial)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 28)
+                                .strokeBorder(.white.opacity(0.12), lineWidth: 1)
+                        }
+                        .shadow(color: .black.opacity(0.5), radius: 50)
+                }
+                .padding(.horizontal, 24)
             }
-            .background {
-                RoundedRectangle(cornerRadius: 28)
-                    .fill(.ultraThinMaterial)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 28)
-                            .strokeBorder(.white.opacity(0.12), lineWidth: 1)
-                    }
-                    .shadow(color: .black.opacity(0.5), radius: 50)
-            }
-            .padding(.horizontal, 24)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear {
+            if blockState.questions.isEmpty { onDismiss() }
+        }
     }
 
     // MARK: - Card Content
