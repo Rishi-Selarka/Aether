@@ -125,17 +125,17 @@ struct SplashView: View {
 
             let opacity = rawOp * appear * breathe
 
-            // Glow
+            // Glow — soft blue halo
             let gr: CGFloat = 5
             gfx.fill(
                 Path(ellipseIn: CGRect(x: pos.x - gr, y: pos.y - gr, width: gr * 2, height: gr * 2)),
-                with: .color(Color(white: dotWhiteLevel, opacity: opacity * 0.15))
+                with: .color(Color(red: 0.38, green: 0.68, blue: 1.0).opacity(opacity * 0.30))
             )
-            // Dot
+            // Dot — vivid gradient blue
             let r: CGFloat = 1.8
             gfx.fill(
                 Path(ellipseIn: CGRect(x: pos.x - r, y: pos.y - r, width: r * 2, height: r * 2)),
-                with: .color(Color(white: dotWhiteLevel, opacity: opacity))
+                with: .color(Color(red: 0.48, green: 0.78, blue: 1.0).opacity(opacity))
             )
         }
     }

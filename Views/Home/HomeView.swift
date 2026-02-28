@@ -100,9 +100,9 @@ struct HomeView: View {
             showSettings = true
         } label: {
             Image(systemName: "gearshape.fill")
-                .font(.system(size: 17, weight: .medium))
+                .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(Color.archsysTextSecondary)
-                .frame(width: 40, height: 40)
+                .frame(width: 30, height: 30)
         }
         .buttonStyle(.glass)
         .accessibilityLabel("Settings")

@@ -147,16 +147,11 @@ struct InteriorView: View {
                 timeLimitMinutes: timeLimitMinutes
             )
         } label: {
-            HStack(spacing: 8) {
-                Text("Enter")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.white)
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.7))
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: InteriorConstants.enterButtonHeight)
+            Text("Enter")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: InteriorConstants.enterButtonHeight)
         }
         .buttonStyle(.glass(.clear))
         .simultaneousGesture(TapGesture().onEnded {
