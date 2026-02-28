@@ -446,6 +446,7 @@ struct AnalysisView: View {
                 .font(.system(size: 15))
                 .foregroundStyle(.white.opacity(0.6))
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .transition(.opacity.combined(with: .scale(scale: 0.9)))
     }
 
