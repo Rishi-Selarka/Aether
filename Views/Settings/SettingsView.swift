@@ -7,7 +7,7 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     var onReset: (() -> Void)? = nil
 
-    @AppStorage("isDarkMode") private var isDarkMode = false
+    @AppStorage("isDarkMode") private var isDarkMode = true
     @AppStorage("dailyReminderEnabled") private var reminderEnabled = false
     @State private var reminderTime = NotificationManager.reminderDate
     @State private var showResetConfirmation = false

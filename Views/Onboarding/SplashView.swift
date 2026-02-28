@@ -132,12 +132,12 @@ struct SplashView: View {
             let gr: CGFloat = 5
             gfx.fill(
                 Path(ellipseIn: CGRect(x: pos.x - gr, y: pos.y - gr, width: gr * 2, height: gr * 2)),
-                with: .color(Color(red: 0.10, green: 0.20, blue: 0.45).opacity(opacity * 0.35))
+                with: .color(Color(white: dotWhiteLevel, opacity: opacity * 0.15))
             )
             let r: CGFloat = 1.8
             gfx.fill(
                 Path(ellipseIn: CGRect(x: pos.x - r, y: pos.y - r, width: r * 2, height: r * 2)),
-                with: .color(Color(red: 0.12, green: 0.25, blue: 0.55).opacity(opacity))
+                with: .color(Color(white: dotWhiteLevel, opacity: opacity))
             )
         }
     }

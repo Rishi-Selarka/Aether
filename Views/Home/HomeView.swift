@@ -5,7 +5,8 @@ import SwiftUI
 struct HomeView: View {
     @Environment(TierStatsCache.self) private var statsCache
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @AppStorage("isDarkMode") private var isDarkMode = false
+    @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("isDarkMode") private var isDarkMode = true
     @State private var showSettings = false
 
     @State private var quote: DailyQuote?
@@ -78,6 +79,11 @@ struct HomeView: View {
         }
         .task {
             await loadDailyContent()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                Task { await loadDailyContent() }
+            }
         }
     }
 

@@ -6,7 +6,7 @@ struct TierMapView: View {
     @Query(sort: \Tier.id) private var tiers: [Tier]
     @State private var selectedTierID: Int?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @AppStorage("isDarkMode") private var isDarkMode = false
+    @AppStorage("isDarkMode") private var isDarkMode = true
     @State private var revealedCities = 0
     @State private var routeDrawProgress: [CGFloat] = [0, 0, 0, 0]
 
@@ -117,7 +117,6 @@ struct TierMapView: View {
                     CityMarkerView(
                         tierID: tierID,
                         cityName: cityName,
-                        subtitle: t?.name ?? "",
                         icon: icon,
                         isUnlocked: t?.unlocked ?? true,
                         isCompleted: t?.completed ?? false,
