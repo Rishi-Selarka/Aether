@@ -14,7 +14,10 @@ struct ContentView: View {
                     .transition(.opacity)
             } else {
                 MainContentView()
-                    .transition(.opacity)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .scale(scale: 0.96)).combined(with: .offset(y: 12)),
+                        removal: .opacity
+                    ))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
