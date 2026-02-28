@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Slot Frame Preference (refreshes on scroll/layout)
+// MARK: - Slot Frame Preference
 
 private struct SlotFramePreferenceKey: PreferenceKey {
     static var defaultValue: [Int: CGRect] { [:] }
@@ -92,7 +92,6 @@ struct BlockCanvasView: View {
 
                 ScrollView(.vertical, showsIndicators: false) {
                     HStack(alignment: .top, spacing: 0) {
-                        // Left floating blocks (even indices)
                         floatingColumn(
                             blocks: unplacedBlocks.enumerated()
                                 .filter { $0.offset % 2 == 0 }.map(\.element),
@@ -101,11 +100,9 @@ struct BlockCanvasView: View {
                         )
                         .frame(width: sideWidth)
 
-                        // Center: slot pipeline
                         slotPipeline
                             .frame(width: boxSize + 20)
 
-                        // Right floating blocks (odd indices)
                         floatingColumn(
                             blocks: unplacedBlocks.enumerated()
                                 .filter { $0.offset % 2 != 0 }.map(\.element),
@@ -119,7 +116,6 @@ struct BlockCanvasView: View {
                 }
             }
 
-            // Drag ghost follows finger - same coordinate space as drag
             if isDragging, let block = draggedBlock {
                 ghostView(block: block)
             }
@@ -216,7 +212,6 @@ struct BlockCanvasView: View {
                 HapticManager.lightImpact()
                 onBlockTap(block)
             } else {
-                // Remove to floating
                 withAnimation(.spring(response: 0.3)) { slots[index] = nil }
                 syncCurrentOrder()
                 HapticManager.lightImpact()
@@ -316,22 +311,18 @@ struct BlockCanvasView: View {
 
         if let target = targetSlotIndex(for: location) {
             if let source = dragSourceSlot {
-                // Slot → Slot: swap contents
                 let occupant = slots[target]
                 withAnimation(.spring(response: 0.25, dampingFraction: 0.55)) {
                     slots[target] = block
                     slots[source] = occupant
                 }
             } else {
-                // Floating → Slot (existing occupant returns to floating automatically)
                 withAnimation(.spring(response: 0.25, dampingFraction: 0.55)) {
                     slots[target] = block
                 }
             }
             triggerSnap(at: target)
         }
-        // Dropped outside any slot: snap back (no change)
-
         resetDrag()
         syncCurrentOrder()
     }
@@ -385,7 +376,6 @@ struct BlockCanvasView: View {
                 let top: CGFloat = 2
                 let bottom = size.height - 2
 
-                // Dashed vertical line
                 ctx.stroke(
                     Path { p in
                         p.move(to: CGPoint(x: midX, y: top))
@@ -394,8 +384,6 @@ struct BlockCanvasView: View {
                     with: .color(Color(white: 0.25)),
                     style: StrokeStyle(lineWidth: 1, dash: [4, 3])
                 )
-
-                // Chevron
                 let cy = size.height / 2
                 ctx.stroke(
                     Path { p in
@@ -406,8 +394,6 @@ struct BlockCanvasView: View {
                     with: .color(Color(white: 0.35)),
                     style: StrokeStyle(lineWidth: 1, lineCap: .round, lineJoin: .round)
                 )
-
-                // Data-pulse dot
                 let t = fmod(time * 0.6 + Double(index) * 0.35, 1.0)
                 let py = top + CGFloat(t) * (bottom - top)
                 let life = 1.0 - abs(t - 0.5) * 2.0

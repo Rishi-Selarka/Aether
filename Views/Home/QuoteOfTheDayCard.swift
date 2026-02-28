@@ -16,7 +16,6 @@ struct QuoteOfTheDayCard: View {
 
     private func loadedContent(_ quote: DailyQuote) -> some View {
         HStack(alignment: .top, spacing: 14) {
-            // Left accent rule
             RoundedRectangle(cornerRadius: 1.5)
                 .fill(Color.homeAccent)
                 .frame(width: 3)

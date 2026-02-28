@@ -11,10 +11,7 @@ struct ArchitectureExportCardView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header gradient bar
             headerBar
-
-            // Main content
             VStack(spacing: 20) {
                 titleSection
                 patternSection
@@ -22,8 +19,6 @@ struct ArchitectureExportCardView: View {
             }
             .padding(.horizontal, 28)
             .padding(.vertical, 24)
-
-            // Footer
             footerBar
         }
         .frame(width: 480)
@@ -88,8 +83,6 @@ struct ArchitectureExportCardView: View {
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.35))
                 .tracking(1.2)
-
-            // Block flow
             HStack(spacing: 0) {
                 ForEach(Array(blocks.enumerated()), id: \.offset) { index, block in
                     blockChip(block)

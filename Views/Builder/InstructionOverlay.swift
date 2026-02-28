@@ -7,15 +7,12 @@ struct InstructionOverlay: View {
 
     var body: some View {
         ZStack {
-            // Dimming background - intercepted touches dismiss overlay
             Color.black.opacity(0.45)
                 .ignoresSafeArea()
                 .onTapGesture { onDismiss() }
 
-            // Liquid Glass card
             GlassEffectContainer(spacing: 16) {
                 VStack(alignment: .leading, spacing: 20) {
-                    // Header
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("How to Play")

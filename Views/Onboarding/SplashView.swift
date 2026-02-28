@@ -5,8 +5,6 @@ struct SplashView: View {
     @State private var startTime: Date?
     @State private var titleOpacity: Double = 0.0
     @State private var network = SplashNetwork.generate()
-
-    // 0→0.5s fast fade in, 0.5→2.2s roam, 2.2→3.6s slow dissolve, ~2.8s title appears
     private let fadeEnd = 3.6
 
     private var edgeWhiteLevel: Double { colorScheme == .dark ? 0.40 : 0.55 }
@@ -64,7 +62,6 @@ struct SplashView: View {
         .ignoresSafeArea()
         .onAppear {
             startTime = .now
-            // Show text while network is still dissolving
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) {
                 withAnimation(.easeOut(duration: 0.8)) {
                     titleOpacity = 1.0
@@ -92,8 +89,6 @@ struct SplashView: View {
             guard elapsed > 0 else { return 0 }
             return min(1.0, elapsed / appearDuration)
         }
-
-        // Edges
         for edge in network.edges {
             let appear = appearFactor(t, delay: edge.appearDelay)
             guard appear > 0 else { continue }
@@ -117,8 +112,6 @@ struct SplashView: View {
             path.addLine(to: b)
             gfx.stroke(path, with: .color(Color(white: edgeWhiteLevel, opacity: opacity)), lineWidth: 0.8)
         }
-
-        // Nodes
         for (i, pos) in positions.enumerated() {
             let node = network.nodes[i]
 
@@ -136,14 +129,11 @@ struct SplashView: View {
             }
 
             let opacity = rawOp * appear * breathe
-
-            // Glow — dark blue halo
             let gr: CGFloat = 5
             gfx.fill(
                 Path(ellipseIn: CGRect(x: pos.x - gr, y: pos.y - gr, width: gr * 2, height: gr * 2)),
                 with: .color(Color(red: 0.10, green: 0.20, blue: 0.45).opacity(opacity * 0.35))
             )
-            // Dot — deep navy blue
             let r: CGFloat = 1.8
             gfx.fill(
                 Path(ellipseIn: CGRect(x: pos.x - r, y: pos.y - r, width: r * 2, height: r * 2)),
@@ -191,12 +181,8 @@ struct SplashNetwork: Sendable {
                 let dx = baseX - 0.5
                 let dy = baseY - 0.5
                 let dist = min(sqrt(dx * dx + dy * dy) / 0.75, 1.0)
-
-                // Appear: edges of screen first (dist=1 → delay=0), center last (dist=0 → delay=0.4)
                 let appearDelay = (1.0 - dist) * 0.4
                     + (hash(seed * 953.7 + 287.1) - 0.5) * 0.1
-
-                // Dissolve: edges first, center last (slower)
                 let fadeStart = 2.2 + (1.0 - dist) * 1.4
                     + (hash(seed * 631.4 + 159.3) - 0.5) * 0.3
 
@@ -236,12 +222,8 @@ struct SplashNetwork: Sendable {
         let dx = midX - 0.5
         let dy = midY - 0.5
         let dist = min(sqrt(dx * dx + dy * dy) / 0.75, 1.0)
-
-        // Appear: edges first (fast)
         let appearDelay = (1.0 - dist) * 0.4
             + (hash(Double(a * 41 + b * 67) * 953.7) - 0.5) * 0.1
-
-        // Dissolve: edges first (slower)
         let fadeStart = 2.2 + (1.0 - dist) * 1.4
             + (hash(Double(a * 97 + b * 31)) - 0.5) * 0.3
         let fadeDuration = 0.5 + hash(Double(a * 53 + b * 71) * 743.1) * 0.5
@@ -268,7 +250,6 @@ struct NetNode: Sendable {
     let fadeStart: Double
 
     func position(t: Double, w: Double, h: Double) -> CGPoint {
-        // Clamp to a modest off-screen margin so nodes don't drift arbitrarily far.
         let x = min(max(baseX + driftX * t, -0.15), 1.15)
         let y = min(max(baseY + driftY * t, -0.15), 1.15)
         return CGPoint(x: x * w, y: y * h)

@@ -7,7 +7,6 @@ struct HomeView: View {
     @AppStorage("isDarkMode") private var isDarkMode = false
     @State private var showSettings = false
 
-    // Daily content
     @State private var quote: DailyQuote?
     @State private var question: DailyQuestion?
 
@@ -17,21 +16,14 @@ struct HomeView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 24) {
-                // Top bar – Liquid Glass, spacing matches GlassEffectContainer
                 GlassEffectContainer(spacing: 12) {
                     HStack(spacing: 12) {
                         Spacer(minLength: 0)
                         settingsButton
                     }
                 }
-
-                // Metrics card
                 StatsCardView()
-
-                // Dare to Dive CTA with GIF
                 DareToDiveCard(onTap: onDareToDive)
-
-                // Daily Challenge
                 QuestionOfTheDayCard(
                     question: question,
                     onAnswer: { index in
@@ -45,8 +37,6 @@ struct HomeView: View {
                         }
                     }
                 )
-
-                // Quote — plain text, no card, no author
                 if let quoteText = quote?.text, !quoteText.isEmpty {
                     Text(quoteText)
                         .font(.system(size: 12, weight: .regular))
@@ -63,8 +53,6 @@ struct HomeView: View {
         .background {
             ZStack(alignment: .bottom) {
                 Color.aetherBackground
-
-                // Light blue sky gradient rising from the bottom
                 LinearGradient(
                     colors: [
                         Color(red: 0.55, green: 0.75, blue: 0.95).opacity(0.25),

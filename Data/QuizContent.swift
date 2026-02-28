@@ -17,14 +17,11 @@ enum QuizContent {
         return raw.map { $0.withShuffledOptions() }
     }
 
-    // MARK: - Generic Questions (fallback per block type)
-
-    // correctIndex distribution across 54 generic questions:
-    // 0: 14, 1: 14, 2: 13, 3: 13
+    // MARK: - Generic Questions
 
     private static let genericQuestions: [NodeType: [QuizQuestion]] = [
 
-        // MARK: UI (indices: 2, 0, 3)
+        // MARK: UI
         .ui: [
             QuizQuestion(id: "gen_ui_1", blockType: .ui,
                 questionText: "What happens if a SwiftUI View directly mutates a data model?",
@@ -58,7 +55,7 @@ enum QuizContent {
                 explanation: "@StateObject ensures SwiftUI creates the object once and preserves it across re-renders, unlike @ObservedObject which expects external ownership."),
         ],
 
-        // MARK: ViewModel (indices: 1, 3, 0)
+        // MARK: ViewModel
         .viewModel: [
             QuizQuestion(id: "gen_vm_1", blockType: .viewModel,
                 questionText: "What problem does a ViewModel solve that a plain model cannot?",
@@ -92,7 +89,7 @@ enum QuizContent {
                 explanation: "The ViewModel owns the decision of when data is stale and needs refreshing, coordinating between View lifecycle events and Repository capabilities."),
         ],
 
-        // MARK: Database (indices: 3, 1, 2)
+        // MARK: Database
         .database: [
             QuizQuestion(id: "gen_db_1", blockType: .database,
                 questionText: "Why does SwiftData use @Model classes instead of plain structs?",
@@ -126,7 +123,7 @@ enum QuizContent {
                 explanation: "Cascade deletes ensure dependent child objects are removed when their parent is deleted, preventing orphaned records."),
         ],
 
-        // MARK: API (indices: 0, 2, 1)
+        // MARK: API
         .api: [
             QuizQuestion(id: "gen_api_1", blockType: .api,
                 questionText: "Why should an API layer return domain models, not raw JSON?",
@@ -160,7 +157,7 @@ enum QuizContent {
                 explanation: "Network errors are often transient (airplane mode, timeout) and worth retrying, while server errors (500, 404) indicate a different class of problem."),
         ],
 
-        // MARK: Repository (indices: 2, 0, 3)
+        // MARK: Repository
         .repository: [
             QuizQuestion(id: "gen_repo_1", blockType: .repository,
                 questionText: "What pattern does a Repository implement between data sources?",
@@ -194,7 +191,7 @@ enum QuizContent {
                 explanation: "User-initiated refresh (pull-to-refresh) is a clear signal to bypass stale cache data and fetch directly from the network."),
         ],
 
-        // MARK: NetworkCache (indices: 1, 3, 0)
+        // MARK: NetworkCache
         .networkCache: [
             QuizQuestion(id: "gen_nc_1", blockType: .networkCache,
                 questionText: "What determines when a network cache entry should be invalidated?",
@@ -228,7 +225,7 @@ enum QuizContent {
                 explanation: "Without eviction policies (LRU, max size), a cache will consume increasing disk space, eventually impacting device storage."),
         ],
 
-        // MARK: MemoryCache (indices: 0, 2, 1)
+        // MARK: MemoryCache
         .memoryCache: [
             QuizQuestion(id: "gen_mc_1", blockType: .memoryCache,
                 questionText: "Why does a memory cache use NSCache instead of a plain Dictionary?",
@@ -262,7 +259,7 @@ enum QuizContent {
                 explanation: "Memory cache provides near-instant access suitable for frequently read, easily re-derivable data like decoded images or computed layouts."),
         ],
 
-        // MARK: BackgroundWorker (indices: 3, 1, 2)
+        // MARK: BackgroundWorker
         .backgroundWorker: [
             QuizQuestion(id: "gen_bw_1", blockType: .backgroundWorker,
                 questionText: "Why must a background worker avoid updating UI state directly?",
@@ -296,7 +293,7 @@ enum QuizContent {
                 explanation: "Serial queues guarantee ordered execution, essential when tasks depend on results of previous tasks or modify shared state."),
         ],
 
-        // MARK: ImageCache (indices: 1, 0, 3)
+        // MARK: ImageCache
         .imageCache: [
             QuizQuestion(id: "gen_ic_1", blockType: .imageCache,
                 questionText: "Why should an image cache store decoded bitmaps, not raw file data?",
@@ -330,7 +327,7 @@ enum QuizContent {
                 explanation: "Memory provides instant access for visible images; disk persists across launches so images survive app termination without re-downloading."),
         ],
 
-        // MARK: LazyLoader (indices: 2, 3, 0)
+        // MARK: LazyLoader
         .lazyLoader: [
             QuizQuestion(id: "gen_ll_1", blockType: .lazyLoader,
                 questionText: "What is the core principle behind lazy loading in mobile apps?",
@@ -364,7 +361,7 @@ enum QuizContent {
                 explanation: "Late-arriving content can cause layout shifts and visual flicker, which is solved with placeholder skeletons and smooth transitions."),
         ],
 
-        // MARK: CircuitBreaker (indices: 0, 2, 1)
+        // MARK: CircuitBreaker
         .circuitBreaker: [
             QuizQuestion(id: "gen_cb_1", blockType: .circuitBreaker,
                 questionText: "What does a circuit breaker do after reaching its failure threshold?",
@@ -398,7 +395,7 @@ enum QuizContent {
                 explanation: "Unlimited retries can overwhelm a struggling service, causing cascading failures. A circuit breaker gives the service time to recover."),
         ],
 
-        // MARK: RetryHandler (indices: 3, 0, 2)
+        // MARK: RetryHandler
         .retryHandler: [
             QuizQuestion(id: "gen_rh_1", blockType: .retryHandler,
                 questionText: "Why should retry delays increase exponentially rather than stay fixed?",
@@ -432,7 +429,7 @@ enum QuizContent {
                 explanation: "Jitter desynchronizes retries across clients so they don't all hit the server at the same moment after a shared failure window."),
         ],
 
-        // MARK: Fallback (indices: 1, 3, 0)
+        // MARK: Fallback
         .fallback: [
             QuizQuestion(id: "gen_fb_1", blockType: .fallback,
                 questionText: "What distinguishes a fallback from a simple error message to users?",
@@ -466,7 +463,7 @@ enum QuizContent {
                 explanation: "Silent fallbacks hide failures. Logging the root cause enables developers to identify and fix recurring issues."),
         ],
 
-        // MARK: HealthMonitor (indices: 2, 1, 3)
+        // MARK: HealthMonitor
         .healthMonitor: [
             QuizQuestion(id: "gen_hm_1", blockType: .healthMonitor,
                 questionText: "What kind of metrics should a health monitor track for a mobile app?",
@@ -500,7 +497,7 @@ enum QuizContent {
                 explanation: "Threshold-based triggers allow automatic responses like enabling fallbacks or disabling features when metrics indicate system degradation."),
         ],
 
-        // MARK: MLModel (indices: 0, 3, 1)
+        // MARK: MLModel
         .mlModel: [
             QuizQuestion(id: "gen_ml_1", blockType: .mlModel,
                 questionText: "Why should ML inference run off the main thread in a mobile app?",
@@ -534,7 +531,7 @@ enum QuizContent {
                 explanation: "A protocol boundary lets you substitute mock predictions in tests and swap model versions without changing consumer code."),
         ],
 
-        // MARK: WebSocket (indices: 3, 2, 0)
+        // MARK: WebSocket
         .websocket: [
             QuizQuestion(id: "gen_ws_1", blockType: .websocket,
                 questionText: "What advantage do WebSockets have over repeated HTTP polling?",
@@ -568,7 +565,7 @@ enum QuizContent {
                 explanation: "Buffering messages during reconnection ensures no data is lost and messages can be processed in order once the connection is restored."),
         ],
 
-        // MARK: EventBus (indices: 1, 0, 2)
+        // MARK: EventBus
         .eventBus: [
             QuizQuestion(id: "gen_eb_1", blockType: .eventBus,
                 questionText: "What problem does an event bus solve between decoupled components?",
@@ -602,7 +599,7 @@ enum QuizContent {
                 explanation: "Retained subscriptions from dismissed views cause memory leaks and unexpected side effects when events trigger on deallocated objects."),
         ],
 
-        // MARK: StateMachine (indices: 2, 3, 1)
+        // MARK: StateMachine
         .stateMachine: [
             QuizQuestion(id: "gen_sm_1", blockType: .stateMachine,
                 questionText: "Why use a state machine instead of scattered boolean flags?",
@@ -637,14 +634,11 @@ enum QuizContent {
         ],
     ]
 
-    // MARK: - Specific Questions (per problem + block type)
-
-    // correctIndex distribution across 69 specific questions:
-    // 0: 17, 1: 17, 2: 18, 3: 17
+    // MARK: - Specific Questions
 
     private static let specificQuestions: [String: [QuizQuestion]] = [
 
-        // MARK: T1 Notes - ViewModel (indices: 0, 2, 3)
+        // MARK: T1 Notes - ViewModel
         "t1_notes_viewModel": [
             QuizQuestion(id: "t1n_vm_1", blockType: .viewModel,
                 questionText: "In a Notes app, why should the ViewModel sort notes instead of the View?",
@@ -678,7 +672,7 @@ enum QuizContent {
                 explanation: "Debouncing batches rapid keystrokes into fewer save operations, reducing disk I/O and CPU usage during active typing."),
         ],
 
-        // MARK: T1 Notes - Repository (indices: 1, 3, 0)
+        // MARK: T1 Notes - Repository
         "t1_notes_repository": [
             QuizQuestion(id: "t1n_repo_1", blockType: .repository,
                 questionText: "Why should the Notes Repository abstract SwiftData from the ViewModel?",
@@ -712,7 +706,7 @@ enum QuizContent {
                 explanation: "An empty array is a valid result that the ViewModel can use to show an empty state, without conflating 'no data' with 'error'."),
         ],
 
-        // MARK: T1 Habit - ViewModel (indices: 2, 0, 1)
+        // MARK: T1 Habit - ViewModel
         "t1_habit_viewModel": [
             QuizQuestion(id: "t1h_vm_1", blockType: .viewModel,
                 questionText: "How should the Habit Tracker ViewModel calculate a streak count?",
@@ -746,7 +740,7 @@ enum QuizContent {
                 explanation: "The ViewModel should pre-compute display-ready data so the chart View simply renders values without performing calculations."),
         ],
 
-        // MARK: T1 Habit - BackgroundWorker (indices: 3, 1, 2)
+        // MARK: T1 Habit - BackgroundWorker
         "t1_habit_backgroundWorker": [
             QuizQuestion(id: "t1h_bw_1", blockType: .backgroundWorker,
                 questionText: "Why does the Habit Tracker need a background worker for notifications?",
@@ -780,7 +774,7 @@ enum QuizContent {
                 explanation: "Saving progress checkpoints allows the worker to resume where it left off on the next execution opportunity instead of losing work."),
         ],
 
-        // MARK: T1 Todo - ViewModel (indices: 0, 3, 1)
+        // MARK: T1 Todo - ViewModel
         "t1_todo_viewModel": [
             QuizQuestion(id: "t1t_vm_1", blockType: .viewModel,
                 questionText: "Why should the Todo ViewModel filter tasks instead of using multiple arrays?",
@@ -814,7 +808,7 @@ enum QuizContent {
                 explanation: "Tracking in-progress state lets the View show a loading indicator, and error state enables showing a failure message if the delete fails."),
         ],
 
-        // MARK: T2 Weather - ViewModel (indices: 2, 0, 3)
+        // MARK: T2 Weather - ViewModel
         "t2_weather_viewModel": [
             QuizQuestion(id: "t2w_vm_1", blockType: .viewModel,
                 questionText: "Why should the Weather ViewModel convert Kelvin to user-preferred units?",
@@ -848,7 +842,7 @@ enum QuizContent {
                 explanation: "Pull-to-refresh is an explicit user intent to get fresh data, so the ViewModel should bypass any cache and fetch from the API directly."),
         ],
 
-        // MARK: T2 Weather - Repository (indices: 1, 3, 2)
+        // MARK: T2 Weather - Repository
         "t2_weather_repository": [
             QuizQuestion(id: "t2w_repo_1", blockType: .repository,
                 questionText: "Why should the Weather Repository cache responses with a short TTL?",
@@ -882,7 +876,7 @@ enum QuizContent {
                 explanation: "Request coalescing deduplicates identical in-flight requests so only one network call is made, sharing the result with all callers."),
         ],
 
-        // MARK: T2 News - NetworkCache (indices: 0, 2, 1)
+        // MARK: T2 News - NetworkCache
         "t2_news_networkCache": [
             QuizQuestion(id: "t2n_nc_1", blockType: .networkCache,
                 questionText: "Why should the News app cache articles with their full content included?",
@@ -916,7 +910,7 @@ enum QuizContent {
                 explanation: "Evicting oldest unread articles keeps the cache relevant by preserving recently viewed and bookmarked content while managing storage."),
         ],
 
-        // MARK: T2 GitHub - Repository (indices: 3, 1, 0)
+        // MARK: T2 GitHub - Repository
         "t2_github_repository": [
             QuizQuestion(id: "t2g_repo_1", blockType: .repository,
                 questionText: "Why should the GitHub Repository paginate API results instead of fetching all?",
@@ -950,7 +944,7 @@ enum QuizContent {
                 explanation: "Mapping API responses to domain models means changes to the GitHub API structure only require updating the repository's mapping layer."),
         ],
 
-        // MARK: T3 Photo - ImageCache (indices: 2, 0, 3)
+        // MARK: T3 Photo - ImageCache
         "t3_photo_imageCache": [
             QuizQuestion(id: "t3p_ic_1", blockType: .imageCache,
                 questionText: "Why should the Photo app cache thumbnails separately from full images?",
@@ -984,7 +978,7 @@ enum QuizContent {
                 explanation: "A photo may be cached as a thumbnail and a full-size image. Including dimensions in the key prevents overwriting one with the other."),
         ],
 
-        // MARK: T3 Photo - BackgroundWorker (indices: 1, 3, 0)
+        // MARK: T3 Photo - BackgroundWorker
         "t3_photo_backgroundWorker": [
             QuizQuestion(id: "t3p_bw_1", blockType: .backgroundWorker,
                 questionText: "Why should photo uploads happen in a background worker, not inline?",
@@ -1018,7 +1012,7 @@ enum QuizContent {
                 explanation: "Incremental progress allows the UI to show per-photo progress indicators, giving users clear feedback on long-running operations."),
         ],
 
-        // MARK: T3 Restaurant - MemoryCache (indices: 2, 1, 3)
+        // MARK: T3 Restaurant - MemoryCache
         "t3_restaurant_memoryCache": [
             QuizQuestion(id: "t3r_mc_1", blockType: .memoryCache,
                 questionText: "Why should the Restaurant app cache menu data in memory rather than disk?",
@@ -1052,7 +1046,7 @@ enum QuizContent {
                 explanation: "Caching a placeholder image prevents repeated network requests for a missing image and provides a consistent visual fallback."),
         ],
 
-        // MARK: T3 Podcast - BackgroundWorker (indices: 0, 2, 1)
+        // MARK: T3 Podcast - BackgroundWorker
         "t3_podcast_backgroundWorker": [
             QuizQuestion(id: "t3pc_bw_1", blockType: .backgroundWorker,
                 questionText: "Why should podcast episode downloads use a background URL session?",
@@ -1086,7 +1080,7 @@ enum QuizContent {
                 explanation: "Pausing and alerting the user lets them decide what to remove, rather than the app making destructive decisions about their content."),
         ],
 
-        // MARK: T4 Banking - CircuitBreaker (indices: 3, 0, 2)
+        // MARK: T4 Banking - CircuitBreaker
         "t4_banking_circuitBreaker": [
             QuizQuestion(id: "t4b_cb_1", blockType: .circuitBreaker,
                 questionText: "Why is a circuit breaker critical for a banking app's transaction service?",
@@ -1120,7 +1114,7 @@ enum QuizContent {
                 explanation: "Financial transactions are high-stakes. A lower failure threshold opens the circuit sooner, protecting users from duplicate charges."),
         ],
 
-        // MARK: T4 Banking - RetryHandler (indices: 1, 3, 0)
+        // MARK: T4 Banking - RetryHandler
         "t4_banking_retryHandler": [
             QuizQuestion(id: "t4b_rh_1", blockType: .retryHandler,
                 questionText: "Why should the banking retry handler use idempotency keys per transaction?",
@@ -1154,7 +1148,7 @@ enum QuizContent {
                 explanation: "Client errors like 400 (bad request) or 403 (forbidden) indicate problems with the request itself that no amount of retrying will fix."),
         ],
 
-        // MARK: T4 Rideshare - HealthMonitor (indices: 2, 0, 3)
+        // MARK: T4 Rideshare - HealthMonitor
         "t4_rideshare_healthMonitor": [
             QuizQuestion(id: "t4r_hm_1", blockType: .healthMonitor,
                 questionText: "Why does a rideshare app need to monitor GPS accuracy as a health metric?",
@@ -1188,7 +1182,7 @@ enum QuizContent {
                 explanation: "Consistent payment failures indicate a systemic issue. The health monitor should trigger the circuit breaker and alert the payment service."),
         ],
 
-        // MARK: T4 Ecommerce - Fallback (indices: 1, 2, 0)
+        // MARK: T4 Ecommerce - Fallback
         "t4_ecommerce_fallback": [
             QuizQuestion(id: "t4e_fb_1", blockType: .fallback,
                 questionText: "What should the ecommerce fallback show when product search fails?",
@@ -1222,7 +1216,7 @@ enum QuizContent {
                 explanation: "Saving the cart and offering notification respects the user's intent while being honest that checkout is temporarily unavailable."),
         ],
 
-        // MARK: T5 Photos - MLModel (indices: 3, 1, 2)
+        // MARK: T5 Photos - MLModel
         "t5_photos_mlModel": [
             QuizQuestion(id: "t5p_ml_1", blockType: .mlModel,
                 questionText: "Why should the Photos ML model process images in batches rather than one by one?",
@@ -1256,7 +1250,7 @@ enum QuizContent {
                 explanation: "ML inference is computationally expensive. Caching results with metadata prevents re-running classification every time a photo is viewed."),
         ],
 
-        // MARK: T5 Photos - StateMachine (indices: 0, 3, 1)
+        // MARK: T5 Photos - StateMachine
         "t5_photos_stateMachine": [
             QuizQuestion(id: "t5p_sm_1", blockType: .stateMachine,
                 questionText: "Why does photo editing benefit from a state machine over boolean flags?",
@@ -1290,7 +1284,7 @@ enum QuizContent {
                 explanation: "Transition logs create an audit trail that makes it easy to reproduce and debug unexpected navigation paths or state corruption."),
         ],
 
-        // MARK: T5 Sports - WebSocket (indices: 2, 0, 3)
+        // MARK: T5 Sports - WebSocket
         "t5_sports_websocket": [
             QuizQuestion(id: "t5s_ws_1", blockType: .websocket,
                 questionText: "Why is WebSocket ideal for live sports scores instead of REST polling?",
@@ -1324,7 +1318,7 @@ enum QuizContent {
                 explanation: "After reconnection, the server may resend recent events. Deduplication using event IDs prevents showing the same score update twice."),
         ],
 
-        // MARK: T5 Sports - EventBus (indices: 1, 3, 0)
+        // MARK: T5 Sports - EventBus
         "t5_sports_eventBus": [
             QuizQuestion(id: "t5s_eb_1", blockType: .eventBus,
                 questionText: "Why should the Sports app use an event bus for score update distribution?",
@@ -1358,7 +1352,7 @@ enum QuizContent {
                 explanation: "Typed channels ensure a score subscriber only receives score events, not unrelated events like chat messages or ad impressions."),
         ],
 
-        // MARK: T5 Search - MLModel (indices: 2, 0, 3)
+        // MARK: T5 Search - MLModel
         "t5_search_mlModel": [
             QuizQuestion(id: "t5sr_ml_1", blockType: .mlModel,
                 questionText: "Why should the Search app use an ML model for query understanding?",
@@ -1392,7 +1386,7 @@ enum QuizContent {
                 explanation: "Running inference on the Neural Engine offloads computation from the CPU, keeping the main processor free for smooth UI interactions."),
         ],
 
-        // MARK: T5 Search - StateMachine (indices: 1, 3, 0)
+        // MARK: T5 Search - StateMachine
         "t5_search_stateMachine": [
             QuizQuestion(id: "t5sr_sm_1", blockType: .stateMachine,
                 questionText: "What states should a Search feature's state machine include at minimum?",

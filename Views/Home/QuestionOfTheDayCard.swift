@@ -24,7 +24,6 @@ struct QuestionOfTheDayCard: View {
 
     private func loadedContent(_ q: DailyQuestion) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header label + refresh
             HStack(spacing: 5) {
                 Image(systemName: "questionmark.circle")
                     .font(.system(size: 11, weight: .semibold))
@@ -53,16 +52,12 @@ struct QuestionOfTheDayCard: View {
                 }
             }
             .padding(.bottom, 8)
-
-            // Question text
             Text(q.question)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(Color.aetherTextPrimary)
                 .fixedSize(horizontal: false, vertical: true)
                 .lineSpacing(2)
                 .padding(.bottom, 10)
-
-            // Options
             VStack(spacing: 6) {
                 ForEach(Array(q.options.enumerated()), id: \.offset) { index, option in
                     optionRow(
@@ -72,8 +67,6 @@ struct QuestionOfTheDayCard: View {
                     )
                 }
             }
-
-            // Explanation (after answer)
             if showExplanation {
                 explanationView(q.explanation)
                     .padding(.top, 12)
@@ -84,7 +77,6 @@ struct QuestionOfTheDayCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .glossyCardBackground(cornerRadius: 12)
         .onAppear {
-            // Restore previous answer if already answered today
             if let saved = q.selectedIndex {
                 selectedIndex = saved
                 showExplanation = true

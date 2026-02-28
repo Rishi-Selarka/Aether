@@ -7,8 +7,6 @@ struct TierMapView: View {
     @State private var selectedTierID: Int?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage("isDarkMode") private var isDarkMode = false
-
-    // Sequential reveal state
     @State private var revealedCities = 0
     @State private var routeDrawProgress: [CGFloat] = [0, 0, 0, 0]
 
@@ -147,7 +145,6 @@ struct TierMapView: View {
     // MARK: - Sequential Reveal
 
     private func startRevealSequence() {
-        // Don't re-run if already revealed
         guard revealedCities == 0 else { return }
 
         // Skip animation for accessibility
@@ -158,21 +155,15 @@ struct TierMapView: View {
         }
 
         Task { @MainActor in
-            // City 1 fades in
             withAnimation(.easeOut(duration: 0.4)) {
                 revealedCities = 1
             }
             try? await Task.sleep(for: .milliseconds(500))
-
-            // For each route: draw line, then reveal next city
             for i in 0 ..< 4 {
-                // Line draws from city i to city i+1
                 withAnimation(.easeInOut(duration: 0.6)) {
                     routeDrawProgress[i] = 1.0
                 }
                 try? await Task.sleep(for: .milliseconds(650))
-
-                // Next city fades in
                 withAnimation(.easeOut(duration: 0.4)) {
                     revealedCities = i + 2
                 }

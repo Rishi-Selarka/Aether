@@ -1,12 +1,7 @@
 import SwiftUI
 import SwiftData
 
-// NOTE: No NavigationStack or List — both cause content clipping inside
-// a .medium presentationDetent sheet. Plain VStack + ScrollView solves this.
-//
-// Liquid Glass: GlassEffectContainer for header bar, glassEffect for section
-// cards. Spacing in container must match layout spacing per SwiftUI best practices.
-
+// Plain VStack + ScrollView (no NavigationStack/List) to avoid content clipping in .medium detent.
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -21,7 +16,6 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header bar — Liquid Glass with GlassEffectContainer
             GlassEffectContainer(spacing: headerBarSpacing) {
                 HStack(spacing: headerBarSpacing) {
                     Spacer(minLength: 0)
@@ -42,8 +36,6 @@ struct SettingsView: View {
             .padding(.horizontal, 24)
             .padding(.top, 20)
             .padding(.bottom, 24)
-
-            // Content
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
                     section(header: "Appearance") {

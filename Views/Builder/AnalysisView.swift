@@ -84,8 +84,7 @@ struct AnalysisView: View {
         .onAppear { runEntranceAnimation() }
     }
 
-    // MARK: - Fixed Button Row (overlay, top of screen)
-    // Uses Liquid Glass (glassEffect + GlassEffectContainer) on iOS 26+; material capsule fallback on iOS 17.
+    // MARK: - Fixed Button Row
 
     private var fixedButtonRowContent: some View {
         GlassEffectContainer(spacing: 16) {
@@ -158,7 +157,6 @@ struct AnalysisView: View {
         VStack(spacing: 0) {
             Spacer(minLength: 0)
 
-            // Row 1: Score ring + Drowned/Survived badge
             HStack(alignment: .center, spacing: 20) {
                 scoreRing
                     .frame(width: 124, height: 124)
@@ -167,7 +165,6 @@ struct AnalysisView: View {
             }
             .padding(.horizontal, 24)
 
-            // Row 2: Concepts below
             conceptChips
                 .padding(.horizontal, 24)
                 .padding(.top, 12)
@@ -485,7 +482,6 @@ struct AnalysisView: View {
             withAnimation(.easeIn(duration: 0.8).delay(0.3)) { particleOpacity = 1.0 }
         } else {
             HapticManager.error()
-            // Water rises, drowned text appears, then both fade as content comes in
             withAnimation(.easeIn(duration: 1.8)) { waterLevel = 0.35 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 withAnimation(.easeIn(duration: 0.4)) { showDrownedText = true }

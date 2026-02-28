@@ -26,18 +26,12 @@ struct InteriorView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                // Background image - full screen
                 backgroundImage(size: geo.size)
 
-                // Content layered on top
                 VStack(spacing: 0) {
-                    // Title zone: fixed height, title below the navigation bar.
                     titleSection
                         .padding(.top, geo.safeAreaInsets.top + 16)
                         .frame(height: geo.safeAreaInsets.top + 120)
-
-                    // Equal spacers around card group → card stays centered
-                    // in the space below the title zone
                     Spacer()
 
                     cardSection

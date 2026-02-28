@@ -21,7 +21,6 @@ struct OnboardingView: View {
         .ignoresSafeArea()
         .onAppear {
             startTime = .now
-            // Show text while network is still ~30% visible (dissolve runs 2.2→3.6)
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) {
                 let animation: Animation? = reduceMotion ? nil : .easeOut(duration: 0.8)
                 withAnimation(animation) {

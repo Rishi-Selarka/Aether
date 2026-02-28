@@ -178,7 +178,7 @@ struct BuilderView: View {
         }
     }
 
-    // MARK: - Fixed Nav Bar (top of screen, like Analysis)
+    // MARK: - Fixed Nav Bar
 
     private func fixedNavBarContent(problem: InteriorProblem) -> some View {
         GlassEffectContainer(spacing: 12) {
@@ -518,8 +518,6 @@ struct BuilderView: View {
         let service = AIQuizService()
         let nodes = problem.blocks
         let capturedTierName = tierName
-
-        // Generate questions for all blocks in parallel
         let blockStates: [BlockQuizState] = await withTaskGroup(of: (Int, BlockQuizState).self) { group in
             for (i, node) in nodes.enumerated() {
                 group.addTask {
@@ -536,7 +534,6 @@ struct BuilderView: View {
                 }
             }
 
-            // Reassemble in original block order; fall back to static questions for any missing slot
             var ordered: [BlockQuizState?] = Array(repeating: nil, count: nodes.count)
             for await (i, state) in group {
                 ordered[i] = state
@@ -606,7 +603,6 @@ struct BuilderView: View {
     private func saveAttempt(session: QuizSession) {
         guard problem != nil else { return }
 
-        // Update tier stats (attempt already counted on entry)
         if session.passed {
             SwiftDataManager.recordPass(tierID: tierID, problemIndex: selectedProblemIndex, score: session.scorePercent, context: modelContext)
         } else {

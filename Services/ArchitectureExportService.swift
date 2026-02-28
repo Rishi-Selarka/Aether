@@ -55,7 +55,6 @@ enum ArchitectureExportService {
             return
         }
 
-        // Generate design guide with Foundation Models
         let designGuide = await generateDesignGuide(problem: problem, tierName: tierName)
 
         guard let pdfData = buildPDF(
@@ -212,13 +211,8 @@ enum ArchitectureExportService {
 
         let pdfRenderer = UIGraphicsPDFRenderer(bounds: pageRect)
         let data = pdfRenderer.pdfData { ctx in
-
-            // --- PAGE 1: System Design Overview ---
-
             ctx.beginPage()
             var yOffset: CGFloat = margin
-
-            // Title
             yOffset = drawText(
                 problem.title,
                 in: pageRect,
@@ -228,8 +222,6 @@ enum ArchitectureExportService {
                 color: .black
             )
             yOffset += 4
-
-            // Tier subtitle
             yOffset = drawText(
                 tierName,
                 in: pageRect,
@@ -239,12 +231,8 @@ enum ArchitectureExportService {
                 color: .darkGray
             )
             yOffset += 16
-
-            // Separator
             yOffset = drawSeparator(in: pageRect, at: yOffset, margin: margin)
             yOffset += 14
-
-            // Problem brief
             yOffset = drawSectionHeader(
                 "📋  Problem Brief",
                 in: pageRect, at: yOffset, margin: margin
@@ -259,8 +247,6 @@ enum ArchitectureExportService {
                 color: .darkGray
             )
             yOffset += 18
-
-            // Concepts
             yOffset = drawSectionHeader(
                 "💡  Key Concepts",
                 in: pageRect, at: yOffset, margin: margin
@@ -278,8 +264,6 @@ enum ArchitectureExportService {
                 yOffset += 2
             }
             yOffset += 16
-
-            // Architecture pattern
             let patternText = problem.blocks.map(\.displayName).joined(separator: " → ")
             yOffset = drawSectionHeader(
                 "🏗️  Architecture Pattern",
@@ -295,8 +279,6 @@ enum ArchitectureExportService {
                 color: UIColor(red: 0.2, green: 0.2, blue: 0.55, alpha: 1)
             )
             yOffset += 8
-
-            // Component roles
             for block in problem.blocks {
                 yOffset = checkPageBreak(
                     ctx: ctx,
@@ -316,8 +298,6 @@ enum ArchitectureExportService {
                 yOffset += 4
             }
             yOffset += 20
-
-            // Card image
             let cardAspect = cardImage.size.height / max(cardImage.size.width, 1)
             let cardDrawWidth = min(contentWidth, 380)
             let cardDrawHeight = cardDrawWidth * cardAspect
@@ -337,12 +317,7 @@ enum ArchitectureExportService {
             )
             cardImage.draw(in: cardRect)
             yOffset += cardDrawHeight + 12
-
-            // Page 1 footer
             drawFooter(footerText, in: pageRect, margin: margin)
-
-            // --- PAGE 2+: How to Design This System ---
-
             ctx.beginPage()
             yOffset = margin
 
@@ -368,8 +343,6 @@ enum ArchitectureExportService {
 
             yOffset = drawSeparator(in: pageRect, at: yOffset, margin: margin)
             yOffset += 16
-
-            // Overview
             yOffset = drawSectionHeader(
                 "🎯  Overview",
                 in: pageRect, at: yOffset, margin: margin
@@ -384,13 +357,9 @@ enum ArchitectureExportService {
                 color: UIColor(white: 0.25, alpha: 1)
             )
             yOffset += 20
-
-            // Design guide sections
             let sectionIcons = ["🔧", "📐", "🔄", "⚙️", "🧩", "🛡️"]
             for (index, section) in designGuide.sections.enumerated() {
                 let icon = sectionIcons[index % sectionIcons.count]
-
-                // Check if we need a new page (estimate header + some body)
                 yOffset = checkPageBreak(
                     ctx: ctx,
                     yOffset: yOffset,
@@ -404,8 +373,6 @@ enum ArchitectureExportService {
                     in: pageRect, at: yOffset, margin: margin
                 )
                 yOffset += 6
-
-                // Draw body text, breaking across pages if needed
                 yOffset = drawLongText(
                     section.body,
                     ctx: ctx,
@@ -417,8 +384,6 @@ enum ArchitectureExportService {
                 )
                 yOffset += 18
             }
-
-            // Key takeaway box
             yOffset = checkPageBreak(
                 ctx: ctx,
                 yOffset: yOffset,
@@ -433,8 +398,6 @@ enum ArchitectureExportService {
                 at: yOffset,
                 margin: margin
             )
-
-            // Final footer
             drawFooter(footerText, in: pageRect, margin: margin)
         }
 
@@ -491,7 +454,6 @@ enum ArchitectureExportService {
             .foregroundColor: color
         ]
 
-        // Split text into paragraphs for page-break handling
         let paragraphs = text.components(separatedBy: "\n\n")
         var currentY = yOffset
 
@@ -596,8 +558,6 @@ enum ArchitectureExportService {
         )
         let bodyHeight = ceil(bodyBounds.height)
         let boxHeight = boxPadding + labelHeight + 4 + bodyHeight + boxPadding
-
-        // Draw box background
         let boxRect = CGRect(x: margin, y: yOffset, width: contentWidth, height: boxHeight)
         let boxPath = UIBezierPath(roundedRect: boxRect, cornerRadius: 10)
         UIColor(red: 0.92, green: 0.97, blue: 0.92, alpha: 1).setFill()
@@ -605,14 +565,10 @@ enum ArchitectureExportService {
         UIColor(red: 0.7, green: 0.85, blue: 0.7, alpha: 1).setStroke()
         boxPath.lineWidth = 1
         boxPath.stroke()
-
-        // Draw label
         ("💡 Key Takeaway" as NSString).draw(
             at: CGPoint(x: margin + boxPadding, y: yOffset + boxPadding),
             withAttributes: labelAttrs
         )
-
-        // Draw body
         let bodyRect = CGRect(
             x: margin + boxPadding,
             y: yOffset + boxPadding + labelHeight + 4,
