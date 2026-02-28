@@ -56,6 +56,7 @@ struct QuizCardView: View {
                         .shadow(color: .black.opacity(0.5), radius: 50)
                 }
                 .padding(.horizontal, 24)
+                .frame(maxWidth: 560)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

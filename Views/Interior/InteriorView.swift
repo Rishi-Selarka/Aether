@@ -4,6 +4,7 @@ import SwiftData
 struct InteriorView: View {
     let tierID: Int
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var currentProblemIndex = 0
     @State private var timeLimitMinutes = InteriorConstants.timeLimitDefault
     @Environment(\.dismiss) private var dismiss
@@ -68,7 +69,7 @@ struct InteriorView: View {
 
                     Spacer()
                 }
-                .padding(.horizontal, 28)
+                .padding(.horizontal, ResponsiveLayout.contentPadding(horizontalSizeClass: horizontalSizeClass))
             }
         }
         .ignoresSafeArea()
@@ -116,7 +117,7 @@ struct InteriorView: View {
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
-        .frame(height: 380)
+        .frame(height: horizontalSizeClass == .regular ? 440 : 380)
         .animation(.easeInOut(duration: 0.3), value: currentProblemIndex)
     }
 

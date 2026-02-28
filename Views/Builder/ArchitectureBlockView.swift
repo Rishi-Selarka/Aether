@@ -6,8 +6,7 @@ struct ArchitectureBlockView: View {
     let nodeType: NodeType
     let isDragging: Bool
     var isLocked: Bool = false
-
-    private let boxSize: CGFloat = 110
+    var boxSize: CGFloat = 110
 
     var body: some View {
         VStack(spacing: 6) {

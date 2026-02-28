@@ -4,6 +4,7 @@ import SwiftUI
 /// Shows stats, daily challenge, and Dare to Dive CTA with quote.
 struct HomeView: View {
     @Environment(TierStatsCache.self) private var statsCache
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @AppStorage("isDarkMode") private var isDarkMode = false
     @State private var showSettings = false
 
@@ -46,7 +47,7 @@ struct HomeView: View {
                         .padding(.horizontal, 12)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, ResponsiveLayout.contentPadding(horizontalSizeClass: horizontalSizeClass))
             .padding(.bottom, 16)
         }
         .scrollBounceBehavior(.basedOnSize)

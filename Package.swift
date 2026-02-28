@@ -38,8 +38,10 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "AppModule",
-            path: "."
+            path: ".",
+            exclude: ["Assets.xcassets"],
+            resources: [.process("Assets.xcassets")]
         )
     ],
-    swiftLanguageVersions: [.version("6")]
+    swiftLanguageModes: [.v6]
 )

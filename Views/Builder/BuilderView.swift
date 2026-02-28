@@ -9,6 +9,7 @@ struct BuilderView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(TierStatsCache.self) private var statsCache
 
     // MARK: - Problem Data
@@ -160,7 +161,7 @@ struct BuilderView: View {
     private func mainContent(problem: InteriorProblem) -> some View {
         VStack(spacing: 0) {
             timerBar
-                .padding(.horizontal, 20)
+                .padding(.horizontal, ResponsiveLayout.contentPadding(horizontalSizeClass: horizontalSizeClass))
                 .padding(.bottom, 8)
             phaseLabel
             BlockCanvasView(
@@ -173,7 +174,7 @@ struct BuilderView: View {
             )
             .id(canvasId)
             bottomBar
-                .padding(.horizontal, 20)
+                .padding(.horizontal, ResponsiveLayout.contentPadding(horizontalSizeClass: horizontalSizeClass))
                 .padding(.bottom, 24)
         }
     }
@@ -204,7 +205,7 @@ struct BuilderView: View {
                 hintButton
             }
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, ResponsiveLayout.contentPadding(horizontalSizeClass: horizontalSizeClass))
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity)
         .background(Color(red: 0.09, green: 0.09, blue: 0.12))
@@ -305,7 +306,7 @@ struct BuilderView: View {
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(isOrdered ? .green.opacity(0.8) : .white.opacity(0.4))
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, ResponsiveLayout.contentPadding(horizontalSizeClass: horizontalSizeClass))
         .padding(.bottom, 10)
         .animation(.easeInOut(duration: 0.4), value: isOrdered)
         .animation(.easeInOut(duration: 0.3), value: isLoadingQuiz)
@@ -416,7 +417,12 @@ struct BuilderView: View {
             .foregroundStyle(.white.opacity(0.4))
             .frame(height: 40)
         } else {
-            Color.clear.frame(height: 40)
+            Text("Tap a block inside placeholder to remove it")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.white.opacity(0.4))
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+                .frame(height: 40)
         }
     }
 

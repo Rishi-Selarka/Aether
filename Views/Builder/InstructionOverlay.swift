@@ -75,6 +75,7 @@ struct InstructionOverlay: View {
                 .glassEffect(.clear, in: .rect(cornerRadius: 24))
                 .shadow(color: .black.opacity(0.4), radius: 40)
             }
+            .frame(maxWidth: 560)
             .padding(.horizontal, 32)
         }
     }

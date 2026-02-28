@@ -22,6 +22,8 @@ struct BlockCanvasView: View {
     let isPaused: Bool
     let onBlockTap: (NodeType) -> Void
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
     // MARK: - Placement State
 
     @State private var slots: [NodeType?]
@@ -43,7 +45,7 @@ struct BlockCanvasView: View {
 
     private let gridSpacing: CGFloat = 30
     private let connectorHeight: CGFloat = 30
-    private let boxSize: CGFloat = 110
+    private var boxSize: CGFloat { ResponsiveLayout.blockBoxSize(horizontalSizeClass: horizontalSizeClass) }
 
     // MARK: - Init
 
@@ -149,14 +151,6 @@ struct BlockCanvasView: View {
                     }
                 }
             }
-            if !isOrdered {
-                Text("Tap a block inside placeholder to remove it")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.4))
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 20)
-                    .padding(.horizontal, 8)
-            }
         }
         .onPreferenceChange(SlotFramePreferenceKey.self) { slotFrames = $0 }
     }
@@ -189,7 +183,8 @@ struct BlockCanvasView: View {
             ArchitectureBlockView(
                 nodeType: block,
                 isDragging: false,
-                isLocked: isOrdered
+                isLocked: isOrdered,
+                boxSize: boxSize
             )
             .scaleEffect(snapSlot == index ? 1.12 : 1.0)
             .animation(
@@ -270,7 +265,7 @@ struct BlockCanvasView: View {
     }
 
     private func floatingCell(block: NodeType, seed: Int) -> some View {
-        ArchitectureBlockView(nodeType: block, isDragging: false)
+        ArchitectureBlockView(nodeType: block, isDragging: false, boxSize: boxSize)
             .scaleEffect(isDragging && draggedBlock == block ? 0.5 : 0.75)
             .opacity(isDragging && draggedBlock == block ? 0.2 : 1.0)
             .modifier(FloatingBob(seed: seed))
@@ -295,7 +290,7 @@ struct BlockCanvasView: View {
     // MARK: - Drag Ghost
 
     private func ghostView(block: NodeType) -> some View {
-        ArchitectureBlockView(nodeType: block, isDragging: true)
+        ArchitectureBlockView(nodeType: block, isDragging: true, boxSize: boxSize)
             .frame(width: boxSize, height: boxSize)
             .scaleEffect(1.08)
             .shadow(color: block.accentColor.opacity(0.4), radius: 20, y: 6)
