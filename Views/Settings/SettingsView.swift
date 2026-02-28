@@ -4,8 +4,8 @@ import SwiftData
 // NOTE: No NavigationStack or List — both cause content clipping inside
 // a .medium presentationDetent sheet. Plain VStack + ScrollView solves this.
 //
-// Liquid glass styling follows Future app: .ultraThinMaterial on the main
-// background and section cards, with subtle white stroke overlays.
+// Liquid Glass: GlassEffectContainer for header bar, glassEffect for section
+// cards. Spacing in container must match layout spacing per SwiftUI best practices.
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -15,17 +15,19 @@ struct SettingsView: View {
     @AppStorage("isDarkMode") private var isDarkMode = false
     @State private var showResetConfirmation = false
 
+    private let headerBarSpacing: CGFloat = 16
+
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            ZStack {
-                Text("Settings")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(.primary)
-                    .frame(maxWidth: .infinity)
+            // Header bar — Liquid Glass with GlassEffectContainer
+            GlassEffectContainer(spacing: headerBarSpacing) {
+                HStack(spacing: headerBarSpacing) {
+                    Spacer(minLength: 0)
+                    Text("Settings")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.primary)
+                        .frame(maxWidth: .infinity)
 
-                HStack {
-                    Spacer()
                     Button("Done") {
                         HapticManager.lightImpact()
                         dismiss()
@@ -66,7 +68,7 @@ struct SettingsView: View {
                 .padding(.bottom, 48)
             }
         }
-        .background(.ultraThinMaterial.opacity(0.025))
+        .background(.ultraThinMaterial.opacity(0.04))
         .preferredColorScheme(isDarkMode ? .dark : .light)
         .confirmationDialog("Reset All Progress?", isPresented: $showResetConfirmation) {
             Button("Reset", role: .destructive) {
@@ -98,13 +100,10 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 content()
             }
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(.ultraThinMaterial)
-            )
+            .glassEffect(.regular, in: .rect(cornerRadius: 14))
             .overlay {
                 RoundedRectangle(cornerRadius: 14)
-                    .strokeBorder(.white.opacity(0.1), lineWidth: 0.5)
+                    .strokeBorder(.white.opacity(isDarkMode ? 0.12 : 0.08), lineWidth: 0.5)
             }
         }
     }

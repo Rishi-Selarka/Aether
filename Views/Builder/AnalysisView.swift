@@ -78,7 +78,7 @@ struct AnalysisView: View {
 
     private var fixedButtonRowContent: some View {
         GlassEffectContainer(spacing: 16) {
-            HStack(spacing: 12) {
+            HStack(spacing: 16) {
                 exportButton
                 Spacer()
                 doneButton
@@ -471,12 +471,10 @@ struct AnalysisView: View {
     private func runEntranceAnimation() {
         if session.passed {
             HapticManager.success()
-            SoundManager.playSuccessSound()
             withAnimation(.easeOut(duration: 0.6)) { showContent = true }
             withAnimation(.easeIn(duration: 0.8).delay(0.3)) { particleOpacity = 1.0 }
         } else {
             HapticManager.error()
-            SoundManager.playDrownSound()
             // Water rises, drowned text appears, then both fade as content comes in
             withAnimation(.easeIn(duration: 1.8)) { waterLevel = 0.35 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {

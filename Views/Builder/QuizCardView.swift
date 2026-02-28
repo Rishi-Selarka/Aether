@@ -55,36 +55,35 @@ struct QuizCardView: View {
             }
             .padding(.horizontal, 24)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Card Content
 
     private var cardContent: some View {
-        GlassEffectContainer(spacing: 16) {
-            VStack(alignment: .leading, spacing: 20) {
-                // Header
-                cardHeader
+        VStack(alignment: .leading, spacing: 20) {
+            // Header
+            cardHeader
 
-                Divider().opacity(0.3)
+            Divider().opacity(0.3)
 
-                // Progress indicator
-                questionProgress
+            // Progress indicator
+            questionProgress
 
-                // Question text
-                Text(currentQuestion.questionText)
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, 4)
+            // Question text
+            Text(currentQuestion.questionText)
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 4)
 
-                // Options
-                optionsList
+            // Options
+            optionsList
 
-                Spacer(minLength: 8)
+            Spacer(minLength: 8)
 
-                // Navigation
-                navigationRow
-            }
+            // Navigation
+            navigationRow
         }
         .padding(24)
     }
@@ -153,9 +152,6 @@ struct QuizCardView: View {
 
     private func optionButton(index: Int, text: String) -> some View {
         let isSelected = selectedIndexForCurrent == index
-        let glassConfig = isSelected
-            ? Glass.regular.tint(blockState.blockType.accentColor.opacity(0.5)).interactive()
-            : Glass.regular.interactive()
 
         return Button {
             selectOption(index: index)
@@ -183,7 +179,21 @@ struct QuizCardView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassEffect(glassConfig, in: .rect(cornerRadius: 14))
+            .background {
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(isSelected
+                          ? blockState.blockType.accentColor.opacity(0.15)
+                          : Color.white.opacity(0.06))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 14)
+                            .strokeBorder(
+                                isSelected
+                                    ? blockState.blockType.accentColor.opacity(0.6)
+                                    : Color.white.opacity(0.08),
+                                lineWidth: isSelected ? 1.5 : 1
+                            )
+                    }
+            }
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Option \(["A","B","C","D"][safe: index] ?? ""): \(text)")
@@ -221,8 +231,15 @@ struct QuizCardView: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 28)
                         .padding(.vertical, 12)
+                        .background {
+                            Capsule()
+                                .fill(blockState.blockType.accentColor.opacity(0.8))
+                                .overlay {
+                                    Capsule()
+                                        .strokeBorder(.white.opacity(0.2), lineWidth: 1)
+                                }
+                        }
                 }
-                .buttonStyle(.glassProminent)
                 .transition(.scale.combined(with: .opacity))
                 .accessibilityLabel("Finish quiz for \(blockState.blockType.displayName)")
             }

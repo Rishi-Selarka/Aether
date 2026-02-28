@@ -1,5 +1,14 @@
 import SwiftUI
 
+// MARK: - Slot Frame Preference (refreshes on scroll/layout)
+
+private struct SlotFramePreferenceKey: PreferenceKey {
+    static var defaultValue: [Int: CGRect] { [:] }
+    static func reduce(value: inout [Int: CGRect], nextValue: () -> [Int: CGRect]) {
+        value.merge(nextValue()) { _, new in new }
+    }
+}
+
 /// Drag-and-drop architecture canvas. Empty placeholder slots run
 /// vertically in the center; source blocks float on the left and right
 /// sides with a bobbing animation. Users drag blocks into slots,
@@ -134,7 +143,16 @@ struct BlockCanvasView: View {
                     }
                 }
             }
+            if !isOrdered {
+                Text("Tap a block inside placeholder to remove it")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.4))
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 20)
+                    .padding(.horizontal, 8)
+            }
         }
+        .onPreferenceChange(SlotFramePreferenceKey.self) { slotFrames = $0 }
     }
 
     // MARK: - Single Slot
@@ -152,12 +170,10 @@ struct BlockCanvasView: View {
         .background(
             GeometryReader { geo in
                 Color.clear
-                    .onAppear { slotFrames[index] = geo.frame(in: .named(canvasSpace)) }
-                    .onChange(of: slots) { _, _ in
-                        DispatchQueue.main.async {
-                            slotFrames[index] = geo.frame(in: .named(canvasSpace))
-                        }
-                    }
+                    .preference(
+                        key: SlotFramePreferenceKey.self,
+                        value: [index: geo.frame(in: .named(canvasSpace))]
+                    )
             }
         )
     }
@@ -311,12 +327,23 @@ struct BlockCanvasView: View {
     }
 
     private func targetSlotIndex(for location: CGPoint) -> Int? {
-        for (index, frame) in slotFrames {
-            // Generous hit area - fingers are imprecise on touch screens
+        // Iterate in slot order (0..<count) — dictionary iteration is unordered and
+        // could return slot 4 before slot 6 when both expanded hit areas overlap.
+        let candidates = (0 ..< slots.count).compactMap { index -> (Int, CGRect)? in
+            guard let frame = slotFrames[index] else { return nil }
             let expanded = frame.insetBy(dx: -30, dy: -18)
-            if expanded.contains(location) { return index }
+            return expanded.contains(location) ? (index, frame) : nil
         }
-        return nil
+        guard !candidates.isEmpty else { return nil }
+        // When multiple slots overlap (common with 6 slots + generous hit area),
+        // pick the one whose center is closest to the drop point.
+        if candidates.count == 1 { return candidates[0].0 }
+        let best = candidates.min { a, b in
+            let distA = hypot(location.x - a.1.midX, location.y - a.1.midY)
+            let distB = hypot(location.x - b.1.midX, location.y - b.1.midY)
+            return distA < distB
+        }
+        return best?.0
     }
 
     private func triggerSnap(at index: Int) {

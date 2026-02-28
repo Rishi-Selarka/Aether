@@ -181,12 +181,12 @@ struct BuilderView: View {
 
     private func fixedNavBarContent(problem: InteriorProblem) -> some View {
         GlassEffectContainer(spacing: 12) {
-            HStack {
+            HStack(spacing: 12) {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
+                        .frame(width: 36, height: 36)
                 }
                 .buttonStyle(.glass)
                 .accessibilityLabel("Back")
@@ -236,18 +236,18 @@ struct BuilderView: View {
                         withAnimation(.easeOut(duration: 0.3)) { hintCooldownToast = nil }
                     }
                 }
-            } label: {
+            }             label: {
                 Image(systemName: "lightbulb.min")
-                    .font(.system(size: 17, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(hintUnlocked ? .yellow : .white.opacity(0.2))
-                    .frame(width: 44, height: 44)
+                    .frame(width: 36, height: 36)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.glass)
             .accessibilityLabel(hintUnlocked ? "Show solution hint" : "Hint locked, wait \(60 - secondsElapsed) seconds")
             .animation(.easeInOut(duration: 0.5), value: hintUnlocked)
         } else {
-            Color.clear.frame(width: 44, height: 44)
+            Color.clear.frame(width: 36, height: 36)
         }
     }
 
@@ -317,7 +317,7 @@ struct BuilderView: View {
                 ? "Ready to analyse"
                 : "Tap blocks to begin quiz"
         }
-        return "Arrange the architecture"
+        return "Arrange the architecture according to priority"
     }
 
     // MARK: - Bottom Bar

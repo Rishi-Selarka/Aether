@@ -43,7 +43,7 @@ struct InstructionOverlay: View {
                         instructionRow(
                             icon: "arrow.up.arrow.down",
                             color: .blue,
-                            text: "Drag blocks to arrange the correct architecture"
+                            text: "Drag blocks to arrange the architecture according to priority"
                         )
                         instructionRow(
                             icon: "checkmark.circle.fill",

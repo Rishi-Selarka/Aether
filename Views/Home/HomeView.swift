@@ -17,10 +17,10 @@ struct HomeView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 24) {
-                // Top bar – settings aligned trailing
+                // Top bar – Liquid Glass, spacing matches GlassEffectContainer
                 GlassEffectContainer(spacing: 12) {
-                    HStack {
-                        Spacer()
+                    HStack(spacing: 12) {
+                        Spacer(minLength: 0)
                         settingsButton
                     }
                 }

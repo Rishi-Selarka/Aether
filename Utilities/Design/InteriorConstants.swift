@@ -3,7 +3,7 @@ import SwiftUI
 enum InteriorConstants {
     // Water-level labels per tier
     static let levels: [Int: String] = [
-        1: "Lake",
+        1: "Pond",
         2: "River",
         3: "Sea",
         4: "Ocean",
