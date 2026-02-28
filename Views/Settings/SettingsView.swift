@@ -13,6 +13,8 @@ struct SettingsView: View {
     var onReset: (() -> Void)? = nil
 
     @AppStorage("isDarkMode") private var isDarkMode = false
+    @AppStorage("dailyReminderEnabled") private var reminderEnabled = false
+    @State private var reminderTime = NotificationManager.reminderDate
     @State private var showResetConfirmation = false
 
     private let headerBarSpacing: CGFloat = 16
@@ -51,6 +53,43 @@ struct SettingsView: View {
                             label: "Dark Mode",
                             isOn: $isDarkMode
                         )
+                    }
+
+                    section(header: "Notifications") {
+                        toggleRow(
+                            icon: "bell.fill",
+                            iconColor: Color(red: 0.90, green: 0.55, blue: 0.15),
+                            label: "Daily Challenge",
+                            isOn: $reminderEnabled
+                        )
+                        .onChange(of: reminderEnabled) { _, enabled in
+                            NotificationManager.isEnabled = enabled
+                            Task {
+                                if enabled {
+                                    await NotificationManager.scheduleDailyReminder()
+                                } else {
+                                    NotificationManager.cancelReminder()
+                                }
+                            }
+                        }
+
+                        if reminderEnabled {
+                            Divider()
+                                .padding(.horizontal, 14)
+
+                            timePickerRow(
+                                icon: "clock.fill",
+                                iconColor: Color(red: 0.90, green: 0.55, blue: 0.15),
+                                label: "Challenge Time",
+                                selection: $reminderTime
+                            )
+                            .onChange(of: reminderTime) { _, newTime in
+                                NotificationManager.reminderDate = newTime
+                                Task {
+                                    await NotificationManager.scheduleDailyReminder()
+                                }
+                            }
+                        }
                     }
 
                     section(header: "Data") {
@@ -152,6 +191,25 @@ struct SettingsView: View {
             .frame(height: 52)
         }
         .buttonStyle(.glass)
+    }
+
+    private func timePickerRow(
+        icon: String,
+        iconColor: Color,
+        label: String,
+        selection: Binding<Date>
+    ) -> some View {
+        HStack(spacing: 14) {
+            iconChip(icon: icon, color: iconColor)
+            Text(label)
+                .font(.system(size: 16))
+                .foregroundStyle(.primary)
+            Spacer()
+            DatePicker("", selection: selection, displayedComponents: .hourAndMinute)
+                .labelsHidden()
+        }
+        .padding(.horizontal, 14)
+        .frame(height: 52)
     }
 
     private func iconChip(icon: String, color: Color) -> some View {
