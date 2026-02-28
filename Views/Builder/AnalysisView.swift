@@ -36,33 +36,36 @@ struct AnalysisView: View {
 
     var body: some View {
         GeometryReader { geo in
+            let totalHeight = geo.size.height
+            let metricsHeight = max(140, totalHeight * 0.35)
+
             ZStack {
                 Color.black.ignoresSafeArea()
 
-                // Drowning water — fades out as content appears
                 if !session.passed {
                     drowningWaterOverlay
                         .opacity(showContent ? 0 : 1)
                         .animation(.easeOut(duration: 0.6), value: showContent)
                 }
 
-                // Success glow
                 if session.passed {
                     successGlowOverlay
                 }
 
-                // Main layout
                 VStack(spacing: 0) {
                     section1
-                        .frame(height: geo.size.height * 0.35)
+                        .frame(height: metricsHeight)
                     section2
                 }
                 .opacity(showContent ? 1 : 0)
 
-                // Drowned text — also fades out as content appears
                 if !session.passed && showDrownedText && !showContent {
                     drownedOverlay
                 }
+            }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                fixedButtonRowContent
+                    .opacity(showContent ? 1 : 0)
             }
         }
         .navigationBarHidden(true)
@@ -70,77 +73,91 @@ struct AnalysisView: View {
         .onAppear { runEntranceAnimation() }
     }
 
-    // MARK: - Section 1: Fixed Header (35% of screen)
+    // MARK: - Fixed Button Row (overlay, top of screen)
+    // Uses Liquid Glass (glassEffect + GlassEffectContainer) on iOS 26+; material capsule fallback on iOS 17.
+
+    private var fixedButtonRowContent: some View {
+        GlassEffectContainer(spacing: 16) {
+            HStack(spacing: 12) {
+                exportButton
+                Spacer()
+                doneButton
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity)
+        .background(Color.black)
+    }
+
+    private var exportButton: some View {
+        Button {
+            isExporting = true
+            Task {
+                await ArchitectureExportService.exportAndShare(
+                    session: session,
+                    tierName: tierName,
+                    onComplete: { isExporting = false }
+                )
+            }
+        } label: {
+            HStack(spacing: 6) {
+                if isExporting {
+                    ProgressView()
+                        .tint(.white)
+                        .scaleEffect(0.7)
+                } else {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                Text("Export")
+                    .font(.system(size: 17, weight: .semibold))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+        }
+        .buttonStyle(.glass)
+        .disabled(isExporting)
+        .accessibilityLabel("Export architecture analysis as PDF")
+    }
+
+    private var doneButton: some View {
+        Button {
+            dismiss()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                onDone()
+            }
+        } label: {
+            Text("Done")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+        }
+        .buttonStyle(.glass)
+        .accessibilityLabel("Done - return to city map")
+    }
+
+    // MARK: - Section 1: Fixed Header (35% of screen, metrics only)
 
     private var section1: some View {
         VStack(spacing: 0) {
-            // Buttons: Export (leading) | Done (trailing)
-            HStack(spacing: 12) {
-                Button {
-                    isExporting = true
-                    Task {
-                        await ArchitectureExportService.exportAndShare(
-                            session: session,
-                            tierName: tierName,
-                            onComplete: { isExporting = false }
-                        )
-                    }
-                } label: {
-                    HStack(spacing: 6) {
-                        if isExporting {
-                            ProgressView()
-                                .tint(.white)
-                                .scaleEffect(0.7)
-                        } else {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        Text("Export")
-                            .font(.system(size: 17, weight: .semibold))
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background { Capsule().fill(.white.opacity(0.12)) }
-                }
-                .disabled(isExporting)
-                .accessibilityLabel("Export architecture analysis as PDF")
-
-                Spacer()
-
-                Button {
-                    dismiss()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                        onDone()
-                    }
-                } label: {
-                    Text("Done")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background { Capsule().fill(.white.opacity(0.12)) }
-                }
-                .accessibilityLabel("Done - return to city map")
-            }
-            .padding(.top, 54)
-            .padding(.horizontal, 24)
-
             Spacer(minLength: 0)
 
-            // Score ring (left) + status & concepts (right)
+            // Row 1: Score ring + Drowned/Survived badge
             HStack(alignment: .center, spacing: 20) {
                 scoreRing
-                    .frame(width: 100, height: 100)
-
-                VStack(alignment: .leading, spacing: 10) {
-                    passFailBadge
-                    conceptChips
-                }
-
+                    .frame(width: 124, height: 124)
+                passFailBadge
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 24)
+
+            // Row 2: Concepts below
+            conceptChips
+                .padding(.horizontal, 24)
+                .padding(.top, 12)
 
             Spacer(minLength: 0)
 
@@ -346,18 +363,11 @@ struct AnalysisView: View {
                 Text("Reattempt")
                     .font(.system(size: 16, weight: .semibold))
             }
-            .foregroundStyle(.white.opacity(0.7))
+            .foregroundStyle(.white.opacity(0.9))
             .frame(maxWidth: .infinity)
             .frame(height: 52)
-            .background {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(.white.opacity(0.07))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 16)
-                            .strokeBorder(.white.opacity(0.12), lineWidth: 1)
-                    }
-            }
         }
+        .buttonStyle(.glassProminent)
         .accessibilityLabel("Reattempt this challenge")
     }
 

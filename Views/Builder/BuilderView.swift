@@ -124,6 +124,11 @@ struct BuilderView: View {
                     .foregroundStyle(.white.opacity(0.5))
             }
         }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if let problem {
+                fixedNavBarContent(problem: problem)
+            }
+        }
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $showAnalysis) {
             if let session = quizSession {
@@ -154,7 +159,6 @@ struct BuilderView: View {
     @ViewBuilder
     private func mainContent(problem: InteriorProblem) -> some View {
         VStack(spacing: 0) {
-            navigationBar(problem: problem)
             timerBar
                 .padding(.horizontal, 20)
                 .padding(.bottom, 8)
@@ -173,32 +177,36 @@ struct BuilderView: View {
         }
     }
 
-    // MARK: - Navigation Bar
+    // MARK: - Fixed Nav Bar (top of screen, like Analysis)
 
-    private func navigationBar(problem: InteriorProblem) -> some View {
-        HStack {
-            Button { dismiss() } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 17, weight: .semibold))
+    private func fixedNavBarContent(problem: InteriorProblem) -> some View {
+        GlassEffectContainer(spacing: 12) {
+            HStack {
+                Button { dismiss() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.glass)
+                .accessibilityLabel("Back")
+
+                Spacer()
+
+                Text(problem.title)
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white)
-                    .frame(width: 44, height: 44)
+                    .lineLimit(1)
+
+                Spacer()
+
+                hintButton
             }
-            .accessibilityLabel("Back")
-
-            Spacer()
-
-            Text(problem.title)
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-
-            Spacer()
-
-            hintButton
         }
-        .padding(.horizontal, 12)
-        .padding(.top, 56)
-        .padding(.bottom, 8)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity)
+        .background(Color(red: 0.09, green: 0.09, blue: 0.12))
     }
 
     // MARK: - Hint Button
@@ -235,6 +243,7 @@ struct BuilderView: View {
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
+            .buttonStyle(.glass)
             .accessibilityLabel(hintUnlocked ? "Show solution hint" : "Hint locked, wait \(60 - secondsElapsed) seconds")
             .animation(.easeInOut(duration: 0.5), value: hintUnlocked)
         } else {
@@ -392,15 +401,8 @@ struct BuilderView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
-                .background {
-                    RoundedRectangle(cornerRadius: 18)
-                        .fill(.blue.opacity(0.7))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 18)
-                                .strokeBorder(.white.opacity(0.2), lineWidth: 1)
-                        }
-                }
             }
+            .buttonStyle(.glassProminent)
             .transition(.move(edge: .bottom).combined(with: .opacity))
             .accessibilityLabel("Analyse all quiz results")
 

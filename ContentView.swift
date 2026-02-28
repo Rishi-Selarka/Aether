@@ -55,7 +55,9 @@ struct MainContentView: View {
                                         .font(.system(size: 17))
                                 }
                                 .foregroundStyle(.primary)
+                                .fixedSize(horizontal: true, vertical: false)
                             }
+                            .buttonStyle(.glass)
                         }
                     }
             } else {

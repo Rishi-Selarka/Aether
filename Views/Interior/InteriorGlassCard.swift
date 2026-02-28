@@ -90,20 +90,22 @@ struct InteriorGlassCard: View {
 
             Spacer()
 
-            HStack(spacing: 12) {
-                stepperButton(systemName: "minus", action: decrementTime)
-                    .accessibilityLabel("Decrease time")
-                    .accessibilityHint("Current: \(timeLimitMinutes) minutes")
+            GlassEffectContainer(spacing: 12) {
+                HStack(spacing: 12) {
+                    stepperButton(systemName: "minus", action: decrementTime)
+                        .accessibilityLabel("Decrease time")
+                        .accessibilityHint("Current: \(timeLimitMinutes) minutes")
 
-                Text("\(timeLimitMinutes) min")
-                    .font(.system(size: 17, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(.white)
-                    .fixedSize(horizontal: true, vertical: false)
-                    .frame(minWidth: 64)
+                    Text("\(timeLimitMinutes) min")
+                        .font(.system(size: 17, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(.white)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .frame(minWidth: 64)
 
-                stepperButton(systemName: "plus", action: incrementTime)
-                    .accessibilityLabel("Increase time")
-                    .accessibilityHint("Current: \(timeLimitMinutes) minutes")
+                    stepperButton(systemName: "plus", action: incrementTime)
+                        .accessibilityLabel("Increase time")
+                        .accessibilityHint("Current: \(timeLimitMinutes) minutes")
+                }
             }
         }
     }
@@ -111,14 +113,11 @@ struct InteriorGlassCard: View {
     private func stepperButton(systemName: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 14, weight: .bold))
+                .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(.white)
-                .frame(width: 44, height: 44)
-                .background {
-                    Circle()
-                        .fill(.white.opacity(0.12))
-                }
+                .frame(width: 32, height: 32)
         }
+        .buttonStyle(.glass)
     }
 
     private func decrementTime() {

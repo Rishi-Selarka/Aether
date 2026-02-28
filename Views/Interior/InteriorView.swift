@@ -79,6 +79,7 @@ struct InteriorView: View {
         }
         .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 backButton
@@ -146,27 +147,18 @@ struct InteriorView: View {
                 timeLimitMinutes: timeLimitMinutes
             )
         } label: {
-            Text("Enter")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: InteriorConstants.enterButtonHeight)
-                .background {
-                    RoundedRectangle(cornerRadius: InteriorConstants.enterButtonCornerRadius)
-                        .fill(.black.opacity(0.25))
-                        .background {
-                            RoundedRectangle(cornerRadius: InteriorConstants.enterButtonCornerRadius)
-                                .fill(.ultraThinMaterial)
-                                .opacity(0.5)
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: InteriorConstants.enterButtonCornerRadius))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: InteriorConstants.enterButtonCornerRadius)
-                                .strokeBorder(.white.opacity(0.2), lineWidth: InteriorConstants.cardBorderWidth)
-                        }
-                        .shadow(color: .black.opacity(0.2), radius: 16, y: 8)
-                }
+            HStack(spacing: 8) {
+                Text("Enter")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.7))
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: InteriorConstants.enterButtonHeight)
         }
+        .buttonStyle(.glass(.clear))
         .simultaneousGesture(TapGesture().onEnded {
             HapticManager.mediumImpact()
         })
@@ -181,11 +173,12 @@ struct InteriorView: View {
             dismiss()
         } label: {
             Image(systemName: "chevron.left")
-                .fontWeight(.semibold)
+                .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(width: 44, height: 44)
         }
-        .accessibilityLabel("Back to map")
+        .buttonStyle(.plain)
+        .accessibilityLabel("Back to cities")
     }
 }
 

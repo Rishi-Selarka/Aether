@@ -19,13 +19,13 @@ struct DareToDiveCard: View {
             // Dim overlay for readability
             Color.black.opacity(0.3)
 
-            // Glass "Dare to Dive" button
+            // Liquid Glass "Dare to Dive" button
             Button {
                 HapticManager.mediumImpact()
                 onTap()
             } label: {
                 HStack(spacing: 8) {
-                    Text("Dare to Dive")
+                    Text("Dare to Dive ?")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.white)
 
@@ -35,13 +35,8 @@ struct DareToDiveCard: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
-                .background(.ultraThinMaterial, in: Capsule())
-                .overlay {
-                    Capsule()
-                        .strokeBorder(.white.opacity(0.3), lineWidth: 0.5)
-                }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.glass(.clear))
             .accessibilityLabel("Dare to Dive")
             .accessibilityHint("Navigate to the city tier map")
         }

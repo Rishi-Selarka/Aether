@@ -2,15 +2,10 @@ import SwiftUI
 import SwiftData
 
 // NOTE: No NavigationStack or List — both cause content clipping inside
-// a .medium presentationDetent sheet. NavigationStack reserves nav-bar
-// height that overflows the fixed detent bounds; List doesn't honour the
-// constrained height. Plain VStack + ScrollView solves this cleanly.
+// a .medium presentationDetent sheet. Plain VStack + ScrollView solves this.
 //
-// The sheet's .presentationBackground(.thinMaterial) provides the liquid
-// glass translucency. GIFImage (UIViewRepresentable) content behind the
-// sheet is composited by UIKit, which .thinMaterial blurs correctly.
-// A .clear background + manual .glassEffect() does NOT work because
-// SwiftUI's blur compositor can't sample UIKit-hosted views.
+// Liquid glass styling follows Future app: .ultraThinMaterial on the main
+// background and section cards, with subtle white stroke overlays.
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -37,6 +32,7 @@ struct SettingsView: View {
                     }
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(.primary)
+                    .buttonStyle(.glass)
                 }
             }
             .padding(.horizontal, 24)
@@ -70,7 +66,7 @@ struct SettingsView: View {
                 .padding(.bottom, 48)
             }
         }
-        // No explicit background — the sheet's .thinMaterial shows through
+        .background(.ultraThinMaterial.opacity(0.025))
         .preferredColorScheme(isDarkMode ? .dark : .light)
         .confirmationDialog("Reset All Progress?", isPresented: $showResetConfirmation) {
             Button("Reset", role: .destructive) {
@@ -102,10 +98,13 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 content()
             }
-            .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 14))
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(.ultraThinMaterial)
+            )
             .overlay {
                 RoundedRectangle(cornerRadius: 14)
-                    .strokeBorder(.white.opacity(0.12), lineWidth: 0.5)
+                    .strokeBorder(.white.opacity(0.1), lineWidth: 0.5)
             }
         }
     }
@@ -153,6 +152,7 @@ struct SettingsView: View {
             .padding(.horizontal, 14)
             .frame(height: 52)
         }
+        .buttonStyle(.glass)
     }
 
     private func iconChip(icon: String, color: Color) -> some View {

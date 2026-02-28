@@ -10,7 +10,7 @@ import AppleProductTypes
 let package = Package(
     name: "archsys",
     platforms: [
-        .iOS("17.0")
+        .iOS("26.0")
     ],
     products: [
         .iOSApplication(
@@ -20,7 +20,7 @@ let package = Package(
             teamIdentifier: "S8LD68K2KG",
             displayVersion: "1.0",
             bundleVersion: "1",
-            appIcon: .placeholder(icon: .cloud),
+            appIcon: .asset("AppIcon"),
             accentColor: .presetColor(.blue),
             supportedDeviceFamilies: [
                 .pad,
@@ -40,5 +40,6 @@ let package = Package(
             name: "AppModule",
             path: "."
         )
-    ]
+    ],
+    swiftLanguageVersions: [.version("6")]
 )

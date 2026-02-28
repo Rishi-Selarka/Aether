@@ -48,6 +48,7 @@ struct QuestionOfTheDayCard: View {
                             .foregroundStyle(Color.archsysTextTertiary)
                             .frame(width: 28, height: 28)
                     }
+                    .buttonStyle(.glass)
                     .accessibilityLabel("Reload question")
                 }
             }
@@ -152,6 +153,7 @@ struct QuestionOfTheDayCard: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
             .background(bgColor, in: RoundedRectangle(cornerRadius: 8))
             .overlay {
                 RoundedRectangle(cornerRadius: 10)

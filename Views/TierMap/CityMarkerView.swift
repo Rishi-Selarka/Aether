@@ -35,19 +35,11 @@ struct CityMarkerView: View {
                     .foregroundStyle(lineColor.opacity(0.5))
             }
         }
-        .buttonStyle(CityMarkerButtonStyle())
+        .buttonStyle(.plain)
         .opacity(isRevealed ? 1 : 0)
         .scaleEffect(isRevealed ? 1.0 : 0.75)
         .accessibilityLabel("Tier \(tierID), \(cityName)")
         .accessibilityHint(isUnlocked ? "Double tap to open" : "Locked")
         .accessibilityAddTraits(isUnlocked ? .isButton : [])
-    }
-}
-
-private struct CityMarkerButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.93 : 1.0)
-            .animation(.easeInOut(duration: 0.12), value: configuration.isPressed)
     }
 }
