@@ -17,6 +17,7 @@ struct AnalysisView: View {
     @State private var particleOpacity: Double = 0
     @State private var isExporting = false
     @State private var isDismissing = false
+    @State private var expandedCardIndex: Int?
 
     // Pre-computed stable particle configs to avoid Double.random inside Canvas (which flickers).
     private let particleConfigs: [(angle: Double, radius: Double, size: Double, opacity: Double)] = (0..<30).map { i in
@@ -72,6 +73,17 @@ struct AnalysisView: View {
 
                 if !session.passed && showDrownedText && !showContent {
                     drownedOverlay
+                }
+
+                if let idx = expandedCardIndex,
+                   let result = results[safe: idx] {
+                    expandedCardOverlay(
+                        result: result,
+                        analysisText: analysisTexts[safe: idx]
+                            ?? result.question.explanation
+                    )
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                    .zIndex(10)
                 }
             }
             .safeAreaInset(edge: .top, spacing: 0) {
@@ -170,6 +182,15 @@ struct AnalysisView: View {
                 .padding(.top, 12)
 
             Spacer(minLength: 0)
+
+            HStack {
+                Spacer()
+                Text("Tap cards to enlarge")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.3))
+            }
+            .padding(.horizontal, 28)
+            .padding(.bottom, 6)
 
             Divider()
                 .opacity(0.15)
@@ -278,6 +299,12 @@ struct AnalysisView: View {
                         analysisText: analysisTexts[safe: i]
                             ?? result.question.explanation
                     )
+                    .onTapGesture {
+                        HapticManager.lightImpact()
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            expandedCardIndex = i
+                        }
+                    }
                 }
 
                 reattemptButton
@@ -355,6 +382,94 @@ struct AnalysisView: View {
             Text(text)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(isCorrect ? .green.opacity(0.9) : .red.opacity(0.9))
+        }
+    }
+
+    // MARK: - Expanded Card Overlay
+
+    private func expandedCardOverlay(result: QuizResult, analysisText: String) -> some View {
+        GeometryReader { geo in
+            ZStack {
+                Color.black.opacity(0.6)
+                    .ignoresSafeArea()
+                    .onTapGesture { dismissExpandedCard() }
+
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack(spacing: 10) {
+                            Image(systemName: result.question.blockType.sfSymbol)
+                                .font(.system(size: 15))
+                                .foregroundStyle(result.question.blockType.accentColor)
+                                .frame(width: 24)
+
+                            Text(result.question.questionText)
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundStyle(.white.opacity(0.9))
+                                .fixedSize(horizontal: false, vertical: true)
+
+                            Spacer(minLength: 32)
+                        }
+
+                        Divider().opacity(0.15)
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            if !result.isCorrect && result.wasAnswered {
+                                answerRow(
+                                    label: "Your answer",
+                                    text: result.userAnswerText,
+                                    isCorrect: false
+                                )
+                            }
+                            answerRow(
+                                label: "Correct answer",
+                                text: result.correctAnswerText,
+                                isCorrect: true
+                            )
+                        }
+
+                        Divider().opacity(0.15)
+
+                        Text(analysisText)
+                            .font(.system(size: 15))
+                            .foregroundStyle(.white.opacity(0.7))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .lineSpacing(4)
+                    }
+                    .padding(20)
+                }
+                .frame(maxWidth: 520)
+                .frame(maxHeight: geo.size.height * 0.55)
+                .glossyCardBackground(cornerRadius: 18)
+                .overlay(alignment: .topTrailing) {
+                    Button {
+                        dismissExpandedCard()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(.white.opacity(0.7))
+                            .frame(width: 26, height: 26)
+                            .background(.white.opacity(0.12), in: Circle())
+                    }
+                    .padding(12)
+                }
+                .overlay {
+                    RoundedRectangle(cornerRadius: 18)
+                        .strokeBorder(
+                            result.isCorrect
+                                ? Color.green.opacity(0.3)
+                                : Color.red.opacity(0.25),
+                            lineWidth: 1
+                        )
+                }
+                .padding(.horizontal, 28)
+            }
+        }
+    }
+
+    private func dismissExpandedCard() {
+        HapticManager.lightImpact()
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            expandedCardIndex = nil
         }
     }
 
