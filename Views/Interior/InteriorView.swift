@@ -31,7 +31,7 @@ struct InteriorView: View {
 
                 VStack(spacing: 0) {
                     titleSection
-                        .padding(.top, geo.safeAreaInsets.top + 16)
+                        .padding(.top, 170)
                         .frame(height: geo.safeAreaInsets.top + 120)
                     Spacer()
 
