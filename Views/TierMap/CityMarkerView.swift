@@ -3,7 +3,6 @@ import SwiftUI
 struct CityMarkerView: View {
     let tierID: Int
     let cityName: String
-    let subtitle: String
     let icon: String
     let isUnlocked: Bool
     let isCompleted: Bool
@@ -29,10 +28,6 @@ struct CityMarkerView: View {
                 Text(cityName)
                     .font(Typography.headingSmall)
                     .foregroundStyle(lineColor)
-
-                Text(subtitle)
-                    .font(Typography.bodySmall)
-                    .foregroundStyle(lineColor.opacity(0.5))
             }
         }
         .buttonStyle(.plain)
