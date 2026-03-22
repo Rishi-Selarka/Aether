@@ -1,19 +1,12 @@
 import SwiftUI
 
 /// Full-width CTA with animated GIF background and a glass "Dare to Dive" button.
-/// Randomly picks one of two GIFs each time the view appears.
 struct DareToDiveCard: View {
     let onTap: () -> Void
 
-    private static let gifAssets = ["daretodive_gif", "daretodive_gif_2"]
-
-    /// Picked once per view lifetime (each app launch creates a new view).
-    @State private var selectedGIF: String = gifAssets.randomElement() ?? "daretodive_gif"
-
     var body: some View {
         ZStack {
-            // GIF background via asset catalog Data Set
-            GIFImage(assetName: selectedGIF)
+            GIFImage(assetName: "daretodive_gif_2")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             // Dim overlay for readability
